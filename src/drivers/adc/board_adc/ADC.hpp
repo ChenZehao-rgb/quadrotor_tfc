@@ -52,7 +52,7 @@
 #include <uORB/Publication.hpp>
 #include <uORB/topics/adc_report.h>
 #include <uORB/topics/system_power.h>
-#include <uORB/topics/forcectl.h>
+#include <uORB/topics/forcectl_forcedata.h>
 #include <lib/mathlib/math/filter/LowPassFilter2p.hpp>
 
 using namespace time_literals;
@@ -113,9 +113,9 @@ private:
 	uORB::Publication<adc_report_s>		_to_adc_report{ORB_ID(adc_report)};
 	uORB::Publication<system_power_s>	_to_system_power{ORB_ID(system_power)};
 
-	forcectl_s force_data = {};
+	forcectl_forcedata_s force_data = {};
 	math::LowPassFilter2p<float>	_forcectl_filter_forcerawdata{100.f, 10.f};
-	uORB::Publication<forcectl_s>		_to_forcedata_report{ORB_ID(forcectl)};
+	uORB::Publication<forcectl_forcedata_s>		_to_forcedata_report{ORB_ID(forcectl_forcedata)};
 #ifdef BOARD_GPIO_VDD_5V_COMP_VALID
 	int _5v_comp_valid_fd {-1};
 #endif

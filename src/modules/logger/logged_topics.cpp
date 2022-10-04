@@ -46,7 +46,8 @@ using namespace px4::logger;
 void LoggedTopics::add_default_topics()
 {
 	add_topic("adc_report", 10);
-	add_topic("forcectl", 10);
+	add_topic("forcectl_forcedata", 10);
+	add_topic("forcectl_controldata", 10);
 	/* add_topic("action_request");
 	add_topic("actuator_armed");
 	add_topic("actuator_controls_0", 50);
