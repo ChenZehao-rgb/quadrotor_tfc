@@ -39,6 +39,8 @@
 #include <uORB/Publication.hpp>
 #include <uORB/topics/actuator_controls.h>
 #include <uORB/topics/gimbal_device_attitude_status.h>
+#include <uORB/topics/forcectl_controldata.h>
+#include <uORB/Subscription.hpp>
 
 namespace gimbal
 {
@@ -60,6 +62,9 @@ private:
 	uORB::Publication <gimbal_device_attitude_status_s>	_attitude_status_pub{ORB_ID(gimbal_device_attitude_status)};
 
 	bool _retract_gimbal = true;
+
+	uORB::Subscription _forcectl_controldata_sub{ORB_ID(forcectl_controldata)};
+	forcectl_controldata_s forcectl_control_data{};
 };
 
 } /* namespace gimbal */
