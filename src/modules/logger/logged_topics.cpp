@@ -45,13 +45,15 @@ using namespace px4::logger;
 
 void LoggedTopics::add_default_topics()
 {
-	add_topic("action_request");
+	add_topic("adc_report", 10);
+	add_topic("forcectl", 10);
+	/* add_topic("action_request");
 	add_topic("actuator_armed");
 	add_topic("actuator_controls_0", 50);
-	add_topic("actuator_controls_1", 100);
-	add_topic("actuator_controls_2", 100);
-	add_topic("actuator_controls_3", 100);
-	add_optional_topic("actuator_controls_status_0", 300);
+	add_topic("actuator_controls_1", 100); */
+	add_topic("actuator_controls_2", 10);
+	add_topic("actuator_controls_3", 10);
+	/* add_optional_topic("actuator_controls_status_0", 300);
 	add_topic("airspeed", 1000);
 	add_optional_topic("airspeed_validated", 200);
 	add_optional_topic("autotune_attitude_control_status", 100);
@@ -125,10 +127,10 @@ void LoggedTopics::add_default_topics()
 	add_optional_topic_multi("rate_ctrl_status", 200, 2);
 	add_optional_topic_multi("sensor_hygrometer", 500, 4);
 	add_optional_topic_multi("rpm", 200);
-	add_optional_topic_multi("telemetry_status", 1000, 4);
+	add_optional_topic_multi("telemetry_status", 1000, 4); */
 
 	// EKF multi topics (currently max 9 estimators)
-#if CONSTRAINED_MEMORY
+/* #if CONSTRAINED_MEMORY
 	static constexpr uint8_t MAX_ESTIMATOR_INSTANCES = 1;
 #else
 	static constexpr uint8_t MAX_ESTIMATOR_INSTANCES = 6; // artificially limited until PlotJuggler fixed
@@ -168,9 +170,9 @@ void LoggedTopics::add_default_topics()
 	add_optional_topic_multi("estimator_visual_odometry_aligned", 200, MAX_ESTIMATOR_INSTANCES);
 	add_optional_topic_multi("yaw_estimator_status", 1000, MAX_ESTIMATOR_INSTANCES);
 
-	// log all raw sensors at minimal rate (at least 1 Hz)
+	// log all raw sensors at minimal rate (at least 1 Hz) */
 	add_topic_multi("battery_status", 200, 2);
-	add_topic_multi("differential_pressure", 1000, 2);
+	/* add_topic_multi("differential_pressure", 1000, 2);
 	add_topic_multi("distance_sensor", 1000, 2);
 	add_topic_multi("optical_flow", 1000, 1);
 	add_optional_topic_multi("sensor_accel", 1000, 4);
@@ -206,7 +208,7 @@ void LoggedTopics::add_default_topics()
 		add_topic("vehicle_attitude_groundtruth", 10);
 		add_topic("vehicle_global_position_groundtruth", 100);
 		add_topic("vehicle_local_position_groundtruth", 20);
-	}
+	} */
 
 #ifdef CONFIG_ARCH_BOARD_PX4_SITL
 	add_topic("actuator_controls_virtual_fw");
