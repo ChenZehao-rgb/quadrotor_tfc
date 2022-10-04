@@ -107,6 +107,7 @@ void ADC::Run()
 	if (_first_run) {
 		open_gpio_devices();
 		_first_run = false;
+		_forcectl_filter_forcerawdata.reset(0.0);
 	}
 
 	hrt_abstime now = hrt_absolute_time();
@@ -167,6 +168,11 @@ void ADC::update_adc_report(hrt_abstime now)
 	adc.resolution = px4_arch_adc_dn_fullcount();
 
 	_to_adc_report.publish(adc);
+
+	force_data.timestamp = now;
+	force_data.force_raw_data = 20.0f*(2048 - adc.raw_data[4])/2048.0f;
+	force_data.force_filtered_data = _forcectl_filter_forcerawdata.apply(force_data.force_raw_data);
+	_to_forcedata_report.publish(force_data);
 }
 
 uint8_t ADC::read_gpio_value(int fd)
