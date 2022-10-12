@@ -40,11 +40,11 @@
 
 #include "forcectl_example.h"
 
-__EXPORT int forcectl_main(int argc, char *argv[]);
+px4::AppState Forcectl::appState;
 
-int forcectl_main(int argc, char *argv[])
+int Forcectl::main()
 {
-	PX4_INFO("Force-feedback-control Start!");
+	appState.setRunning(true);
 
 	/* subscribe to forcectl topic */
 	int forcedata_sub_fd = orb_subscribe(ORB_ID(forcectl_forcedata));
@@ -70,7 +70,7 @@ int forcectl_main(int argc, char *argv[])
 	struct forcectl_forcedata_s forcedata = {};
 	struct actuator_controls_s force_exp = {};
 
-	while(true){
+	while(appState.isRunning()){
 		/* wait for sensor update of 1 file descriptor for 1000 ms (1 second) */
 		int poll_ret = px4_poll(fds, 2, 1000);
 
@@ -106,10 +106,8 @@ int forcectl_main(int argc, char *argv[])
 		control_data.force_controls_data = (control_data.force_exp_data - forcedata.force_filtered_data)/20.0f*2.0f-1.0f;
 		orb_publish(ORB_ID(forcectl_controldata), controldata_pub, &control_data);
 
-		px4_usleep(20000);
+		px4_usleep(10000);
 	}
 
-	PX4_INFO("exiting");
-
-	return OK;
+	return 0;
 }

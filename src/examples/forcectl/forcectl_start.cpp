@@ -32,39 +32,58 @@
  ****************************************************************************/
 
 /**
- * @file frocectl_app.h
- * Example app for Linux
+ * @file forcectl_start_posix.cpp
  *
  * @author Yanchun Chang <changyanchun@sia.cn>
  */
-#pragma once
+#include "forcectl_example.h"
 
-#include <px4_platform_common/log.h>
-#include <px4_platform_common/px4_config.h>
-#include <px4_platform_common/tasks.h>
-#include <px4_platform_common/posix.h>
-#include <px4_platform_common/app.h>
-#include <px4_platform_common/time.h>
-#include <px4_platform_common/init.h>
-#include <unistd.h>
-#include <stdio.h>
-#include <poll.h>
-#include <string.h>
-#include <math.h>
-#include <sched.h>
-#include <uORB/uORB.h>
-#include <uORB/topics/forcectl_forcedata.h>
-#include <uORB/topics/forcectl_controldata.h>
-#include <uORB/topics/actuator_controls.h>
+static int forcectl_task;             /* Handle of forcectl task / thread */
 
-class Forcectl
+extern "C" __EXPORT int forcectl_main(int argc, char *argv[]);
+int forcectl_main(int argc, char *argv[])
 {
-public:
-	Forcectl() {}
 
-	~Forcectl() {}
+	if (argc < 2) {
+		PX4_WARN("usage: forcectl {start|stop|status}\n");
+		return 1;
+	}
 
-	int main();
+	if (!strcmp(argv[1], "start")) {
 
-	static px4::AppState appState; /* track requests to terminate app */
-};
+		if (Forcectl::appState.isRunning()) {
+			PX4_INFO("already running\n");
+			/* this is not an error */
+			return 0;
+		}
+
+		forcectl_task = px4_task_spawn_cmd("forcectl",
+						 SCHED_DEFAULT,
+						 SCHED_PRIORITY_MAX - 5,
+						 3000,
+						 PX4_MAIN,
+						 (argv) ? (char *const *)&argv[2] : (char *const *)nullptr);
+
+		return 0;
+	}
+
+	if (!strcmp(argv[1], "stop")) {
+		Forcectl::appState.requestExit();
+		Forcectl::appState.setRunning(false);
+		return 0;
+	}
+
+	if (!strcmp(argv[1], "status")) {
+		if (Forcectl::appState.isRunning()) {
+			PX4_INFO("is running\n");
+
+		} else {
+			PX4_INFO("not started\n");
+		}
+
+		return 0;
+	}
+
+	PX4_WARN("usage: forcectl_main {start|stop|status}\n");
+	return 1;
+}

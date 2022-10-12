@@ -30,10 +30,14 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 ############################################################################
+
 px4_add_module(
 	MODULE examples__forcectl
 	MAIN forcectl
+	COMPILE_FLAGS
 	SRCS
-		forcectl_example.c
+		forcectl_start.cpp
+		forcectl_main.cpp
+		forcectl_example.cpp
 	DEPENDS
 	)

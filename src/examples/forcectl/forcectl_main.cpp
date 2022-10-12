@@ -32,39 +32,21 @@
  ****************************************************************************/
 
 /**
- * @file frocectl_app.h
- * Example app for Linux
+ * @file forcectl_main.cpp
  *
  * @author Yanchun Chang <changyanchun@sia.cn>
  */
-#pragma once
 
-#include <px4_platform_common/log.h>
-#include <px4_platform_common/px4_config.h>
-#include <px4_platform_common/tasks.h>
-#include <px4_platform_common/posix.h>
-#include <px4_platform_common/app.h>
-#include <px4_platform_common/time.h>
-#include <px4_platform_common/init.h>
-#include <unistd.h>
-#include <stdio.h>
-#include <poll.h>
-#include <string.h>
-#include <math.h>
-#include <sched.h>
-#include <uORB/uORB.h>
-#include <uORB/topics/forcectl_forcedata.h>
-#include <uORB/topics/forcectl_controldata.h>
-#include <uORB/topics/actuator_controls.h>
+#include "forcectl_example.h"
 
-class Forcectl
+int PX4_MAIN(int argc, char **argv)
 {
-public:
-	Forcectl() {}
+	px4::init(argc, argv, "forcectl");
 
-	~Forcectl() {}
+	printf("Force-feedback-control Start!\n");
+	Forcectl forcectl;
+	forcectl.main();
 
-	int main();
-
-	static px4::AppState appState; /* track requests to terminate app */
-};
+	printf("Exiting!\n");
+	return 0;
+}
