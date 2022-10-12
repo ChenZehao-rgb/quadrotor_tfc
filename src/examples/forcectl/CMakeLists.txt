@@ -31,9 +31,9 @@
 #
 ############################################################################
 px4_add_module(
-	MODULE examples__forcectl_app
-	MAIN forcectl_app
+	MODULE examples__forcectl
+	MAIN forcectl
 	SRCS
-		forcectl_app.c
+		forcectl_example.c
 	DEPENDS
 	)

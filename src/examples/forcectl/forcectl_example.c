@@ -32,17 +32,17 @@
  ****************************************************************************/
 
 /**
- * @file forcectl_app.c
+ * @file forcectl_start.c
  * Text application example for force feedback control
  *
  * @author Yanchun Chang <changyanchun@sia.cn>
  */
 
-#include "forcectl_app.h"
+#include "forcectl_example.h"
 
-__EXPORT int forcectl_app_main(int argc, char *argv[]);
+__EXPORT int forcectl_main(int argc, char *argv[]);
 
-int forcectl_app_main(int argc, char *argv[])
+int forcectl_main(int argc, char *argv[])
 {
 	PX4_INFO("Force-feedback-control Start!");
 
