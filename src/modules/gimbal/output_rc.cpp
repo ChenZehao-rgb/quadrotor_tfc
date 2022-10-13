@@ -82,9 +82,12 @@ void OutputRC::update(const ControlData &control_data, bool new_setpoints)
 	actuator_controls.timestamp = hrt_absolute_time();
 
 	_forcectl_controldata_sub.update(&forcectl_control_data);
+	_rc_channels_sub.update(&rc_channals_data);
+	_vehicle_status_sub.update(&vehicle_status);
+
 	actuator_controls.control[0] = -1.0f;
 
-	if(_rc_channels_sub.update(&rc_channals_data)){
+	if(!vehicle_status.rc_signal_lost){
 		if(rc_channals_data.channels[5] < -0.3f)
 		{
 			actuator_controls.control[0] = rc_channals_data.channels[2]*2.0f-1.0f;
@@ -95,7 +98,7 @@ void OutputRC::update(const ControlData &control_data, bool new_setpoints)
 		}
 		else if(rc_channals_data.channels[5] > 0.3f)
 		{
-			actuator_controls.control[0] = forcectl_control_data.force_controls_data;
+			actuator_controls.control[0] = forcectl_control_data.force_controls_data*2.0f-1.0f;
 		}
 	}
 

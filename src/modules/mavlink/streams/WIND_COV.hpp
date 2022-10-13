@@ -36,6 +36,8 @@
 
 #include <uORB/topics/vehicle_local_position.h>
 #include <uORB/topics/wind.h>
+#include <uORB/topics/forcectl_forcedata.h>
+#include <uORB/topics/forcectl_controldata.h>
 
 class MavlinkStreamWindCov : public MavlinkStream
 {
@@ -58,29 +60,56 @@ private:
 
 	uORB::Subscription _wind_sub{ORB_ID(wind)};
 	uORB::Subscription _local_pos_sub{ORB_ID(vehicle_local_position)};
+	uORB::Subscription _forcedata_sub{ORB_ID(forcectl_forcedata)};
+	uORB::Subscription _controldata_sub{ORB_ID(forcectl_controldata)};
 
 	bool send() override
 	{
-		wind_s wind;
+		// wind_s wind;
 
-		if (_wind_sub.update(&wind)) {
+		// if (_wind_sub.update(&wind)) {
+		// 	mavlink_wind_cov_t msg{};
+
+		// 	msg.time_usec = wind.timestamp;
+
+		// 	msg.wind_x = wind.windspeed_north;
+		// 	msg.wind_y = wind.windspeed_east;
+		// 	msg.wind_z = 0.0f;
+
+		// 	msg.var_horiz = wind.variance_north + wind.variance_east;
+		// 	msg.var_vert = 0.0f;
+
+		// 	vehicle_local_position_s lpos{};
+		// 	_local_pos_sub.copy(&lpos);
+		// 	msg.wind_alt = (lpos.z_valid && lpos.z_global) ? (-lpos.z + lpos.ref_alt) : (float)NAN;
+
+		// 	msg.horiz_accuracy = 0.0f;
+		// 	msg.vert_accuracy = 0.0f;
+
+		// 	mavlink_msg_wind_cov_send_struct(_mavlink->get_channel(), &msg);
+
+		// 	return true;
+		// }
+
+		forcectl_forcedata_s forcedata = {};
+		forcectl_controldata_s control_data = {};
+
+		if (_forcedata_sub.update(&forcedata)) {
 			mavlink_wind_cov_t msg{};
+			_controldata_sub.copy(&control_data);
 
-			msg.time_usec = wind.timestamp;
+			msg.time_usec = hrt_absolute_time();
 
-			msg.wind_x = wind.windspeed_north;
-			msg.wind_y = wind.windspeed_east;
-			msg.wind_z = 0.0f;
+			msg.wind_x = control_data.force_exp_data;
+			msg.wind_y = forcedata.force_filtered_data;
+			msg.wind_z = control_data.force_exp_data - forcedata.force_filtered_data;
 
-			msg.var_horiz = wind.variance_north + wind.variance_east;
-			msg.var_vert = 0.0f;
+			msg.var_horiz = forcedata.force_raw_data;
+			msg.var_vert = control_data.force_controls_data;
 
-			vehicle_local_position_s lpos{};
-			_local_pos_sub.copy(&lpos);
-			msg.wind_alt = (lpos.z_valid && lpos.z_global) ? (-lpos.z + lpos.ref_alt) : (float)NAN;
-
-			msg.horiz_accuracy = 0.0f;
-			msg.vert_accuracy = 0.0f;
+			msg.wind_alt = control_data.force_controls_p;
+			msg.horiz_accuracy = control_data.force_controls_i;
+			msg.vert_accuracy = control_data.force_controls_d;
 
 			mavlink_msg_wind_cov_send_struct(_mavlink->get_channel(), &msg);
 

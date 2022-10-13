@@ -46,15 +46,20 @@ int Forcectl::main()
 {
 	appState.setRunning(true);
 
-	/* subscribe to forcectl topic */
+	/* subscribe to forcectl_forcedata topic */
 	int forcedata_sub_fd = orb_subscribe(ORB_ID(forcectl_forcedata));
-	/* limit the update rate to 1 Hz */
+	/* limit the update rate to 50 Hz */
 	orb_set_interval(forcedata_sub_fd, 20);
 
-	/* subscribe to forcectl topic */
+	/* subscribe to actuator_controls_3 topic */
 	int forceexp_sub_fd = orb_subscribe(ORB_ID(actuator_controls_3));
-	/* limit the update rate to 1 Hz */
+	/* limit the update rate to 50 Hz */
 	orb_set_interval(forceexp_sub_fd, 20);
+
+	/* subscribe to rc_channels topic */
+	int pid_sub_fd = orb_subscribe(ORB_ID(rc_channels));
+	/* limit the update rate to 1 Hz */
+	orb_set_interval(pid_sub_fd, 20);
 
 	/* advertise forcectl_controldata topic */
 	struct forcectl_controldata_s control_data;
@@ -69,6 +74,8 @@ int Forcectl::main()
 
 	struct forcectl_forcedata_s forcedata = {};
 	struct actuator_controls_s force_exp = {};
+	struct rc_channels_s rc_channals_data = {};
+	float force_max = 1.0f;
 
 	while(appState.isRunning()){
 		/* wait for sensor update of 1 file descriptor for 1000 ms (1 second) */
@@ -96,14 +103,21 @@ int Forcectl::main()
 
 				/* copy sensors raw data into local buffer */
 				orb_copy(ORB_ID(actuator_controls_3), forceexp_sub_fd, &force_exp);
-				control_data.force_exp_data = 20.0f*force_exp.control[3];
+				control_data.force_exp_data = force_max*force_exp.control[3];
 				//PX4_INFO("The force_exp data: %8.4f\t", (double)forcectl_force_exp);
 			}
 
 		}
 
+		orb_copy(ORB_ID(rc_channels), pid_sub_fd, &rc_channals_data);
+		control_data.force_controls_p = (rc_channals_data.channels[6] + 1.0f)/2.0f;
+		control_data.force_controls_i = (rc_channals_data.channels[7] + 1.0f)/2.0f;
+		control_data.force_controls_d = (rc_channals_data.channels[8] + 1.0f)/2.0f;
+
+		float force_error = control_data.force_exp_data - forcedata.force_filtered_data;
+		control_data.force_controls_data = control_data.force_controls_p*force_error/force_max;
+
 		control_data.timestamp = hrt_absolute_time();
-		control_data.force_controls_data = (control_data.force_exp_data - forcedata.force_filtered_data)/20.0f*2.0f-1.0f;
 		orb_publish(ORB_ID(forcectl_controldata), controldata_pub, &control_data);
 
 		px4_usleep(10000);

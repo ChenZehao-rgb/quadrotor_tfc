@@ -56,6 +56,7 @@
 #include <uORB/topics/forcectl_forcedata.h>
 #include <uORB/topics/forcectl_controldata.h>
 #include <uORB/topics/actuator_controls.h>
+#include <uORB/topics/rc_channels.h>
 
 class Forcectl
 {
