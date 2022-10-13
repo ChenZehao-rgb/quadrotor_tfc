@@ -81,8 +81,22 @@ void OutputRC::update(const ControlData &control_data, bool new_setpoints)
 	// 				       -1.f, 1.f);
 	actuator_controls.timestamp = hrt_absolute_time();
 
-	if(_forcectl_controldata_sub.update(&forcectl_control_data)){
-		actuator_controls.control[1] = forcectl_control_data.force_controls_data;
+	_forcectl_controldata_sub.update(&forcectl_control_data);
+	actuator_controls.control[0] = -1.0f;
+
+	if(_rc_channels_sub.update(&rc_channals_data)){
+		if(rc_channals_data.channels[5] < -0.3f)
+		{
+			actuator_controls.control[0] = rc_channals_data.channels[2]*2.0f-1.0f;
+		}
+		else if((rc_channals_data.channels[5] > -0.3f) && (rc_channals_data.channels[5] < 0.3f))
+		{
+			actuator_controls.control[0] = -1.0f;
+		}
+		else if(rc_channals_data.channels[5] > 0.3f)
+		{
+			actuator_controls.control[0] = forcectl_control_data.force_controls_data;
+		}
 	}
 
 	_actuator_controls_pub.publish(actuator_controls);

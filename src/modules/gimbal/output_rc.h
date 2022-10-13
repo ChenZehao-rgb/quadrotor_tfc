@@ -41,6 +41,7 @@
 #include <uORB/topics/gimbal_device_attitude_status.h>
 #include <uORB/topics/forcectl_controldata.h>
 #include <uORB/Subscription.hpp>
+#include <uORB/topics/rc_channels.h>
 
 namespace gimbal
 {
@@ -65,6 +66,8 @@ private:
 
 	uORB::Subscription _forcectl_controldata_sub{ORB_ID(forcectl_controldata)};
 	forcectl_controldata_s forcectl_control_data{};
+	uORB::Subscription _rc_channels_sub{ORB_ID(rc_channels)};
+	rc_channels_s rc_channals_data{};
 };
 
 } /* namespace gimbal */
