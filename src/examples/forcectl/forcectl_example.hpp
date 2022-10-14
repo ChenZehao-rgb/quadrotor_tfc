@@ -32,8 +32,7 @@
  ****************************************************************************/
 
 /**
- * @file frocectl_app.h
- * Example app for Linux
+ * @file frocectl_example.hpp
  *
  * @author Yanchun Chang <changyanchun@sia.cn>
  */

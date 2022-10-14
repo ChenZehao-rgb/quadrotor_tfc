@@ -32,58 +32,78 @@
  ****************************************************************************/
 
 /**
- * @file forcectl_start.cpp
+ * @file frocectl_kf_filter.hpp
  *
  * @author Yanchun Chang <changyanchun@sia.cn>
  */
-#include "forcectl_example.hpp"
+#pragma once
 
-static int forcectl_task;             /* Handle of forcectl task / thread */
+#include <matrix/math.hpp>
+#include <mathlib/mathlib.h>
+#include <matrix/Matrix.hpp>
+#include <matrix/Vector.hpp>
 
-extern "C" __EXPORT int forcectl_main(int argc, char *argv[]);
-int forcectl_main(int argc, char *argv[])
+class ForcectlKfFilter
 {
+public:
+	ForcectlKfFilter() {}
 
-	if (argc < 2) {
-		PX4_WARN("usage: forcectl {start|stop|status}\n");
-		return 1;
-	}
+	/**
+	 * Constructor, initialize state
+	 */
+	ForcectlKfFilter(float covInit);
 
-	if (!strcmp(argv[1], "start")) {
+	~ForcectlKfFilter() {}
 
-		if (Forcectl::appState.isRunning()) {
-			PX4_INFO("already running\n");
-			/* this is not an error */
-			return 0;
-		}
+	float force_kf_filter(float dt, float inputdata);
 
-		forcectl_task = px4_task_spawn_cmd("forcectl",
-						 SCHED_DEFAULT,
-						 SCHED_PRIORITY_MAX - 5,
-						 3000,
-						 PX4_MAIN,
-						 (argv) ? (char *const *)&argv[2] : (char *const *)nullptr);
+	/**
+	 * Get the current filter state
+	 * @param state0 First state
+	 * @param state1 Second state
+	 */
+	void getState(float &state0, float &state1);
 
-		return 0;
-	}
+	/**
+	 * Get state variances (diagonal elements)
+	 * @param cov00 Variance of first state
+	 * @param cov11 Variance of second state
+	 */
+	void getCovariance(float &cov00, float &cov11);
 
-	if (!strcmp(argv[1], "stop")) {
-		Forcectl::appState.requestExit();
-		Forcectl::appState.setRunning(false);
-		return 0;
-	}
+	/**
+	 * Get measurement innovation and covariance of last update call
+	 * @param innov Measurement innovation
+	 * @param innovCov Measurement innovation covariance
+	 */
+	void getInnovations(float &innov, float &innovCov);
 
-	if (!strcmp(argv[1], "status")) {
-		if (Forcectl::appState.isRunning()) {
-			PX4_INFO("is running\n");
+private:
+	/**
+	 * Predict the state with an external acceleration estimate
+	 * @param dt            Time delta in seconds since last state change
+	 * @param acc           Acceleration estimate
+	 * @param acc_unc       Variance of acceleration estimate
+	 */
+	void predict(float dt, float acc, float acc_unc);
 
-		} else {
-			PX4_INFO("not started\n");
-		}
+	/**
+	 * Update the state estimate with a measurement
+	 * @param meas    state measeasurement
+	 * @param measUnc measurement uncertainty
+	 * @return update success (measurement not rejected)
+	 */
+	bool update(float meas, float measUnc);
 
-		return 0;
-	}
+	matrix::Vector<float, 2> _force; // state
 
-	PX4_WARN("usage: forcectl_main {start|stop|status}\n");
-	return 1;
-}
+	matrix::Matrix<float, 2, 2> _covariance; // state covariance
+
+	float _cov_measure{0.05f};
+
+	float _cov_estimate{0.08f};
+
+	float _residual{0.0f}; // residual of last measurement update
+
+	float _innovCov{0.0f}; // innovation covariance of last measurement update
+};

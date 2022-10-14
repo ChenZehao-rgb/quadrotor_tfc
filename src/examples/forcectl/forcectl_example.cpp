@@ -32,8 +32,8 @@
  ****************************************************************************/
 
 /**
- * @file forcectl_start.c
- * Text application example for force feedback control
+ * @file forcectl_example.cpp
+ * Test application example for force feedback control
  *
  * @author Yanchun Chang <changyanchun@sia.cn>
  */

@@ -54,6 +54,7 @@
 #include <uORB/topics/system_power.h>
 #include <uORB/topics/forcectl_forcedata.h>
 #include <lib/mathlib/math/filter/LowPassFilter2p.hpp>
+#include <examples/forcectl/forcectl_kf_filter.hpp>
 
 using namespace time_literals;
 
@@ -116,6 +117,8 @@ private:
 	forcectl_forcedata_s force_data = {};
 	math::LowPassFilter2p<float>	_forcectl_lowpass_filter{100.f, 30.f};
 	uORB::Publication<forcectl_forcedata_s>		_to_forcedata_report{ORB_ID(forcectl_forcedata)};
+	ForcectlKfFilter forcectl_kf_filter{0.3f};
+
 #ifdef BOARD_GPIO_VDD_5V_COMP_VALID
 	int _5v_comp_valid_fd {-1};
 #endif
