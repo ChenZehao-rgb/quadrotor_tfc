@@ -73,9 +73,8 @@ int Forcectl::main()
 	};
 
 	struct forcectl_forcedata_s forcedata = {};
-	struct actuator_controls_s force_exp = {};
+	struct actuator_controls_s force_exp_from_rc = {};
 	struct rc_channels_s rc_channals_data = {};
-	float force_max = 1.0f;
 
 	while(appState.isRunning()){
 		/* wait for sensor update of 1 file descriptor for 1000 ms (1 second) */
@@ -89,33 +88,23 @@ int Forcectl::main()
 		} else if (poll_ret > 0) {
 
 			if (fds[0].revents & POLLIN) {
-				/* obtained data for the first file descriptor */
-
-				/* copy sensors raw data into local buffer */
 				orb_copy(ORB_ID(forcectl_forcedata), forcedata_sub_fd, &forcedata);
-				// PX4_INFO("The force_raw data: %8.4f, %8.4f\t",
-				// 	 (double)forcedata.force_raw_data,
-				// 	 (double)forcedata.force_filtered_data);
 			}
 
 			if (fds[1].revents & POLLIN) {
-				/* obtained data for the first file descriptor */
-
-				/* copy sensors raw data into local buffer */
-				orb_copy(ORB_ID(actuator_controls_3), forceexp_sub_fd, &force_exp);
-				control_data.force_exp_data = force_max*force_exp.control[3];
-				//PX4_INFO("The force_exp data: %8.4f\t", (double)forcectl_force_exp);
+				orb_copy(ORB_ID(actuator_controls_3), forceexp_sub_fd, &force_exp_from_rc);
+				control_data.force_exp = forcedata.force_max*force_exp_from_rc.control[3];
 			}
 
 		}
 
 		orb_copy(ORB_ID(rc_channels), pid_sub_fd, &rc_channals_data);
-		control_data.force_controls_p = (rc_channals_data.channels[6] + 1.0f)/2.0f;
-		control_data.force_controls_i = (rc_channals_data.channels[7] + 1.0f)/2.0f;
-		control_data.force_controls_d = (rc_channals_data.channels[8] + 1.0f)/2.0f;
+		control_data.kp = (rc_channals_data.channels[6] + 1.0f)/2.0f;
+		control_data.ki = (rc_channals_data.channels[7] + 1.0f)/2.0f;
+		control_data.kd = (rc_channals_data.channels[8] + 1.0f)/2.0f;
 
-		float force_error = control_data.force_exp_data - forcedata.force_filtered_data;
-		control_data.force_controls_data = control_data.force_controls_p*force_error/force_max;
+		control_data.force_error = control_data.force_exp - forcedata.force_kf_filtered_data;
+		control_data.force_control_out = control_data.kp*control_data.force_error;
 
 		control_data.timestamp = hrt_absolute_time();
 		orb_publish(ORB_ID(forcectl_controldata), controldata_pub, &control_data);

@@ -100,16 +100,16 @@ private:
 
 			msg.time_usec = hrt_absolute_time();
 
-			msg.wind_x = control_data.force_exp_data;
-			msg.wind_y = forcedata.force_filtered_data;
-			msg.wind_z = control_data.force_exp_data - forcedata.force_filtered_data;
+			msg.wind_x = control_data.force_exp;
+			msg.wind_y = forcedata.force_kf_filtered_data;
+			msg.wind_z = control_data.force_error;
 
 			msg.var_horiz = forcedata.force_raw_data;
-			msg.var_vert = control_data.force_controls_data;
+			msg.var_vert = control_data.force_control_out;
 
-			msg.wind_alt = control_data.force_controls_p;
-			msg.horiz_accuracy = control_data.force_controls_i;
-			msg.vert_accuracy = control_data.force_controls_d;
+			msg.wind_alt = control_data.kp;
+			msg.horiz_accuracy = control_data.ki;
+			msg.vert_accuracy = control_data.kd;
 
 			mavlink_msg_wind_cov_send_struct(_mavlink->get_channel(), &msg);
 

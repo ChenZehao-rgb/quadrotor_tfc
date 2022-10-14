@@ -98,7 +98,7 @@ void OutputRC::update(const ControlData &control_data, bool new_setpoints)
 		}
 		else if(rc_channals_data.channels[5] > 0.3f)
 		{
-			actuator_controls.control[0] = forcectl_control_data.force_controls_data*2.0f-1.0f;
+			actuator_controls.control[0] = forcectl_control_data.force_control_out*2.0f-1.0f;
 		}
 	}
 
