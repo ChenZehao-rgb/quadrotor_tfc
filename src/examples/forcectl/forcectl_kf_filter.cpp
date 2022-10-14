@@ -80,7 +80,7 @@ bool ForcectlKfFilter::update(float meas, float measUnc)
 
 	// 5% false alarm probability
 	if (beta > 3.84f) {
-		return false;
+		//return false;
 	}
 
 	matrix::Vector<float, 2> kalmanGain;
@@ -124,7 +124,27 @@ float ForcectlKfFilter::force_kf_filter(float dt, float inputdata)
 {
 	dt = (dt < 0.001f) ? 0.01f : dt;
 	predict(dt, 0.0f, _cov_estimate);
+
+#if SAVE_FORCECTL_KF_FILTER_DATA
+	forcectl_kf_data.dt = dt;
+	forcectl_kf_data.force_estimate = _force(0);
+	forcectl_kf_data.force_v_estimate = _force(1);
+	forcectl_kf_data.cov_before = _covariance(0, 0);
+	forcectl_kf_data.kalman_gain = _covariance(0, 0) / (_covariance(0, 0) + (_cov_measure * _cov_measure));
+#endif
+
 	update(inputdata, _cov_measure);
+
+#if SAVE_FORCECTL_KF_FILTER_DATA
+	forcectl_kf_data.force_measure = inputdata;
+	forcectl_kf_data.innov_cov = _innovCov;
+	forcectl_kf_data.force = _force(0);
+	forcectl_kf_data.force_v = _force(1);
+	forcectl_kf_data.cov_after = _covariance(0, 0);
+
+	forcectl_kf_data.timestamp = hrt_absolute_time();
+	orb_publish(ORB_ID(forcectl_kf_filterdata), kf_filter_data_pub, &forcectl_kf_data);
+#endif
 
 	return _force(0);
 }

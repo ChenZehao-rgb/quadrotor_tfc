@@ -207,6 +207,7 @@ set(msg_files
 	yaw_estimator_status.msg
 	forcectl_forcedata.msg
 	forcectl_controldata.msg
+	forcectl_kf_filterdata.msg
 )
 
 if(NOT px4_constrained_flash_build)

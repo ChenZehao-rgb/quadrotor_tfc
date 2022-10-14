@@ -42,6 +42,10 @@
 #include <mathlib/mathlib.h>
 #include <matrix/Matrix.hpp>
 #include <matrix/Vector.hpp>
+#include <uORB/uORB.h>
+#include <uORB/topics/forcectl_kf_filterdata.h>
+
+#define SAVE_FORCECTL_KF_FILTER_DATA 1
 
 class ForcectlKfFilter
 {
@@ -101,9 +105,14 @@ private:
 
 	float _cov_measure{0.05f};
 
-	float _cov_estimate{0.08f};
+	float _cov_estimate{25.0f};
 
 	float _residual{0.0f}; // residual of last measurement update
 
 	float _innovCov{0.0f}; // innovation covariance of last measurement update
+
+#if SAVE_FORCECTL_KF_FILTER_DATA
+	forcectl_kf_filterdata_s forcectl_kf_data = {0};
+	orb_advert_t kf_filter_data_pub = orb_advertise(ORB_ID(forcectl_kf_filterdata), &forcectl_kf_data);
+#endif
 };
