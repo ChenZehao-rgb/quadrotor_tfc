@@ -36,7 +36,7 @@
  *
  * @author Yanchun Chang <changyanchun@sia.cn>
  */
-#include "forcectl_example.h"
+#include "forcectl_example.hpp"
 
 static int forcectl_task;             /* Handle of forcectl task / thread */
 

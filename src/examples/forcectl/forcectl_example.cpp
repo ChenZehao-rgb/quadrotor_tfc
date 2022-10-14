@@ -38,9 +38,39 @@
  * @author Yanchun Chang <changyanchun@sia.cn>
  */
 
-#include "forcectl_example.h"
+#include "forcectl_example.hpp"
 
 px4::AppState Forcectl::appState;
+
+typedef struct{
+	float Kp;
+	float Ki;
+	float Kd;
+	float p_out;
+	float i_out;
+	float d_out;
+	float err;
+	float last_err;
+	float previous_err;
+	float output;
+}incremental_PID;
+
+void Incremental_PID_calculate(incremental_PID *pid)
+{
+	if(pid == NULL){
+		return;
+	}
+
+	pid->p_out = pid->Kp * (pid->err - pid->last_err);
+	pid->i_out = pid->Ki * pid->err;
+	pid->d_out = pid->Kd * (pid->err - 2.0f*pid->last_err + pid->previous_err);
+
+	pid->output += pid->p_out + pid->i_out + pid->d_out;
+	pid->output = (pid->output < 0) ? 0 : ((pid->output > 1) ? 1 : pid->output);
+
+	pid->previous_err = pid->last_err;
+	pid->last_err = pid->err;
+}
 
 int Forcectl::main()
 {
@@ -75,6 +105,7 @@ int Forcectl::main()
 	struct forcectl_forcedata_s forcedata = {};
 	struct actuator_controls_s force_exp_from_rc = {};
 	struct rc_channels_s rc_channals_data = {};
+	static incremental_PID incre_pid = {};
 
 	while(appState.isRunning()){
 		/* wait for sensor update of 1 file descriptor for 1000 ms (1 second) */
@@ -104,7 +135,13 @@ int Forcectl::main()
 		control_data.kd = (rc_channals_data.channels[8] + 1.0f)/2.0f;
 
 		control_data.force_error = control_data.force_exp - forcedata.force_kf_filtered_data;
-		control_data.force_control_out = control_data.kp*control_data.force_error;
+		incre_pid.Kp = control_data.kp;
+		incre_pid.Ki = control_data.ki;
+		incre_pid.Kd = control_data.kd;
+		incre_pid.err = control_data.force_error;
+		Incremental_PID_calculate(&incre_pid);
+
+		control_data.force_control_out = incre_pid.output;
 
 		control_data.timestamp = hrt_absolute_time();
 		orb_publish(ORB_ID(forcectl_controldata), controldata_pub, &control_data);

@@ -37,7 +37,7 @@
  * @author Yanchun Chang <changyanchun@sia.cn>
  */
 
-#include "forcectl_example.h"
+#include "forcectl_example.hpp"
 
 int PX4_MAIN(int argc, char **argv)
 {
