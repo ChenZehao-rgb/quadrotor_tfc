@@ -50,7 +50,12 @@
 class ForcectlKfFilter
 {
 public:
-	ForcectlKfFilter() {}
+	ForcectlKfFilter() {
+		_force(0) = 0.0f;
+		_force(1) = 0.0f;
+		_covariance(0,0) = 10.0f;
+		_covariance(1,1) = 10.0f;
+	}
 
 	/**
 	 * Constructor, initialize state
@@ -105,7 +110,7 @@ private:
 
 	float _cov_measure{0.05f};
 
-	float _cov_estimate{25.0f};
+	float _cov_estimate{5.0f};
 
 	float _residual{0.0f}; // residual of last measurement update
 

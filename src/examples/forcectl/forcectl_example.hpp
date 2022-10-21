@@ -56,6 +56,7 @@
 #include <uORB/topics/forcectl_controldata.h>
 #include <uORB/topics/actuator_controls.h>
 #include <uORB/topics/rc_channels.h>
+#include <lib/mathlib/math/filter/LowPassFilter2p.hpp>
 
 class Forcectl
 {

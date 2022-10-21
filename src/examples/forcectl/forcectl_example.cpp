@@ -41,6 +41,8 @@
 #include "forcectl_example.hpp"
 
 px4::AppState Forcectl::appState;
+math::LowPassFilter2p<float>	_pid_pout_lowpass_filter{100.f, 10.f};
+math::LowPassFilter2p<float>	_pid_dout_lowpass_filter{100.f, 10.f};
 
 typedef struct{
 	float Kp;
@@ -65,8 +67,11 @@ void Incremental_PID_calculate(incremental_PID *pid)
 	pid->i_out = pid->Ki * pid->err;
 	pid->d_out = pid->Kd * (pid->err - 2.0f*pid->last_err + pid->previous_err);
 
+	pid->p_out = _pid_pout_lowpass_filter.apply(pid->p_out);
+	pid->d_out = _pid_dout_lowpass_filter.apply(pid->d_out);
+
 	pid->output += pid->p_out + pid->i_out + pid->d_out;
-	pid->output = (pid->output < 0) ? 0 : ((pid->output > 1) ? 1 : pid->output);
+	pid->output = (pid->output < 0) ? 0 : ((pid->output > 0.5f) ? 0.5f : pid->output);
 
 	pid->previous_err = pid->last_err;
 	pid->last_err = pid->err;
@@ -107,6 +112,9 @@ int Forcectl::main()
 	struct rc_channels_s rc_channals_data = {};
 	static incremental_PID incre_pid = {};
 
+	_pid_pout_lowpass_filter.reset(0.0);
+	_pid_dout_lowpass_filter.reset(0.0);
+
 	while(appState.isRunning()){
 		/* wait for sensor update of 1 file descriptor for 1000 ms (1 second) */
 		int poll_ret = px4_poll(fds, 2, 1000);
@@ -130,15 +138,21 @@ int Forcectl::main()
 		}
 
 		orb_copy(ORB_ID(rc_channels), pid_sub_fd, &rc_channals_data);
-		control_data.kp = (rc_channals_data.channels[6] + 1.0f)/2.0f;
-		control_data.ki = (rc_channals_data.channels[7] + 1.0f)/2.0f;
-		control_data.kd = (rc_channals_data.channels[8] + 1.0f)/2.0f;
+		control_data.kp = 0.3f*(rc_channals_data.channels[6] + 1.0f)/2.0f;
+		control_data.ki = 0.3f*(rc_channals_data.channels[7] + 1.0f)/2.0f;
+		control_data.kd = 0.3f*(rc_channals_data.channels[8] + 1.0f)/2.0f;
 
 		control_data.force_error = control_data.force_exp - forcedata.force_kf_filtered_data;
 		incre_pid.Kp = control_data.kp;
 		incre_pid.Ki = control_data.ki;
 		incre_pid.Kd = control_data.kd;
 		incre_pid.err = control_data.force_error;
+
+		if((rc_channals_data.channels[5] > -0.3f) && (rc_channals_data.channels[5] < 0.3f))
+		{
+			memset(&incre_pid, 0, sizeof(incre_pid));
+		}
+
 		Incremental_PID_calculate(&incre_pid);
 
 		control_data.force_control_out = incre_pid.output;

@@ -88,17 +88,20 @@ void OutputRC::update(const ControlData &control_data, bool new_setpoints)
 	actuator_controls.control[0] = -1.0f;
 
 	if(!vehicle_status.rc_signal_lost){
-		if(rc_channals_data.channels[5] < -0.3f)
-		{
-			actuator_controls.control[0] = rc_channals_data.channels[2]*2.0f-1.0f;
-		}
-		else if((rc_channals_data.channels[5] > -0.3f) && (rc_channals_data.channels[5] < 0.3f))
+		if(rc_channals_data.channels[4] < 0.0f)
 		{
 			actuator_controls.control[0] = -1.0f;
 		}
-		else if(rc_channals_data.channels[5] > 0.3f)
+		else if(rc_channals_data.channels[4] > 0.0f)
 		{
-			actuator_controls.control[0] = forcectl_control_data.force_control_out*2.0f-1.0f;
+			if(rc_channals_data.channels[5] < -0.3f)
+			{
+				actuator_controls.control[0] = rc_channals_data.channels[2]*2.0f-1.0f;
+			}
+			else if(rc_channals_data.channels[5] > 0.3f)
+			{
+				actuator_controls.control[0] = forcectl_control_data.force_control_out*2.0f-1.0f;
+			}
 		}
 	}
 

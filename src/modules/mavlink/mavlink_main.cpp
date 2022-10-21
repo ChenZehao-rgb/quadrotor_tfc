@@ -1683,6 +1683,10 @@ Mavlink::configure_streams_to_default(const char *configure_single_stream)
 	/* fallthrough */
 	case MAVLINK_MODE_CUSTOM:
 		//stream nothing
+		configure_stream_local("ATTITUDE", 5.0f);
+		configure_stream_local("ACTUATOR_CONTROL_TARGET2", 10.0f);
+		configure_stream_local("RC_CHANNELS", 2.0f);
+		configure_stream_local("WIND_COV", unlimited_rate);
 		break;
 
 	case MAVLINK_MODE_CONFIG: // USB
