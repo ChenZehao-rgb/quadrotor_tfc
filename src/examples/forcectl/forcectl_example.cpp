@@ -41,7 +41,7 @@
 #include "forcectl_example.hpp"
 
 px4::AppState Forcectl::appState;
-math::LowPassFilter2p<float>	_pid_pout_lowpass_filter{100.f, 10.f};
+math::LowPassFilter2p<float>	_pid_pout_lowpass_filter{100.f, 30.f};
 math::LowPassFilter2p<float>	_pid_dout_lowpass_filter{100.f, 10.f};
 
 typedef struct{
@@ -138,9 +138,9 @@ int Forcectl::main()
 		}
 
 		orb_copy(ORB_ID(rc_channels), pid_sub_fd, &rc_channals_data);
-		control_data.kp = 0.3f*(rc_channals_data.channels[6] + 1.0f)/2.0f;
-		control_data.ki = 0.3f*(rc_channals_data.channels[7] + 1.0f)/2.0f;
-		control_data.kd = 0.3f*(rc_channals_data.channels[8] + 1.0f)/2.0f;
+		control_data.kp = 2.0f*(rc_channals_data.channels[6] + 1.0f)/2.0f;
+		control_data.ki = 0.2f*(rc_channals_data.channels[7] + 1.0f)/2.0f;
+		control_data.kd = 5.0f*(rc_channals_data.channels[8] + 1.0f)/2.0f;
 
 		control_data.force_error = control_data.force_exp - forcedata.force_kf_filtered_data;
 		incre_pid.Kp = control_data.kp;
@@ -148,7 +148,7 @@ int Forcectl::main()
 		incre_pid.Kd = control_data.kd;
 		incre_pid.err = control_data.force_error;
 
-		if((rc_channals_data.channels[5] > -0.3f) && (rc_channals_data.channels[5] < 0.3f))
+		if((rc_channals_data.channels[4] < 0.0f)||(rc_channals_data.channels[5] < 0.3f))
 		{
 			memset(&incre_pid, 0, sizeof(incre_pid));
 		}

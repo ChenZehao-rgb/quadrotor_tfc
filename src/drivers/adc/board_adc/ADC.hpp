@@ -115,7 +115,7 @@ private:
 	uORB::Publication<system_power_s>	_to_system_power{ORB_ID(system_power)};
 
 	forcectl_forcedata_s force_data = {};
-	math::LowPassFilter2p<float>	_forcectl_lowpass_filter{100.f, 10.f};
+	math::LowPassFilter2p<float>	_forcectl_lowpass_filter{100.f, 30.f};
 	uORB::Publication<forcectl_forcedata_s>		_to_forcedata_report{ORB_ID(forcectl_forcedata)};
 	ForcectlKfFilter forcectl_kf_filter{1.0f};
 
