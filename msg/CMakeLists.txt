@@ -208,6 +208,7 @@ set(msg_files
 	forcectl_forcedata.msg
 	forcectl_controldata.msg
 	forcectl_kf_filterdata.msg
+	forcectl_adrc_data.msg
 )
 
 if(NOT px4_constrained_flash_build)

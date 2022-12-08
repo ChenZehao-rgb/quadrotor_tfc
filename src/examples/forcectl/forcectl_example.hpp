@@ -57,6 +57,9 @@
 #include <uORB/topics/actuator_controls.h>
 #include <uORB/topics/rc_channels.h>
 #include <lib/mathlib/math/filter/LowPassFilter2p.hpp>
+#include <uORB/topics/forcectl_adrc_data.h>
+
+#define SAVE_FORCECTL_ADRC_DATA 1
 
 class Forcectl
 {
@@ -68,4 +71,10 @@ public:
 	int main();
 
 	static px4::AppState appState; /* track requests to terminate app */
+
+private:
+#if SAVE_FORCECTL_ADRC_DATA
+	forcectl_adrc_data_s forcectl_ADRC_data = {0};
+	orb_advert_t adrc_data_pub = orb_advertise(ORB_ID(forcectl_adrc_data), &forcectl_ADRC_data);
+#endif
 };

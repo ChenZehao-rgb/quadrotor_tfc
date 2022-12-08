@@ -45,7 +45,7 @@
 #include <uORB/uORB.h>
 #include <uORB/topics/forcectl_kf_filterdata.h>
 
-#define SAVE_FORCECTL_KF_FILTER_DATA 1
+#define SAVE_FORCECTL_KF_FILTER_DATA 0
 
 class ForcectlKfFilter
 {

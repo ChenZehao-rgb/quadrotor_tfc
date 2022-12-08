@@ -85,6 +85,7 @@ void OutputRC::update(const ControlData &control_data, bool new_setpoints)
 	_rc_channels_sub.update(&rc_channals_data);
 	_vehicle_status_sub.update(&vehicle_status);
 
+	/*Td=(1-alpha)*omiga + aplha*omiga2*/
 	float forcectl_alpha = (rc_channals_data.channels[9] + 1.0f)/2.0f;
 	forcectl_alpha = (forcectl_alpha < 0.01f) ? 0.01f : ((forcectl_alpha > 1.0f) ? 1.0f : forcectl_alpha);
 	float forcectl_manual_control = ((float)sqrt((1.0f - forcectl_alpha)*(1.0f - forcectl_alpha) + 4.0f*forcectl_alpha*rc_channals_data.channels[2]) + (forcectl_alpha - 1.0f))/(2.0f * forcectl_alpha);
@@ -99,11 +100,11 @@ void OutputRC::update(const ControlData &control_data, bool new_setpoints)
 		}
 		else if(rc_channals_data.channels[4] > 0.0f)
 		{
-			if(rc_channals_data.channels[5] < 0.3f)
+			if(rc_channals_data.channels[5] < -0.3f)
 			{
 				actuator_controls.control[0] = forcectl_manual_control*2.0f-1.0f;
 			}
-			else if(rc_channals_data.channels[5] > 0.3f)
+			else if(rc_channals_data.channels[5] > -0.3f)
 			{
 				actuator_controls.control[0] = forcectl_control_data.force_control_out*2.0f-1.0f;
 			}
