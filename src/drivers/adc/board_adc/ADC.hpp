@@ -119,6 +119,9 @@ private:
 	uORB::Publication<forcectl_forcedata_s>		_to_forcedata_report{ORB_ID(forcectl_forcedata)};
 	ForcectlKfFilter forcectl_kf_filter{1.0f};
 
+	math::LowPassFilter2p<float>	_forcectl_torque_lowpass_filter{100.f, 30.f};
+	ForcectlKfFilter forcectl_torque_kf_filter{1.0f};
+
 #ifdef BOARD_GPIO_VDD_5V_COMP_VALID
 	int _5v_comp_valid_fd {-1};
 #endif
