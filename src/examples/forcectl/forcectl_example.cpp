@@ -73,6 +73,7 @@ typedef struct{
 	float b0;
 	float Kp;
 	float Kd;
+	float u0_CTL;
 	float output;
 }ADRC;
 
@@ -98,7 +99,7 @@ void Incremental_PID_calculate(incremental_PID *pid)
 
 float ADRC_sign(float in1)
 {
-	return ((in1 > 0.0f) ? 1.0f : ((abs(in1 - 0.0f) < 1e-7) ? 0.0f : -1.0f));
+	return ((in1 > 0.0f) ? 1.0f : ((fabs(in1 - 0.0f) < 1e-7) ? 0.0f : -1.0f));
 }
 
 float ADRC_fsg(float in1, float in2)
@@ -106,25 +107,25 @@ float ADRC_fsg(float in1, float in2)
 	return (ADRC_sign(in1 + in2) - ADRC_sign(in1 - in2))/2.0f;
 }
 
-float ADRC_fhan(float in1, float in2, float in3, float in4)
+float ADRC_fhan(double in1, double in2, double in3, double in4)
 {
-	float d = in3 * in4 * in4;
-	float a0 = in4 * in2;
-	float y = in1 + a0;
-	float a1 = sqrt(d*(d+ 8.0f*abs(y)));
-	float a2 = a0 + ADRC_sign(y)*(a1-d)/2.0f;
-	float a = (a0 + y)*ADRC_fsg(y,d) + a2*(1.0f-ADRC_fsg(y,d));
-	float fhan = -in3*(a/d)*ADRC_fsg(a,d) - in3*ADRC_sign(a)*(1.0f - ADRC_fsg(a,d));
+	double d = in3 * in4 * in4;
+	double a0 = in4 * in2;
+	double y = in1 + a0;
+	double a1 = sqrt(d*(d + 8.0*fabs(y)));
+	double a2 = a0 + (double)ADRC_sign(y)*(a1 - d)/2.0;
+	double a = (a0 + y)*(double)ADRC_fsg(y,d) + a2*(1.0 - (double)ADRC_fsg(y,d));
+	double fhan = -in3*(a/d)*(double)ADRC_fsg(a,d) - in3*(double)ADRC_sign(a)*(1.0 - (double)ADRC_fsg(a,d));
 
-	return fhan;
+	return (float)fhan;
 }
 
 float ADRC_fal(float in1, float in2, float in3)
 {
-	float s = (ADRC_sign(in1 +in3) - ADRC_sign(in1 - in3))/2.0f;
-	float fal = (float)(in1*s/((float)pow(in3, (1.0f - in2)))) + (float)((float)pow(abs(in1), in2)*ADRC_sign(in1)*(1.0f - s));
+	float s = (ADRC_sign(in1 + in3) - ADRC_sign(in1 - in3))/2.0f;
+	double fal = (double)in1*(double)s/(pow(in3, (1.0f - in2))) + pow(fabs(in1), in2)*(double)ADRC_sign(in1)*(1.0 - (double)s);
 
-	return fal;
+	return (float)fal;
 }
 
 void ADRC_calculate(ADRC *adrc)
@@ -135,7 +136,7 @@ void ADRC_calculate(ADRC *adrc)
 
 	uint64_t time_now = hrt_absolute_time();
 	float dt = (float)(time_now - adrc->last_timestamp)/1000000.0f;
-	dt = dt < 0.001f ? 0.02f : dt;
+	dt = (dt < 0.001f) ? 0.02f : ((dt > 0.04f) ? 0.02f : dt);
 	adrc->dt = dt;
 	adrc->last_timestamp = time_now;
 
@@ -145,11 +146,11 @@ void ADRC_calculate(ADRC *adrc)
 	adrc->TD_v1 = adrc->TD_v1 + adrc->TD_v2*dt;
 	adrc->TD_v2 = adrc->TD_v2 + fh*dt;
 
-	/*CONTROLLOR*/
+	/*CONTROLLER*/
 	float e1_CTL = adrc->TD_v1 - adrc->ESO_z1;
 	float e2_CTL = adrc->TD_v2 - adrc->ESO_z2;
-	float u0_CTL = adrc->Kp*e1_CTL + adrc->Kd*e2_CTL;
-	float u_CTL = u0_CTL - adrc->ESO_z3/adrc->b0;
+	adrc->u0_CTL += adrc->Kp*e1_CTL + adrc->Kd*e2_CTL;
+	float u_CTL = (adrc->u0_CTL - adrc->ESO_z3)/adrc->b0;
 
 	/*ESO*/
 	float e_ESO = adrc->ESO_z1 - adrc->force_mea;
@@ -158,9 +159,11 @@ void ADRC_calculate(ADRC *adrc)
 	adrc->ESO_z1 = adrc->ESO_z1 + dt*(adrc->ESO_z2 - adrc->beta1*e_ESO);
 	adrc->ESO_z2 = adrc->ESO_z2 + dt*(adrc->ESO_z3 - adrc->beta2*fe + adrc->b0*u_CTL);
 	adrc->ESO_z3 = adrc->ESO_z3 + dt*(-adrc->beta3*fe1);
+	// adrc->ESO_z1 = adrc->ESO_z1 + dt*(adrc->ESO_z2 - adrc->beta1*e_ESO + adrc->b0*u_CTL);
+	// adrc->ESO_z2 = adrc->ESO_z2 + dt*(-adrc->beta2*fe);
 
 	/*OUTPUT*/
-	adrc->output = (u_CTL > 1.0f) ? 1.0f : ((u_CTL < 0.0f) ? 0.0f : u_CTL);
+	adrc->output = (u_CTL > 0.5f) ? 0.5f : ((u_CTL < 0.0f) ? 0.0f : u_CTL);
 }
 
 int Forcectl::main()
@@ -221,7 +224,6 @@ int Forcectl::main()
 				orb_copy(ORB_ID(actuator_controls_3), forceexp_sub_fd, &force_exp_from_rc);
 				control_data.force_exp = forcedata.force_max*force_exp_from_rc.control[3];
 			}
-
 		}
 
 		orb_copy(ORB_ID(rc_channels), pid_sub_fd, &rc_channals_data);
@@ -229,11 +231,11 @@ int Forcectl::main()
 		{
 			memset(&incre_pid, 0, sizeof(incre_pid));
 		}
-		/* if((rc_channals_data.channels[4] < 0.0f)||(rc_channals_data.channels[5] < 0.3f))
+		if((rc_channals_data.channels[4] < 0.0f)||(rc_channals_data.channels[5] < 0.3f))
 		{
 			memset(&adrc, 0, sizeof(adrc));
 		}
- */
+
 		if((rc_channals_data.channels[5] > -0.3f)&&(rc_channals_data.channels[5] < 0.3f))
 		{
 			control_data.kp = 2.0f*(rc_channals_data.channels[6] + 1.0f)/2.0f;
@@ -249,21 +251,24 @@ int Forcectl::main()
 			Incremental_PID_calculate(&incre_pid);
 
 			control_data.force_control_out = incre_pid.output;
-		//}
-		//else if(rc_channals_data.channels[5] > 0.3f)
-		//{
-			adrc.b0 = (float)0.028e7/(1.292f*0.055f);
-			adrc.beta1 = (float)1e4;
-			adrc.beta2 = (float)1e7;
-			adrc.beta3 = (float)1e10;
-			adrc.Kp = 0.08f;
-			adrc.Kd = 0.005f;
+		}
+		else if(rc_channals_data.channels[5] > 0.3f)
+		{
+			adrc.b0 = 60000.0f;//(float)0.028e4/(1.292f*0.055f);
+			adrc.beta1 = 50.0f;
+			adrc.beta2 = 100.0f;
+			adrc.beta3 = 200.0f;
+			adrc.Kp = 0.08f*(rc_channals_data.channels[6] + 1.0f)/2.0f;
+			adrc.Kd = 0.01f*(rc_channals_data.channels[7] + 1.0f)/2.0f;
 			adrc.force_exp = control_data.force_exp;
-			adrc.force_mea = forcedata.force_raw_data;
+			adrc.force_mea = forcedata.force_kf_filtered_data;
 
-			ADRC_calculate(&adrc);
+			if(rc_channals_data.channels[4] > 0.0f)
+			{
+				ADRC_calculate(&adrc);
+			}
 
-			//control_data.force_control_out = adrc.output;
+			control_data.force_control_out = adrc.output;
 		}
 		else if(rc_channals_data.channels[5] < -0.3f)
 		{
