@@ -556,6 +556,7 @@ else
 	fi
 	unset BOARD_BOOTLOADER_UPGRADE
 
+	barometric_force_sensor start /dev/ttyS2
 #
 # End of autostart.
 #

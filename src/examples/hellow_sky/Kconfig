@@ -1,0 +1,5 @@
+menuconfig EXAMPLES_HELLOW_SKY
+ bool "hellow_sky"
+ default n
+ ---help---
+     Enable support for hellow_sky

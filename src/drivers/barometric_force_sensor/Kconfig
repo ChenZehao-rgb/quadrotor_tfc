@@ -1,0 +1,5 @@
+menuconfig DRIVERS_BAROMETRIC_FORCE_SENSOR
+	bool "barometric_force_sensor"
+	default n
+	---help---
+		Enable support for barometric_force_sensor

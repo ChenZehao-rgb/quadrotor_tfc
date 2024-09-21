@@ -209,6 +209,7 @@ set(msg_files
 	forcectl_controldata.msg
 	forcectl_kf_filterdata.msg
 	forcectl_adrc_data.msg
+	barometric_force_sensor.msg
 )
 
 if(NOT px4_constrained_flash_build)
