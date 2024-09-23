@@ -212,12 +212,13 @@ int barometric_force_sensor_thread_main(int argc, char *argv[])
                 buffer[i] = data;
                 data = '0'; // 重置 data 为 0
             }
+            // buffer[0]-'0' 其中 -'0' 的目的是将字符型转换为整数型
             sensordata.data1 = (buffer[0]-'0') * 1000 + (buffer[1]-'0') * 100 + (buffer[2]-'0') * 10 + (buffer[3]-'0');
             sensordata.data2 = (buffer[4]-'0') * 1000 + (buffer[5]-'0') * 100 + (buffer[6]-'0') * 10 + (buffer[7]-'0');
             sensordata.data3 = (buffer[8]-'0') * 1000 + (buffer[9]-'0') * 100 + (buffer[10]-'0') * 10 + (buffer[11]-'0');
             sensordata.data4 = (buffer[12]-'0') * 1000 + (buffer[13]-'0') * 100 + (buffer[14]-'0') * 10 + (buffer[15]-'0');
             // strncpy(sensordata.data_,buffer,16); // 将读取的数据复制到sensordata.datastr中
-            // sensordata.data = atoi(sensordata.datastr); // 将字符串转换为证书存入sensordata.data
+            // sensordata.data = atoi(sensordata.datastr); // 将字符串转换为整数存入sensordata.data
 
             // force_1 = buffer[0] * 1000 + buffer[1] * 100 + buffer[2] * 10 + buffer[3];
             // force_1 = atoi(buffer);
