@@ -44,9 +44,20 @@ using namespace matrix;
 
 namespace ControlMath
 {
+
+/* 将推力向量（thr_sp）转换为一个姿态设定（att_sp）的函数。
+它结合了推力方向与大小，以及期望的航向（yaw_sp），来计算无人机的姿态设定值。 */
 void thrustToAttitude(const Vector3f &thr_sp, const float yaw_sp, vehicle_attitude_setpoint_s &att_sp)
 {
+	/* 将推力向量和航向设定值转换为姿态设定。
+	-thr_sp 代表推力方向的负值，因为推力通常是在机体坐标系的负 Z 轴方向上作用的。
+	通过这个函数可以将推力向量方向和大小转换为 UAV 的期望姿态，并将结果保存到 att_sp 中。
+	yaw_sp：这个参数代表期望的航向角，即无人机绕 Z 轴的旋转方向。 */
 	bodyzToAttitude(-thr_sp, yaw_sp, att_sp);
+	/* thr_sp.length() 计算的是推力向量的模，即推力的大小。
+	推力大小存储在姿态设定的推力 Z 轴分量中，因为推力通常作用在无人机的 Z 轴上。
+	-thr_sp.length() 这里的负号是因为在无人机的惯性系中，推力方向通常与 Z 轴相反（向下为正 Z 轴，
+	推力方向为负 Z 轴），所以需要用负号来修正方向。 */
 	att_sp.thrust_body[2] = -thr_sp.length();
 }
 
@@ -67,52 +78,78 @@ void limitTilt(Vector3f &body_unit, const Vector3f &world_unit, const float max_
 	body_unit = cosf(angle) * world_unit + sinf(angle) * rejection.unit();
 }
 
+/* 根据期望的推力方向向量（body_z）和航向角（yaw_sp），计算出无人机的姿态，
+并将姿态结果填充到 att_sp 结构体中。
+该姿态包括无人机的姿态矩阵（旋转矩阵）、四元数表示的姿态以及欧拉角表示的姿态。 */
 void bodyzToAttitude(Vector3f body_z, const float yaw_sp, vehicle_attitude_setpoint_s &att_sp)
 {
 	// zero vector, no direction, set safe level value
-	if (body_z.norm_squared() < FLT_EPSILON) {
+	/* 检查向量是否为零：body_z.norm_squared() 计算向量 body_z 的平方模，如果其值小于非常小的阈值 FLT_EPSILON（表示几乎为零），
+	说明推力方向向量是一个零向量。 */
+	if (body_z.norm_squared() < FLT_EPSILON) 
+	{
+		/* 处理零向量：如果 body_z 是零向量，将 body_z 的 Z 轴分量设为 1。
+		这确保即使输入推力向量无效，代码仍然能给出一个合理的向上方向。 */
 		body_z(2) = 1.f;
 	}
 
+	/* 标准化向量：将推力方向向量 body_z 归一化为单位向量，确保它的长度为 1，用于接下来的姿态计算。 */
 	body_z.normalize();
 
 	// vector of desired yaw direction in XY plane, rotated by PI/2
+	/* 计算 Y 轴方向向量：这是根据航向角 yaw_sp 计算得到的一个 Y 轴方向向量，
+	它位于 XY 平面内，并绕 Z 轴旋转了 90 度（PI/2），用于确保机体的 X 轴保持与推力方向正交。 */
 	const Vector3f y_C{-sinf(yaw_sp), cosf(yaw_sp), 0.f};
 
 	// desired body_x axis, orthogonal to body_z
+	/* 计算机体 X 轴方向：这里通过叉积（% 表示向量叉积）计算出机体的 X 轴方向，使其与推力方向 body_z 正交。 */
 	Vector3f body_x = y_C % body_z;
 
 	// keep nose to front while inverted upside down
-	if (body_z(2) < 0.0f) {
+	/* 保持机头朝前：如果无人机倒飞（推力方向 body_z 的 Z 分量为负值），则将 X 轴方向取反，以确保无人机的 "鼻子" 朝前，即机体朝正确的方向。 */
+	if (body_z(2) < 0.0f) 
+	{
 		body_x = -body_x;
 	}
 
-	if (fabsf(body_z(2)) < 0.000001f) {
+	/* 处理特殊情况：如果推力方向接近完全水平（body_z(2) 几乎为零），则将 X 轴设置为 Z 方向，以确保旋转矩阵可以正确构建。此时，航向角不再重要。 */
+	if (fabsf(body_z(2)) < 0.000001f) 
+	{
 		// desired thrust is in XY plane, set X downside to construct correct matrix,
 		// but yaw component will not be used actually
 		body_x.zero();
 		body_x(2) = 1.0f;
 	}
 
+	// 标准化 X 轴向量：确保 X 轴向量为单位向量。
 	body_x.normalize();
 
 	// desired body_y axis
+	// 计算机体 Y 轴方向：通过叉积计算机体的 Y 轴方向，确保其与 X 轴和 Z 轴均正交。
 	const Vector3f body_y = body_z % body_x;
 
+	// 创建旋转矩阵对象：R_sp 用于存储姿态的旋转矩阵。
 	Dcmf R_sp;
 
 	// fill rotation matrix
-	for (int i = 0; i < 3; i++) {
+	// 填充旋转矩阵：将计算好的 X、Y、Z 轴方向向量分别填充到旋转矩阵的列中，形成最终的机体姿态矩阵。
+	for (int i = 0; i < 3; i++) 
+	{
 		R_sp(i, 0) = body_x(i);
 		R_sp(i, 1) = body_y(i);
 		R_sp(i, 2) = body_z(i);
 	}
 
 	// copy quaternion setpoint to attitude setpoint topic
+	// 计算并保存四元数表示的姿态：将旋转矩阵 R_sp 转换为四元数 q_sp，
+	// 并将其拷贝到姿态设定 att_sp.q_d 中。四元数用于高效地表示旋转。
 	const Quatf q_sp{R_sp};
 	q_sp.copyTo(att_sp.q_d);
 
 	// calculate euler angles, for logging only, must not be used for control
+	/* 计算并保存欧拉角表示的姿态：将旋转矩阵 R_sp 转换为欧拉角 euler，
+	并将其对应的滚转（roll_body）、俯仰（pitch_body）和偏航（yaw_body）角度存储到 att_sp 中。
+	注意，这里的欧拉角仅用于日志记录，而不是用于控制。 */
 	const Eulerf euler{R_sp};
 	att_sp.roll_body = euler.phi();
 	att_sp.pitch_body = euler.theta();
