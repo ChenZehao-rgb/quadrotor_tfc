@@ -34,6 +34,10 @@
 #pragma once
 
 #include <mixer/MixerBase/Mixer.hpp>
+#include <uORB/uORB.h>
+#include <uORB/Publication.hpp>
+#include <uORB/topics/thrust_desired_data.h>
+#include <uORB/topics/thrust_control_data.h>
 
 /**
  * Supported multirotor geometries.
@@ -252,4 +256,12 @@ private:
 
 	float 				*_outputs_prev{nullptr};
 	float 				*_tmp_array{nullptr};
+
+	/**
+	 * 新增发布各轴期望升力定义
+	 * **/
+	thrust_desired_data_s thrustdesireddata = {};
+    uORB::Publication<thrust_desired_data_s>  _to_thrustdesireddata_report{ORB_ID(thrust_desired_data)};
+
+	// struct thrust_control_data_s thrustcontroldata = {};
 };

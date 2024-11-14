@@ -43,6 +43,7 @@
 #include <uORB/Subscription.hpp>
 #include <uORB/topics/rc_channels.h>
 #include <uORB/topics/vehicle_status.h>
+#include <uORB/topics/thrust_control_data.h>
 
 namespace gimbal
 {
@@ -71,6 +72,9 @@ private:
 	rc_channels_s rc_channals_data{};
 	uORB::Subscription _vehicle_status_sub{ORB_ID(vehicle_status)};
 	vehicle_status_s vehicle_status{};
+
+	uORB::Subscription _thrust_control_data_sub{ORB_ID(thrust_control_data)};
+	thrust_control_data_s thrustcontroldata{};
 };
 
 } /* namespace gimbal */

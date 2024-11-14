@@ -846,20 +846,35 @@ MixingOutput::limitAndUpdateOutputs(float outputs[MAX_ACTUATORS], bool has_updat
 	}
 }
 
+// 将混控器的标准化输出value（通常在[-1,1]之间）映射到实际的PWM范围（通常在[1000,2000]之间）
 uint16_t MixingOutput::output_limit_calc_single(int i, float value) const
 {
 	// check for invalid / disabled channels
-	if (!PX4_ISFINITE(value)) {
+	// 检查无效或禁用的通道
+	// 检查 value 是否是一个有限值（即不是无穷大或 NaN）
+	// 如果 value 不是有效的数字（如无效输入或通道被禁用），则返回 _disarmed_value[i]，表示该通道处于禁用或失效状态
+	if (!PX4_ISFINITE(value)) 
+	{
+		// _disarmed_value[i] 是该通道对应的失效PWM值，通常为1000us或另一个定义的安全PWM值
 		return _disarmed_value[i];
 	}
 
-	if (_reverse_output_mask & (1 << i)) {
+	// 输出反向检查
+	// 检查是否需要对输出值 value 进行反向处理
+	// _reverse_output_mask 是一个掩码，用于标识哪些输出通道需要反向输出。(1 << i) 表示第 i 个通道
+	if (_reverse_output_mask & (1 << i)) 
+	{
+		// 如果反向输出掩码中的第 i 位为1，则该通道的 value 需要反向处理，即将 value 乘以 -1
 		value = -1.f * value;
 	}
 
+	// 将标准化输出值映射到PWM范围
+	// pwm = 500 * value + 1500, value [-1,1]
 	uint16_t effective_output = value * (_max_value[i] - _min_value[i]) / 2 + (_max_value[i] + _min_value[i]) / 2;
 
 	// last line of defense against invalid inputs
+	// 约束输出值
+	// 如果计算出的PWM值超出最大范围2000us或低于最小范围1000us，这段代码将其限制在有效范围内
 	return math::constrain(effective_output, _min_value[i], _max_value[i]);
 }
 

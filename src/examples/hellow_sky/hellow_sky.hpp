@@ -1,6 +1,6 @@
 /****************************************************************************
  *
- *   Copyright (C) 2015 Mark Charlebois. All rights reserved.
+ *   Copyright (c) 2012-2019 PX4 Development Team. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -32,32 +32,45 @@
  ****************************************************************************/
 
 /**
- * @file forcectl_main.cpp
+ * @file hellow_sky.c
+ * Minimal application example for PX4 autopilot
  *
- * @author Yanchun Chang <changyanchun@sia.cn>
+ * @author Example User <mail@example.com>
  */
+#include <termios.h>                   // 终端I/O接口
+#include <unistd.h>                    // POSIX 操作系统 API 接口
+#include <stdbool.h>                   // 定义 bool 类型
+#include <errno.h>                     // 错误码定义
+#include <drivers/drv_hrt.h>           // PX4 高精度定时器相关的驱动程序头文件
+#include <systemlib/err.h>             // 系统错误处理库（可能已经被替代，不推荐使用）
+#include <nuttx/config.h>              // NuttX 配置
+#include <fcntl.h>                     // 文件控制定义
+#include <sys/types.h>                 // 定义数据类型，如 `size_t`
+#include <sys/stat.h>                  // 文件状态定义
+#include <stdint.h>
 
-#include "forcectl_example.hpp"
+#include <px4_platform_common/px4_config.h>
+#include <px4_platform_common/tasks.h>
+#include <px4_platform_common/posix.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <poll.h>
+#include <string.h>
+#include <math.h>
 
-// 这段代码定义了 PX4_MAIN 函数，这是 forcectl 任务的入口函数，用于初始化系统并运行主控制逻辑。
-// argc 和 argv 是命令行参数，分别表示参数的数量和具体的参数内容。
-// PX4_MAIN 是任务的入口函数名，通常用于定义任务或应用程序的启动入口点。
-// 在PX4系统中，当你通过命令行启动 forcectl 时，这个函数会被调用。
-int PX4_MAIN(int argc, char **argv)
-{
-	// 这行代码通过调用 px4::init() 初始化系统，传入命令行参数 argc 和 argv，并指定任务的名称为 "forcectl"。
-	// px4::init() 函数通常用于初始化PX4的运行环境，它可能设置一些必要的资源、调度器、日志系统等。
-	px4::init(argc, argv, "forcectl");
+#include <uORB/uORB.h>
+#include <uORB/topics/sensor_combined.h>
+#include <uORB/topics/vehicle_attitude.h>
 
-	// 打印启动信息 "Force-feedback-control Start!"，向控制台输出一条消息，表示 forcectl 任务已经启动并即将进入主逻辑。
-	printf("Force-feedback-control Start!\n");
-	// 这两行代码创建了一个 Forcectl 类的实例 forcectl，然后调用它的 main() 方法。
-	// Forcectl 是一个实现了具体业务逻辑的类，负责处理与力反馈控制相关的功能。
-	Forcectl forcectl;
-	// forcectl.main() 会运行 forcectl 的主逻辑，控制传感器、执行器、数据处理等功能。
-	forcectl.main();
+#include <uORB/topics/barometric_force_sensor.h>
+#include <uORB/topics/thrust_data.h>
 
-	// 当 forcectl.main() 方法完成执行后，程序打印 "Exiting!"，表示 forcectl 任务已经结束。
-	printf("Exiting!\n");
-	return 0;
-}
+// class HellowSky
+// {
+// public:
+//     HellowSky() {}
+//     ~HellowSky() {}
+
+//     int main();
+
+// };

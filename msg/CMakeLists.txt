@@ -210,6 +210,9 @@ set(msg_files
 	forcectl_kf_filterdata.msg
 	forcectl_adrc_data.msg
 	barometric_force_sensor.msg
+	thrust_data.msg
+	thrust_control_data.msg
+	thrust_desired_data.msg
 )
 
 if(NOT px4_constrained_flash_build)

@@ -229,17 +229,27 @@ MultirotorMixer::mix_airmode_rp(float roll, float pitch, float yaw, float thrust
 	mix_yaw(yaw, outputs);
 }
 
+/*
+	混控矩阵
+	const MultirotorMixer::Rotor _config_quad_x[] = {
+		{ -0.707107,  0.707107,  1.000000,  1.000000 },
+		{  0.707107, -0.707107,  1.000000,  1.000000 },
+		{  0.707107,  0.707107, -1.000000,  1.000000 },
+		{ -0.707107, -0.707107, -1.000000,  1.000000 },
+*/
 void
 MultirotorMixer::mix_airmode_rpy(float roll, float pitch, float yaw, float thrust, float *outputs)
 {
 	// Airmode for roll, pitch and yaw
 
 	// Do full mixing
-	for (unsigned i = 0; i < _rotor_count; i++) {
-		outputs[i] = roll * _rotors[i].roll_scale +
-			     pitch * _rotors[i].pitch_scale +
-			     yaw * _rotors[i].yaw_scale +
-			     thrust * _rotors[i].thrust_scale;
+	for (unsigned i = 0; i < _rotor_count; i++) 
+	{
+		// outputs[i]为各轴旋翼所需的期望升力
+		outputs[i] = roll * _rotors[i].roll_scale + // 混控矩阵中的第i行第一个元素
+			     pitch * _rotors[i].pitch_scale + // 混控矩阵中的第i行第二个元素
+			     yaw * _rotors[i].yaw_scale + // 混控矩阵中的第i行第三个元素
+			     thrust * _rotors[i].thrust_scale; // 混控矩阵中的第i行第四个元素
 
 		// Thrust will be used to unsaturate if needed
 		_tmp_array[i] = _rotors[i].thrust_scale;
@@ -249,7 +259,8 @@ MultirotorMixer::mix_airmode_rpy(float roll, float pitch, float yaw, float thrus
 
 	// Unsaturate yaw (in case upper and lower bounds are exceeded)
 	// to prioritize roll/pitch over yaw.
-	for (unsigned i = 0; i < _rotor_count; i++) {
+	for (unsigned i = 0; i < _rotor_count; i++) 
+	{
 		_tmp_array[i] = _rotors[i].yaw_scale;
 	}
 
@@ -313,23 +324,157 @@ void MultirotorMixer::mix_yaw(float yaw, float *outputs)
 	minimize_saturation(_tmp_array, outputs, _saturation_status, 0.f, 1.f, true);
 }
 
+// unsigned
+// MultirotorMixer::mix(float *outputs, unsigned space)
+// {
+	
+// 	if (space < _rotor_count) 
+// 	{
+// 		return 0;
+// 	}
+
+// 	float roll    = math::constrain(get_control(0, 0), -1.0f, 1.0f);
+// 	float pitch   = math::constrain(get_control(0, 1), -1.0f, 1.0f);
+// 	float yaw     = math::constrain(get_control(0, 2), -1.0f, 1.0f);
+// 	float thrust  = math::constrain(get_control(0, 3), 0.0f, 1.0f);
+
+// 	// clean out class variable used to capture saturation
+// 	_saturation_status.value = 0;
+
+// 	// Do the mixing using the strategy given by the current Airmode configuration
+// 	switch (_airmode) 
+// 	{
+// 	case Airmode::roll_pitch:
+// 		mix_airmode_rp(roll, pitch, yaw, thrust, outputs);
+// 		break;
+
+// 	case Airmode::roll_pitch_yaw:
+// 		mix_airmode_rpy(roll, pitch, yaw, thrust, outputs);
+// 		break;
+
+// 	case Airmode::disabled:
+// 	default: // just in case: default to disabled
+// 		mix_airmode_disabled(roll, pitch, yaw, thrust, outputs);
+// 		break;
+// 	}
+
+// 	// Apply thrust model and scale outputs to range [idle_speed, 1].
+// 	// At this point the outputs are expected to be in [0, 1], but they can be outside, for example
+// 	// if a roll command exceeds the motor band limit.
+// 	for (unsigned i = 0; i < _rotor_count; i++) 
+// 	{
+// 		// Implement simple model for static relationship between applied motor pwm and motor thrust
+// 		// model: thrust = (1 - _thrust_factor) * PWM + _thrust_factor * PWM^2
+// 		if (_thrust_factor > 0.0f) 
+// 		{
+// 			outputs[i] = -(1.0f - _thrust_factor) / (2.0f * _thrust_factor) + sqrtf((1.0f - _thrust_factor) *
+// 					(1.0f - _thrust_factor) / (4.0f * _thrust_factor * _thrust_factor) + (outputs[i] < 0.0f ? 0.0f : outputs[i] /
+// 							_thrust_factor));
+// 		}
+// 		outputs[i] = math::constrain((2.f * outputs[i] - 1.f), -1.f, 1.f);
+// 	}
+
+// 	// Slew rate limiting and saturation checking
+// 	for (unsigned i = 0; i < _rotor_count; i++) 
+// 	{
+// 		bool clipping_high = false;
+// 		bool clipping_low_roll_pitch = false;
+// 		bool clipping_low_yaw = false;
+
+// 		// Check for saturation against static limits.
+// 		// We only check for low clipping if airmode is disabled (or yaw
+// 		// clipping if airmode==roll/pitch), since in all other cases thrust will
+// 		// be reduced or boosted and we can keep the integrators enabled, which
+// 		// leads to better tracking performance.
+// 		if (outputs[i] < -0.99f) 
+// 		{
+// 			if (_airmode == Airmode::disabled) 
+// 			{
+// 				clipping_low_roll_pitch = true;
+// 				clipping_low_yaw = true;
+
+// 			} 
+// 			else if (_airmode == Airmode::roll_pitch) 
+// 			{
+// 				clipping_low_yaw = true;
+// 			}
+// 		}
+
+// 		// check for saturation against slew rate limits
+// 		if (_delta_out_max > 0.0f) 
+// 		{
+// 			float delta_out = outputs[i] - _outputs_prev[i];
+
+// 			if (delta_out > _delta_out_max) 
+// 			{
+// 				outputs[i] = _outputs_prev[i] + _delta_out_max;
+// 				clipping_high = true;
+
+// 			} 
+// 			else if (delta_out < -_delta_out_max) 
+// 			{
+// 				outputs[i] = _outputs_prev[i] - _delta_out_max;
+// 				clipping_low_roll_pitch = true;
+// 				clipping_low_yaw = true;
+// 			}
+// 		}
+
+// 		_outputs_prev[i] = outputs[i];
+
+// 		// update the saturation status report
+// 		update_saturation_status(i, clipping_high, clipping_low_roll_pitch, clipping_low_yaw);
+// 	}
+
+// 	// this will force the caller of the mixer to always supply new slew rate values, otherwise no slew rate limiting will happen
+// 	_delta_out_max = 0.0f;
+
+// 	return _rotor_count;
+// }
+
 unsigned
 MultirotorMixer::mix(float *outputs, unsigned space)
 {
-	if (space < _rotor_count) {
+	
+	// 如果最大输出通道数（通常为8）小于电机数，返回0
+	if (space < _rotor_count) 
+	{
 		return 0;
 	}
 
+	// 订阅力控制数据
+	// int thrustcontroldata_sub_fd = orb_subscribe(ORB_ID(thrust_control_data));
+	// orb_set_interval(thrustcontroldata_sub_fd, 20);
+
+	// px4_pollfd_struct_t fds[] =
+	// {
+	// 	{ .fd = thrustcontroldata_sub_fd,   .events = POLLIN },
+	// };
+
+	// if (fds[0].revents & POLLIN)
+    // {
+    //     orb_copy(ORB_ID(thrust_control_data), thrustcontroldata_sub_fd, &thrustcontroldata);
+    // }
+
+	// 从控制输入获取期望的roll、pitch、yaw和推力。
+	// roll、pitch、yaw分别取控制输入组0的第0，1，2个元素经过缩放系数缩放，再进行限幅，
+	// 限制在，-1到1之间。推力直接取控制输入组0的第3个元素，并限幅在0到1之间。
 	float roll    = math::constrain(get_control(0, 0), -1.0f, 1.0f);
 	float pitch   = math::constrain(get_control(0, 1), -1.0f, 1.0f);
 	float yaw     = math::constrain(get_control(0, 2), -1.0f, 1.0f);
 	float thrust  = math::constrain(get_control(0, 3), 0.0f, 1.0f);
 
 	// clean out class variable used to capture saturation
+	// 电机饱和度清零
 	_saturation_status.value = 0;
 
 	// Do the mixing using the strategy given by the current Airmode configuration
-	switch (_airmode) {
+	// 根据当前airmode配置进行混控
+	// 下述一共三种混控方式，对应不同的抗执行器饱和策略，roll_pitch和roll_pitch_yaw都属于
+	// 使能airmode的范畴，不同的是roll_pitch仅对横滚和俯仰进行抗执行器饱和处理，而偏航单独混控，
+	// roll_pitch_yaw则是对横滚、俯仰、偏航均进行抗执行器饱和处理。
+	// disabled表示禁用airmode。
+	switch (_airmode) 
+	{
 	case Airmode::roll_pitch:
 		mix_airmode_rp(roll, pitch, yaw, thrust, outputs);
 		break;
@@ -344,23 +489,40 @@ MultirotorMixer::mix(float *outputs, unsigned space)
 		break;
 	}
 
+	// 发布各轴期望升力
+	thrustdesireddata.thrust_desired1 = outputs[0];
+	thrustdesireddata.thrust_desired2 = outputs[1];
+	thrustdesireddata.thrust_desired3 = outputs[2];
+	thrustdesireddata.thrust_desired4 = outputs[3];
+	_to_thrustdesireddata_report.publish(thrustdesireddata);
+
+	// outputs[0] = thrustcontroldata.thrust_control_out1;
+	// outputs[0] = math::constrain((2.f * outputs[0] - 1.f), -1.f, 1.f);
 	// Apply thrust model and scale outputs to range [idle_speed, 1].
 	// At this point the outputs are expected to be in [0, 1], but they can be outside, for example
 	// if a roll command exceeds the motor band limit.
-	for (unsigned i = 0; i < _rotor_count; i++) {
+	// 应用以下推力模型，通过该推力模型，计算出PWM值
+	// 移项并解一元二次方程算出PWM值，如下所示
+
+	for (unsigned i = 0; i < _rotor_count; i++) 
+	{
 		// Implement simple model for static relationship between applied motor pwm and motor thrust
 		// model: thrust = (1 - _thrust_factor) * PWM + _thrust_factor * PWM^2
-		if (_thrust_factor > 0.0f) {
+		if (_thrust_factor > 0.0f) 
+		{
 			outputs[i] = -(1.0f - _thrust_factor) / (2.0f * _thrust_factor) + sqrtf((1.0f - _thrust_factor) *
 					(1.0f - _thrust_factor) / (4.0f * _thrust_factor * _thrust_factor) + (outputs[i] < 0.0f ? 0.0f : outputs[i] /
 							_thrust_factor));
 		}
-
+		// 将PWM值从[0,1]缩放至[-1,1]
 		outputs[i] = math::constrain((2.f * outputs[i] - 1.f), -1.f, 1.f);
 	}
 
 	// Slew rate limiting and saturation checking
-	for (unsigned i = 0; i < _rotor_count; i++) {
+	// 将最终的输出进行抗负向饱和以及变化速率限幅
+	for (unsigned i = 0; i < _rotor_count; i++) 
+	{
+		// 定义标志位
 		bool clipping_high = false;
 		bool clipping_low_roll_pitch = false;
 		bool clipping_low_yaw = false;
@@ -370,25 +532,37 @@ MultirotorMixer::mix(float *outputs, unsigned space)
 		// clipping if airmode==roll/pitch), since in all other cases thrust will
 		// be reduced or boosted and we can keep the integrators enabled, which
 		// leads to better tracking performance.
-		if (outputs[i] < -0.99f) {
-			if (_airmode == Airmode::disabled) {
+		// 这里判断是否需要进行抗下限饱和，并对相关的标志位进行置位
+		// 具体的抗饱和操作根据设置，在mix_arimode_rp、mix_airmode_rpy、mix_airmode_disabled中进行。
+		if (outputs[i] < -0.99f) 
+		{
+			if (_airmode == Airmode::disabled) 
+			{
 				clipping_low_roll_pitch = true;
 				clipping_low_yaw = true;
 
-			} else if (_airmode == Airmode::roll_pitch) {
+			} 
+			else if (_airmode == Airmode::roll_pitch) 
+			{
 				clipping_low_yaw = true;
 			}
 		}
 
 		// check for saturation against slew rate limits
-		if (_delta_out_max > 0.0f) {
+		// 这里判断每次循环的输出变化幅度是否需要限制，判断方法就是比较当前输出与上一次输出的差值，是否超出极限，
+		// 如果超出极限，则设置为最大值，并对标志位进行置位。
+		if (_delta_out_max > 0.0f) 
+		{
 			float delta_out = outputs[i] - _outputs_prev[i];
 
-			if (delta_out > _delta_out_max) {
+			if (delta_out > _delta_out_max) 
+			{
 				outputs[i] = _outputs_prev[i] + _delta_out_max;
 				clipping_high = true;
 
-			} else if (delta_out < -_delta_out_max) {
+			} 
+			else if (delta_out < -_delta_out_max) 
+			{
 				outputs[i] = _outputs_prev[i] - _delta_out_max;
 				clipping_low_roll_pitch = true;
 				clipping_low_yaw = true;
@@ -398,10 +572,12 @@ MultirotorMixer::mix(float *outputs, unsigned space)
 		_outputs_prev[i] = outputs[i];
 
 		// update the saturation status report
+		// 更新状态标志位
 		update_saturation_status(i, clipping_high, clipping_low_roll_pitch, clipping_low_yaw);
 	}
 
 	// this will force the caller of the mixer to always supply new slew rate values, otherwise no slew rate limiting will happen
+	// 将输出变化幅度的最大值置零，在每次进行混控前都要对该参数进行赋值，否则将不进行限幅。
 	_delta_out_max = 0.0f;
 
 	return _rotor_count;

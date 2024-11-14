@@ -248,6 +248,7 @@ MulticopterRateControl::Run()
 			_controller_status_pub.publish(rate_ctrl_status);
 
 			// publish actuator controls
+			// 发布无人机的三轴姿态和总升力，作为混控器的输入
 			actuator_controls_s actuators{};
 			actuators.control[actuator_controls_s::INDEX_ROLL] = PX4_ISFINITE(att_control(0)) ? att_control(0) : 0.0f;
 			actuators.control[actuator_controls_s::INDEX_PITCH] = PX4_ISFINITE(att_control(1)) ? att_control(1) : 0.0f;

@@ -49,15 +49,21 @@
 //#include <debug.h>
 //#define debug(fmt, args...)	syslog(fmt "\n", ##args)
 
+/*
+	MixerGroup::mix 函数的作用是遍历 _mixers 中的每个 mixer，将其计算的输出依次填入 outputs 数组，
+	直到数组空间耗尽或所有 mixer 处理完毕。这种方式支持在多旋翼（Multirotor）系统中组合多个混控器的输出。
+*/
 unsigned
 MixerGroup::mix(float *outputs, unsigned space)
 {
 	unsigned index = 0;
 
-	for (auto mixer : _mixers) {
+	for (auto mixer : _mixers) 
+	{
 		index += mixer->mix(outputs + index, space - index);
 
-		if (index >= space) {
+		if (index >= space) 
+		{
 			break;
 		}
 	}

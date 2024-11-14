@@ -35,6 +35,6 @@ px4_add_module(
  MAIN hellow_sky
  STACK_MAIN 2000
  SRCS
-     hellow_sky.c
+     hellow_sky.cpp
  DEPENDS
  )

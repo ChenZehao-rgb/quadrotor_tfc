@@ -38,23 +38,9 @@
  * @author Example User <mail@example.com>
  */
 
-#include <px4_platform_common/px4_config.h>
-#include <px4_platform_common/tasks.h>
-#include <px4_platform_common/posix.h>
-#include <unistd.h>
-#include <stdio.h>
-#include <poll.h>
-#include <string.h>
-#include <math.h>
+#include "hellow_sky.hpp"
 
-#include <uORB/uORB.h>
-#include <uORB/topics/sensor_combined.h>
-#include <uORB/topics/vehicle_attitude.h>
-
-// #include <drivers/barometric_force_sensor/barometric_force_sensor_topic.h>
-#include <uORB/topics/barometric_force_sensor.h>
-
-__EXPORT int hellow_sky_main(int argc, char *argv[]);
+extern "C" __EXPORT int hellow_sky_main(int argc, char *argv[]);
 
 int hellow_sky_main(int argc, char *argv[])
 {
@@ -68,16 +54,21 @@ int hellow_sky_main(int argc, char *argv[])
     int sensor_sub_fd = orb_subscribe(ORB_ID(barometric_force_sensor));
     /* limit the update rate to 50 Hz */
     orb_set_interval(sensor_sub_fd, 20);
+    struct barometric_force_sensor_s sensordata;
 
-    if (sensor_sub_fd < 0)
-    {
-        PX4_ERR("Failed to subscribe to barometric_force_sensor");
-        return -1;
-    }
-    else
-    {
-        PX4_INFO("Successfully subscribed to barometric_force_sensor");
-    }
+    int thrust_data_sub_fd = orb_subscribe(ORB_ID(thrust_data));
+    orb_set_interval(thrust_data_sub_fd, 20);
+
+    struct thrust_data_s thrustdata;
+    // if (sensor_sub_fd < 0)
+    // {
+    //     PX4_ERR("Failed to subscribe to barometric_force_sensor");
+    //     return -1;
+    // }
+    // else
+    // {
+    //     PX4_INFO("Successfully subscribed to barometric_force_sensor");
+    // }
 
 
     /* advertise attitude topic */
@@ -89,40 +80,45 @@ int hellow_sky_main(int argc, char *argv[])
     px4_pollfd_struct_t fds[] =
     {
         { .fd = sensor_sub_fd,   .events = POLLIN },
-        /* there could be more file descriptors here, in the form like:
-         * { .fd = other_sub_fd,   .events = POLLIN },
-         */
+        { .fd = thrust_data_sub_fd,   .events = POLLIN },
     };
 
     int error_counter = 0;
 
-    for (int i = 0; ; i++) {
+    for (int i = 0; ; i++) 
+    {
         /* wait for sensor update of 1 file descriptor for 1000 ms (1 second) */
-        int poll_ret = px4_poll(fds, 1, 1000);
+        int poll_ret = px4_poll(fds, 2, 1000);
 
         /* handle the poll result */
-        if (poll_ret == 0) {
+        if (poll_ret == 0) 
+        {
             /* this means none of our providers is giving us data */
             PX4_ERR("Got no data within a second");
 
-        } else if (poll_ret < 0) {
+        } 
+        else if (poll_ret < 0) 
+        {
             /* this is seriously bad - should be an emergency */
-            if (error_counter < 10 || error_counter % 50 == 0) {
+            if (error_counter < 10 || error_counter % 50 == 0) 
+            {
                 /* use a counter to prevent flooding (and slowing us down) */
                 PX4_ERR("ERROR return value from poll(): %d", poll_ret);
             }
 
             error_counter++;
 
-        } else {
+        } 
+        else 
+        {
 
-            if (fds[0].revents & POLLIN) {
+            if (fds[0].revents & POLLIN) 
+            {
                 /* obtained data for the first file descriptor */
-                struct barometric_force_sensor_s sensordata;
+                
                 /* copy sensors raw data into local buffer */
                 orb_copy(ORB_ID(barometric_force_sensor), sensor_sub_fd, &sensordata);
-                PX4_INFO("Force_Data:\t%dg\t%dg\t%dg\t%dg",
-                     sensordata.data1, sensordata.data2, sensordata.data3, sensordata.data4);
+                
                 // PX4_INFO("Force_Data:\t%dg",
                 //      sensordata.data1);
                 /* set att and publish this information for other apps
@@ -135,10 +131,33 @@ int hellow_sky_main(int argc, char *argv[])
                 // orb_publish(ORB_ID(vehicle_attitude), att_pub, &att);
             }
 
+            if (fds[1].revents & POLLIN)
+            {
+                
+                orb_copy(ORB_ID(thrust_data), thrust_data_sub_fd, &thrustdata);
+                
+                
+            }
+            
             /* there could be more file descriptors here, in the form like:
              * if (fds[1..n].revents & POLLIN) {}
              */
         }
+
+        // PX4_INFO("Force_Data:\t%dg\t%dg\t%dg\t%dg",
+        //              sensordata.data1, sensordata.data2, sensordata.data3, sensordata.data4);
+        PX4_INFO("Raw_Data & Kalman_Data :\t%dg\t%dg\t%dg\t%dg\t%.3fkg\t%.3fkg\t%.3fkg\t%.3fkg",
+                    sensordata.data1, 
+                    sensordata.data2, 
+                    sensordata.data3, 
+                    sensordata.data4,
+                    static_cast<double>(thrustdata.thrust_kalman_filter_data_1), 
+                    static_cast<double>(thrustdata.thrust_kalman_filter_data_2),
+                    static_cast<double>(thrustdata.thrust_kalman_filter_data_3),
+                    static_cast<double>(thrustdata.thrust_kalman_filter_data_4));
+        
+
+        
     }
 
     // PX4_INFO("exiting");

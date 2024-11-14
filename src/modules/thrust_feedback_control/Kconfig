@@ -1,0 +1,5 @@
+menuconfig MODULES_THRUST_FEEDBACK_CONTROL
+	bool "thrust_feedback_control"
+	default n
+	---help---
+		Enable support for thrust_feedback_control
