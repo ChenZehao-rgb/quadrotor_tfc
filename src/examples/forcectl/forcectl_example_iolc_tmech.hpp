@@ -68,7 +68,6 @@
 #include <uORB/SubscriptionInterval.hpp>
 #include <drivers/drv_hrt.h>
 #include <uORB/topics/parameter_update.h>
-#include <lib/parameters/param.h>
 
 using namespace time_literals;
 
@@ -128,4 +127,8 @@ private:
 	struct vehicle_attitude_s vehicle_attitude{};
 	struct battery_status_s battery_status{};
 
+#if SAVE_FORCECTL_ADRC_DATA
+	forcectl_adrc_data_s forcectl_ADRC_data = {0};
+	orb_advert_t adrc_data_pub = orb_advertise(ORB_ID(forcectl_adrc_data), &forcectl_ADRC_data);
+#endif
 };

@@ -33,8 +33,8 @@
 
 #include "thrust_feedback_control.hpp"
 
-math::LowPassFilter2p<float>	_positional_pid_pout_lowpass_filter{100.f, 30.f};
-math::LowPassFilter2p<float>	_positional_pid_dout_lowpass_filter{100.f, 10.f};
+math::LowPassFilter2p<float>	_position_pid_pout_lowpass_filter{100.f, 30.f};
+math::LowPassFilter2p<float>	_position_pid_dout_lowpass_filter{100.f, 10.f};
 
 px4::AppState ThrustFeedbackControl::appState;
 
@@ -134,10 +134,10 @@ void Positional_PID_Calculate(positional_PID *pos_pid, int _rotor_count)
     pos_pid->i_out(_rotor_count) = pos_pid->ki * pos_pid->integral(_rotor_count);
     pos_pid->d_out(_rotor_count) = pos_pid->kd * pos_pid->derivative(_rotor_count);
 
-    pos_pid->p_out(_rotor_count) = _positional_pid_pout_lowpass_filter.apply(pos_pid->p_out(_rotor_count));
+    pos_pid->p_out(_rotor_count) = _position_pid_pout_lowpass_filter.apply(pos_pid->p_out(_rotor_count));
     // i_out 被 math::constrain 限制在 -pid->limit_i 到 pid->limit_i 的范围内，防止积分项积累过多，导致饱和或控制不稳定
     pos_pid->i_out(_rotor_count) = math::constrain(pos_pid->i_out(_rotor_count), -pos_pid->limit_i, pos_pid->limit_i);
-    pos_pid->d_out(_rotor_count) = _positional_pid_dout_lowpass_filter.apply(pos_pid->d_out(_rotor_count));
+    pos_pid->d_out(_rotor_count) = _position_pid_dout_lowpass_filter.apply(pos_pid->d_out(_rotor_count));
 
     pos_pid->output(_rotor_count) = pos_pid->p_out(_rotor_count) + pos_pid->i_out(_rotor_count) + pos_pid->d_out(_rotor_count);
     pos_pid->output(_rotor_count) = (pos_pid->output(_rotor_count) < 0) ? 0 : ((pos_pid->output(_rotor_count) > 1.0f) ? 1.0f : pos_pid->output(_rotor_count));

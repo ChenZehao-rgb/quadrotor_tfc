@@ -40,7 +40,9 @@
 /*这段代码实现了一个名为 forcectl 的应用程序的主函数 forcectl_main，该函数处理应用的启动、停止和状态查询命令。
 通过这个主函数，用户可以使用命令行参数来控制这个程序的运行状态。*/
 
-#include "forcectl_example.hpp"
+// #include "forcectl_example.hpp"
+#include "forcectl_example_iolc_tmech.hpp"
+
 
 // 这是一个静态的全局变量，用于保存 forcectl 任务或线程的句柄。
 // 在PX4中，任务通常是在后台以独立线程的方式运行的，而 forcectl_task 保存了这个任务的句柄，用来跟踪它的状态。
