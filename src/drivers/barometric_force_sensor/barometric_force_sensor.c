@@ -224,6 +224,7 @@ int barometric_force_sensor_thread_main(int argc, char *argv[])
             // force_1 = atoi(buffer);
             // printf("force_sensor_1: %dg\n",force_1); // 打印读取到的4个字节数据
             // printf("force_sensor_1: %dg\n",sensordata.data); // 打印读取到的4个字节数据
+            sensordata.timestamp = hrt_absolute_time();
             orb_publish(ORB_ID(barometric_force_sensor), barometric_force_sensor_pub, &sensordata); // 用orb_publish函数发布新的传感器数据
             // if (ret < 0)
             // {
@@ -234,6 +235,7 @@ int barometric_force_sensor_thread_main(int argc, char *argv[])
             //     PX4_INFO("Successd to publish sensor data: %d", ret);
             // }
             // px4_sleep(1);
+            // px4_usleep(10000);
         }
     }
 

@@ -1,5 +1,0 @@
-menuconfig DRIVERS_BAROMETRICFORCE
-	bool "barometricforce"
-	default n
-	---help---
-		Enable support for barometricforce

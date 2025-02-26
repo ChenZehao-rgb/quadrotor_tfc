@@ -39,6 +39,7 @@ px4_add_module(
 		forcectl_start.cpp
 		forcectl_main.cpp
 		forcectl_example.cpp
+		# forcectl_example_iolc_tmech.cpp
 		forcectl_kf_filter.cpp
 	DEPENDS
 	)

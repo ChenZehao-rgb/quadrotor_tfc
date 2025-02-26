@@ -117,11 +117,15 @@ void Positional_PID_Calculate(positional_PID *pos_pid, int _rotor_count)
         return;
     }
 
+    // 获取当前时间戳，单位为微秒
     uint64_t time_now = hrt_absolute_time();
+    // 限制dt在0.001秒至0.05秒之间，防止时间间隔过短或过长导致不稳定
     float dt = math::constrain(((time_now - pos_pid->pre_timestamp) * 1e-6f), 0.001f, 0.05f);
 
     pos_pid->error(_rotor_count) = pos_pid->thrust_exp(_rotor_count) - pos_pid->thrust_mea(_rotor_count);
     pos_pid->derivative(_rotor_count) = (pos_pid->error(_rotor_count) - pos_pid->pre_error(_rotor_count)) / dt;
+    // i_factor 用于控制 积分项（I） 的影响。首先计算误差和积分因子基准 factorbase_i 的比例
+    // 然后用 math::max 限制 i_factor 的值不小于 0，且通过 1.0f - i_factor * i_factor 进行平方限制，以避免积分项过大
     float i_factor = pos_pid->error(_rotor_count) / pos_pid->factorbase_i;
     i_factor = math::max(0.0f, 1.0f - i_factor * i_factor);
     pos_pid->integral(_rotor_count) += i_factor * pos_pid->error(_rotor_count) * dt;
@@ -131,6 +135,7 @@ void Positional_PID_Calculate(positional_PID *pos_pid, int _rotor_count)
     pos_pid->d_out(_rotor_count) = pos_pid->kd * pos_pid->derivative(_rotor_count);
 
     pos_pid->p_out(_rotor_count) = _positional_pid_pout_lowpass_filter.apply(pos_pid->p_out(_rotor_count));
+    // i_out 被 math::constrain 限制在 -pid->limit_i 到 pid->limit_i 的范围内，防止积分项积累过多，导致饱和或控制不稳定
     pos_pid->i_out(_rotor_count) = math::constrain(pos_pid->i_out(_rotor_count), -pos_pid->limit_i, pos_pid->limit_i);
     pos_pid->d_out(_rotor_count) = _positional_pid_dout_lowpass_filter.apply(pos_pid->d_out(_rotor_count));
 

@@ -38,6 +38,7 @@
  */
 
 #include "forcectl_example.hpp"
+// #include "forcectl_example_iolc_tmech.hpp"
 
 // 这段代码定义了 PX4_MAIN 函数，这是 forcectl 任务的入口函数，用于初始化系统并运行主控制逻辑。
 // argc 和 argv 是命令行参数，分别表示参数的数量和具体的参数内容。

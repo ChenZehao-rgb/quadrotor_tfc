@@ -1,0 +1,296 @@
+[0/1] Re-running CMake...
+-- PX4 version: v1.13.0-5-g252d6d7437
+-- Found PythonInterp: /usr/bin/python3 (found suitable version "3.8.10", minimum required is "3") 
+-- PX4 config file: /home/hanjiang/PX4-Autopilot/boards/px4/fmu-v5/default.px4board
+-- PLATFORM nuttx
+-- TOOLCHAIN arm-none-eabi
+-- ARCHITECTURE cortex-m7
+-- ROMFSROOT px4fmu_common
+-- IO px4_io-v2_default
+-- SERIAL_GPS1 /dev/ttyS0
+-- SERIAL_TEL1 /dev/ttyS1
+-- SERIAL_TEL2 /dev/ttyS2
+-- SERIAL_TEL4 /dev/ttyS3
+-- UAVCAN_INTERFACES 2
+-- UAVCAN_TIMER_OVERRIDE 6
+-- PX4 config: px4_fmu-v5_default
+-- PX4 platform: nuttx
+-- cmake build type: MinSizeRel
+-- Enabling double FP precision hardware instructions
+-- drivers/px4io: ROMFS including px4_io-v2_default
+-- Found PythonInterp: /usr/bin/python3 (found version "3.8.10") 
+-- Using C++11
+-- Release build type: MinSizeRel
+-- ROMFS: ROMFS/px4fmu_common
+-- ROMFS:  Adding platforms/nuttx/init/stm32f7/rc.board_arch_defaults -> /etc/init.d/rc.board_arch_defaults
+-- ROMFS:  Adding boards/px4/fmu-v5/init/rc.board_defaults -> /etc/init.d/rc.board_defaults
+-- ROMFS:  Adding boards/px4/fmu-v5/init/rc.board_sensors -> /etc/init.d/rc.board_sensors
+-- ROMFS:  Adding boards/px4/fmu-v5/extras/px4_fmu-v5_bootloader.bin -> /etc/extras/px4_fmu-v5_bootloader.bin
+-- ROMFS:  Adding boards/px4/fmu-v5/extras/px4_io-v2_default.bin -> /etc/extras/px4_io-v2_default.bin
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/hanjiang/PX4-Autopilot/build/px4_fmu-v5_default
+[1/1142] Generating ../../../platforms/nuttx/NuttX/nuttx/include/nuttx/config.h, ../../../platforms/nuttx/NuttX/nuttx/include/arch/chip
+[2/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/uORBTopics.cpp.obj
+[3/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/actuator_outputs.cpp.obj
+[4/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/actuator_servos_trim.cpp.obj
+[5/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/camera_capture.cpp.obj
+[6/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/airspeed_validated.cpp.obj
+[7/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/actuator_motors.cpp.obj
+[8/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/actuator_controls.cpp.obj
+[9/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/actuator_controls_status.cpp.obj
+[10/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/actuator_servos.cpp.obj
+[11/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/airspeed_wind.cpp.obj
+[12/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/battery_status.cpp.obj
+[13/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/action_request.cpp.obj
+[14/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/actuator_armed.cpp.obj
+[15/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/adc_report.cpp.obj
+[16/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/airspeed.cpp.obj
+[17/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/actuator_test.cpp.obj
+[18/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/autotune_attitude_control_status.cpp.obj
+[19/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/button_event.cpp.obj
+[20/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/barometric_force_sensor.cpp.obj
+[21/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/camera_status.cpp.obj
+[22/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/commander_state.cpp.obj
+[23/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/cellular_status.cpp.obj
+[24/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/control_allocator_status.cpp.obj
+[25/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/cpuload.cpp.obj
+[26/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/camera_trigger.cpp.obj
+[27/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/collision_constraints.cpp.obj
+[28/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/debug_array.cpp.obj
+[29/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/collision_report.cpp.obj
+[30/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/differential_pressure.cpp.obj
+[31/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/distance_sensor.cpp.obj
+[32/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/esc_report.cpp.obj
+[33/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/estimator_selector_status.cpp.obj
+[34/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/debug_key_value.cpp.obj
+[35/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/debug_value.cpp.obj
+[36/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/ekf2_timestamps.cpp.obj
+[37/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/debug_vect.cpp.obj
+[38/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/esc_status.cpp.obj
+[39/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/estimator_event_flags.cpp.obj
+[40/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/estimator_gps_status.cpp.obj
+[41/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/estimator_optical_flow_vel.cpp.obj
+[42/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/estimator_innovations.cpp.obj
+[43/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/estimator_sensor_bias.cpp.obj
+[44/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/estimator_status_flags.cpp.obj
+[45/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/event.cpp.obj
+[46/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/estimator_baro_bias.cpp.obj
+[47/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/forcectl_kf_filterdata.cpp.obj
+[48/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/estimator_states.cpp.obj
+[49/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/failure_detector_status.cpp.obj
+[50/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/estimator_status.cpp.obj
+[51/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/follow_target.cpp.obj
+[52/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/forcectl_adrc_data.cpp.obj
+[53/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/forcectl_controldata.cpp.obj
+[54/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/geofence_result.cpp.obj
+[55/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/forcectl_forcedata.cpp.obj
+[56/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/gimbal_device_attitude_status.cpp.obj
+[57/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/gimbal_device_information.cpp.obj
+[58/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/generator_status.cpp.obj
+[59/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/gimbal_manager_set_manual_control.cpp.obj
+[60/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/gimbal_device_set_attitude.cpp.obj
+[61/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/gimbal_manager_set_attitude.cpp.obj
+[62/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/gimbal_manager_status.cpp.obj
+[63/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/gimbal_manager_information.cpp.obj
+[64/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/hover_thrust_estimate.cpp.obj
+[65/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/gps_inject_data.cpp.obj
+[66/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/heater_status.cpp.obj
+[67/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/gps_dump.cpp.obj
+[68/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/input_rc.cpp.obj
+[69/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/iridiumsbd_status.cpp.obj
+[70/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/home_position.cpp.obj
+[71/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/internal_combustion_engine_status.cpp.obj
+[72/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/landing_target_innovations.cpp.obj
+[73/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/landing_gear.cpp.obj
+[74/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/manual_control_setpoint.cpp.obj
+[75/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/manual_control_switches.cpp.obj
+[76/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/irlock_report.cpp.obj
+[77/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/landing_target_pose.cpp.obj
+[78/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/logger_status.cpp.obj
+[79/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/log_message.cpp.obj
+[80/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/magnetometer_bias_estimate.cpp.obj
+[81/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/mavlink_tunnel.cpp.obj
+[82/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/mission.cpp.obj
+[83/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/led_control.cpp.obj
+[84/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/mavlink_log.cpp.obj
+[85/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/mag_worker_data.cpp.obj
+[86/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/obstacle_distance.cpp.obj
+[87/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/navigator_mission_item.cpp.obj
+[88/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/mount_orientation.cpp.obj
+[89/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/npfg_status.cpp.obj
+[90/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/mission_result.cpp.obj
+[91/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/offboard_control_mode.cpp.obj
+[92/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/optical_flow.cpp.obj
+[93/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/orbit_status.cpp.obj
+[94/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/position_setpoint.cpp.obj
+[95/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/parameter_update.cpp.obj
+[96/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/onboard_computer_status.cpp.obj
+[97/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/power_button_state.cpp.obj
+[98/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/position_controller_status.cpp.obj
+[99/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/position_setpoint_triplet.cpp.obj
+[100/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/pps_capture.cpp.obj
+[101/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/px4io_status.cpp.obj
+[102/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/ping.cpp.obj
+[103/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/power_monitor.cpp.obj
+[104/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/position_controller_landing_status.cpp.obj
+[105/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/pwm_input.cpp.obj
+[106/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/radio_status.cpp.obj
+[107/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/rc_parameter_map.cpp.obj
+[108/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/rate_ctrl_status.cpp.obj
+[109/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/rc_channels.cpp.obj
+[110/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/rtl_time_estimate.cpp.obj
+[111/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/rpm.cpp.obj
+[112/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/sensor_baro.cpp.obj
+[113/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/safety.cpp.obj
+[114/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/sensor_correction.cpp.obj
+[115/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/satellite_info.cpp.obj
+[116/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/sensor_accel.cpp.obj
+[117/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/sensor_accel_fifo.cpp.obj
+[118/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/sensor_combined.cpp.obj
+[119/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/sensor_gnss_relative.cpp.obj
+[120/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/sensor_gps.cpp.obj
+[121/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/sensor_gyro_fifo.cpp.obj
+[122/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/sensor_gyro.cpp.obj
+[123/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/sensor_gyro_fft.cpp.obj
+[124/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/sensor_preflight_mag.cpp.obj
+[125/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/system_power.cpp.obj
+[126/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/sensor_hygrometer.cpp.obj
+[127/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/takeoff_status.cpp.obj
+[128/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/tecs_status.cpp.obj
+[129/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/sensor_selection.cpp.obj
+[130/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/task_stack_info.cpp.obj
+[131/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/sensors_status_imu.cpp.obj
+[132/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/telemetry_status.cpp.obj
+[133/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/test_motor.cpp.obj
+[134/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/sensor_mag.cpp.obj
+[135/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/thrust_data.cpp.obj
+[136/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/sensors_status.cpp.obj
+[137/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/thrust_desired_data.cpp.obj
+[138/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/thrust_control_data.cpp.obj
+[139/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/transponder_report.cpp.obj
+[140/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/timesync.cpp.obj
+[141/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/trajectory_bezier.cpp.obj
+[142/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/timesync_status.cpp.obj
+[143/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/tune_control.cpp.obj
+[144/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/uavcan_parameter_request.cpp.obj
+[145/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/ulog_stream.cpp.obj
+[146/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/uavcan_parameter_value.cpp.obj
+[147/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/ulog_stream_ack.cpp.obj
+[148/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/uwb_distance.cpp.obj
+[149/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/trajectory_waypoint.cpp.obj
+[150/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/uwb_grid.cpp.obj
+[151/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/vehicle_air_data.cpp.obj
+[152/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/vehicle_acceleration.cpp.obj
+[153/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/vehicle_angular_acceleration.cpp.obj
+[154/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/vehicle_command_ack.cpp.obj
+[155/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/vehicle_angular_velocity.cpp.obj
+[156/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/vehicle_attitude_setpoint.cpp.obj
+[157/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/vehicle_attitude.cpp.obj
+[158/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/vehicle_constraints.cpp.obj
+[159/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/vehicle_angular_acceleration_setpoint.cpp.obj
+[160/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/vehicle_global_position.cpp.obj
+[161/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/vehicle_command.cpp.obj
+[162/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/vehicle_gps_position.cpp.obj
+[163/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/vehicle_imu.cpp.obj
+[164/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/vehicle_land_detected.cpp.obj
+[165/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/vehicle_control_mode.cpp.obj
+[166/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/vehicle_magnetometer.cpp.obj
+[167/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/vehicle_odometry.cpp.obj
+[168/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/vehicle_local_position.cpp.obj
+[169/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/vehicle_status.cpp.obj
+[170/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/vehicle_imu_status.cpp.obj
+[171/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/vehicle_local_position_setpoint.cpp.obj
+[172/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/vehicle_thrust_setpoint.cpp.obj
+[173/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/vehicle_rates_setpoint.cpp.obj
+[174/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/vehicle_trajectory_bezier.cpp.obj
+[175/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/vtol_vehicle_status.cpp.obj
+[176/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/vehicle_roi.cpp.obj
+[177/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/vehicle_torque_setpoint.cpp.obj
+[178/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/wind.cpp.obj
+[179/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/vehicle_trajectory_waypoint.cpp.obj
+[180/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/vehicle_status_flags.cpp.obj
+[181/1142] Building CXX object src/lib/mixer/CMakeFiles/mixer.dir/load_mixer_file.cpp.obj
+[182/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/yaw_estimator_status.cpp.obj
+[183/1142] Building CXX object msg/CMakeFiles/uorb_msgs.dir/topics_sources/wheel_encoders.cpp.obj
+[184/1142] Building CXX object src/lib/mixer/MixerBase/CMakeFiles/MixerBase.dir/Mixer.cpp.obj
+[185/1142] Building CXX object src/drivers/uavcan/libuavcan/libuavcan/CMakeFiles/uavcan.dir/src/marshal/uc_bit_array_copy.cpp.obj
+[186/1142] Building CXX object src/lib/mixer/NullMixer/CMakeFiles/NullMixer.dir/NullMixer.cpp.obj
+[187/1142] Building CXX object boards/px4/fmu-v5/src/CMakeFiles/board_bus_info.dir/i2c.cpp.obj
+[188/1142] Linking CXX static library src/lib/mixer/MixerBase/libMixerBase.a
+[189/1142] Building CXX object src/lib/mixer/HelicopterMixer/CMakeFiles/HelicopterMixer.dir/HelicopterMixer.cpp.obj
+[190/1142] Linking CXX static library src/lib/mixer/NullMixer/libNullMixer.a
+[191/1142] Building CXX object src/lib/mixer/CMakeFiles/mixer.dir/MixerGroup.cpp.obj
+[192/1142] Building CXX object src/lib/mixer/SimpleMixer/CMakeFiles/SimpleMixer.dir/SimpleMixer.cpp.obj
+[193/1142] Building CXX object src/lib/perf/CMakeFiles/perf.dir/perf_counter.cpp.obj
+[194/1142] Building CXX object src/drivers/uavcan/libuavcan/libuavcan/CMakeFiles/uavcan.dir/src/driver/uc_can.cpp.obj
+[195/1142] Linking CXX static library msg/libuorb_msgs.a
+[196/1142] Linking CXX static library src/lib/mixer/HelicopterMixer/libHelicopterMixer.a
+[197/1142] Building CXX object src/drivers/uavcan/libuavcan/libuavcan/CMakeFiles/uavcan.dir/src/marshal/uc_bit_stream.cpp.obj
+[198/1142] Building CXX object src/drivers/uavcan/libuavcan/libuavcan/CMakeFiles/uavcan.dir/src/marshal/uc_float_spec.cpp.obj
+[199/1142] Building CXX object src/drivers/uavcan/libuavcan/libuavcan/CMakeFiles/uavcan.dir/src/marshal/uc_scalar_codec.cpp.obj
+[200/1142] Building C object src/lib/version/CMakeFiles/version.dir/version.c.obj
+[201/1142] Linking CXX static library src/lib/perf/libperf.a
+[202/1142] Building CXX object src/lib/geo/CMakeFiles/geo.dir/geo.cpp.obj
+[203/1142] Building CXX object src/drivers/uavcan/libuavcan/libuavcan/CMakeFiles/uavcan.dir/src/transport/uc_crc.cpp.obj
+[204/1142] Building CXX object src/drivers/uavcan/libuavcan/libuavcan/CMakeFiles/uavcan.dir/src/node/uc_global_data_type_registry.cpp.obj
+[205/1142] Building CXX object src/lib/mixer/MultirotorMixer/CMakeFiles/MultirotorMixer.dir/MultirotorMixer.cpp.obj
+[206/1142] Building CXX object src/lib/world_magnetic_model/CMakeFiles/world_magnetic_model.dir/geo_mag_declination.cpp.obj
+[207/1142] Building CXX object src/drivers/uavcan/libuavcan/libuavcan/CMakeFiles/uavcan.dir/src/node/uc_generic_publisher.cpp.obj
+[208/1142] Linking CXX static library src/lib/mixer/SimpleMixer/libSimpleMixer.a
+[209/1142] Linking C static library src/lib/version/libversion.a
+[210/1142] Linking CXX static library src/lib/geo/libgeo.a
+[211/1142] Linking CXX static library src/lib/mixer/MultirotorMixer/libMultirotorMixer.a
+[212/1142] Building CXX object src/drivers/uavcan/libuavcan/libuavcan/CMakeFiles/uavcan.dir/src/node/uc_generic_subscriber.cpp.obj
+[213/1142] Linking CXX static library src/lib/world_magnetic_model/libworld_magnetic_model.a
+[214/1142] Building CXX object src/drivers/uavcan/libuavcan/libuavcan/CMakeFiles/uavcan.dir/src/node/uc_service_client.cpp.obj
+[215/1142] Linking CXX static library src/lib/mixer/libmixer.a
+[216/1142] Building CXX object src/drivers/uavcan/libuavcan/libuavcan/CMakeFiles/uavcan.dir/src/node/uc_timer.cpp.obj
+[217/1142] Building CXX object src/drivers/uavcan/libuavcan/libuavcan/CMakeFiles/uavcan.dir/src/transport/uc_transfer.cpp.obj
+[218/1142] Building CXX object src/drivers/uavcan/libuavcan/libuavcan/CMakeFiles/uavcan.dir/src/uc_data_type.cpp.obj
+[219/1142] Building CXX object src/drivers/uavcan/libuavcan/libuavcan/CMakeFiles/uavcan.dir/src/transport/uc_frame.cpp.obj
+[220/1142] Building CXX object src/lib/wind_estimator/CMakeFiles/wind_estimator.dir/WindEstimator.cpp.obj
+[221/1142] Building CXX object src/drivers/uavcan/libuavcan/libuavcan/CMakeFiles/uavcan.dir/src/node/uc_scheduler.cpp.obj
+[222/1142] Building CXX object src/drivers/uavcan/libuavcan/libuavcan/CMakeFiles/uavcan.dir/src/uc_dynamic_memory.cpp.obj
+[223/1142] Building CXX object src/drivers/uavcan/libuavcan/libuavcan/CMakeFiles/uavcan.dir/src/uc_error.cpp.obj
+[224/1142] Building CXX object src/drivers/uavcan/libuavcan/libuavcan/CMakeFiles/uavcan.dir/src/transport/uc_outgoing_transfer_registry.cpp.obj
+[225/1142] Linking CXX static library src/lib/wind_estimator/libwind_estimator.a
+[226/1142] Building C object boards/px4/fmu-v5/src/CMakeFiles/drivers_userspace.dir/stm32_userspace.c.obj
+[227/1142] Linking C static library boards/px4/fmu-v5/src/libdrivers_userspace.a
+[228/1142] Generating nuttx/crypto/libcrypto.a
+[229/1142] Building CXX object src/drivers/uavcan/libuavcan/libuavcan/CMakeFiles/uavcan.dir/src/transport/uc_transfer_receiver.cpp.obj
+[230/1142] Building CXX object src/drivers/uavcan/libuavcan/libuavcan/CMakeFiles/uavcan.dir/src/transport/uc_dispatcher.cpp.obj
+[231/1142] Building CXX object boards/px4/fmu-v5/src/CMakeFiles/board_bus_info.dir/spi.cpp.obj
+[232/1142] Building CXX object src/drivers/uavcan/libuavcan_drivers/CMakeFiles/uavcan_stm32_driver.dir/src/uc_stm32_thread.cpp.obj
+[233/1142] Building CXX object src/drivers/uavcan/libuavcan/libuavcan/CMakeFiles/uavcan.dir/src/transport/uc_transfer_buffer.cpp.obj
+[234/1142] Building CXX object src/drivers/uavcan/libuavcan/libuavcan/CMakeFiles/uavcan.dir/src/transport/uc_transfer_sender.cpp.obj
+[235/1142] Building CXX object src/drivers/uavcan/libuavcan_drivers/CMakeFiles/uavcan_stm32_driver.dir/src/uc_stm32_clock.cpp.obj
+[236/1142] Linking CXX static library boards/px4/fmu-v5/src/libboard_bus_info.a
+[237/1142] Building CXX object src/drivers/uavcan/libuavcan/libuavcan/CMakeFiles/uavcan.dir/src/transport/uc_can_io.cpp.obj
+[238/1142] Building CXX object src/drivers/uavcan/libuavcan/libuavcan/CMakeFiles/uavcan.dir/src/transport/uc_can_acceptance_filter_configurator.cpp.obj
+[239/1142] Generating nuttx/boards/libboards.a
+[240/1142] Building CXX object src/drivers/uavcan/libuavcan/libuavcan/CMakeFiles/uavcan.dir/src/transport/uc_transfer_listener.cpp.obj
+[241/1142] Building CXX object src/lib/parameters/tinybson/CMakeFiles/tinybson.dir/tinybson.cpp.obj
+[242/1142] Linking CXX static library src/lib/parameters/tinybson/libtinybson.a
+[243/1142] Building CXX object src/drivers/uavcan/libuavcan/libuavcan/CMakeFiles/uavcan.dir/src/protocol/uc_node_status_provider.cpp.obj
+[244/1142] Building CXX object src/drivers/uavcan/libuavcan/libuavcan/CMakeFiles/uavcan.dir/src/protocol/uc_dynamic_node_id_client.cpp.obj
+[245/1142] Linking CXX static library src/drivers/uavcan/libuavcan/libuavcan/libuavcan.a
+[246/1142] Generating px4 event json file from source
+[247/1142] Generating nuttx/libs/libxx/libxx.a
+[248/1142] Generating nuttx/binfmt/libbinfmt.a
+[249/1142] Building CXX object src/drivers/uavcan/libuavcan_drivers/CMakeFiles/uavcan_stm32_driver.dir/src/uc_stm32_can.cpp.obj
+[250/1142] Linking CXX static library src/drivers/uavcan/libuavcan_drivers/libuavcan_stm32_driver.a
+[251/1142] Generating combined event json file
+[252/1142] Generating component_general.json and checksums.h
+[253/1142] ROMFS: copying extras
+[254/1142] ROMFS: pruning
+[255/1142] ROMFS: generating image
+[256/1142] Building C object ROMFS/CMakeFiles/romfs.dir/nsh_romfsimg.c.obj
+[257/1142] Linking C static library ROMFS/libromfs.a
+[258/1142] Generating nuttx/mm/libmm.a
+[259/1142] Generating apps/libapps.a
+[260/1142] Generating nuttx/drivers/libdrivers.a
+[261/1142] Generating nuttx/arch/arm/src/libarch.a
+[262/1142] Generating nuttx/fs/libfs.a
+[263/1142] Generating nuttx/sched/libsched.a
+ninja: build stopped: interrupted by user.
