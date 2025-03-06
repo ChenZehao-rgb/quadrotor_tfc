@@ -69,6 +69,9 @@
 #include <drivers/drv_hrt.h>
 #include <uORB/topics/parameter_update.h>
 
+#include <uORB/topics/barometric_force_sensor.h>
+#include <uORB/topics/thrust_iolc_ekf.h>
+
 using namespace time_literals;
 
 #define SAVE_FORCECTL_ADRC_DATA 0
@@ -109,7 +112,11 @@ private:
 		(ParamFloat<px4::params::FORCECTL_ADRC_B2>) _param_forcectl_adrc_b2,
 		(ParamFloat<px4::params::FORCECTL_ADRC_B3>) _param_forcectl_adrc_b3,
 		(ParamFloat<px4::params::FORCECTL_ADRC_KP>) _param_forcectl_adrc_kp,
-		(ParamFloat<px4::params::FORCECTL_ADRC_KD>) _param_forcectl_adrc_kd
+		(ParamFloat<px4::params::FORCECTL_ADRC_KD>) _param_forcectl_adrc_kd,
+        (ParamFloat<px4::params::FORCECTL_IOLC_K0>) _param_forcectl_iolc_k0,
+        (ParamFloat<px4::params::FORCECTL_IOLC_Q>) _param_forcectl_iolc_q,
+        (ParamFloat<px4::params::FORCECTL_IOLC_R>) _param_forcectl_iolc_r,
+		(ParamFloat<px4::params::FORCECTL_IOLC_D>) _param_forcectl_iolc_d
 	)
 
 	uORB::SubscriptionInterval	_parameter_update_sub{ORB_ID(parameter_update), 1_s};
@@ -118,6 +125,8 @@ private:
 	ForcectlKfFilter forcectl_kf_filter{1.0f};
 	ForcectlKfFilter forcectl_torque_kf_filter{1.0f};
 
+    struct thrust_iolc_ekf_s iolc_ekf_data;
+    struct barometric_force_sensor_s sensordata;
 	struct forcectl_forcedata_s force_data{};
 	struct forcectl_controldata_s control_data{};
 	struct adc_report_s adc{};
@@ -126,6 +135,18 @@ private:
 	struct rc_channels_s rc_channals_data{};
 	struct vehicle_attitude_s vehicle_attitude{};
 	struct battery_status_s battery_status{};
+
+    // double iolc_ekf_a3 = 1.034e-7;
+    // double iolc_ekf_a2 = -1.285e-3;
+    // double iolc_ekf_a1 = 9.251;
+    // double iolc_ekf_b0 = -3.008e4;
+	double iolc_ekf_a3 = 0;
+    double iolc_ekf_a2 = -0.1663;
+    double iolc_ekf_a1 = -71.6385;
+    double iolc_ekf_b0 = 6.0018e4;
+    double iolc_ekf_c3 = 3.379e-10*9.5493*9.5493*9.5493;
+    double iolc_ekf_c2 = -1.518e-6*9.5493*9.5493;
+    double iolc_ekf_c1 = 3.573e-3*9.5493;
 
 #if SAVE_FORCECTL_ADRC_DATA
 	forcectl_adrc_data_s forcectl_ADRC_data = {0};

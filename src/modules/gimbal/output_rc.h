@@ -73,8 +73,11 @@ private:
 	uORB::Subscription _vehicle_status_sub{ORB_ID(vehicle_status)};
 	vehicle_status_s vehicle_status{};
 
-	uORB::Subscription _thrust_control_data_sub{ORB_ID(thrust_control_data)};
-	thrust_control_data_s thrustcontroldata{};
+	uORB::Subscription _actuator_controls_sub{ORB_ID(actuator_controls_0)};
+	actuator_controls_s actuator_controls_data{};
+
+	// uORB::Subscription _thrust_control_data_sub{ORB_ID(thrust_control_data)};
+	// thrust_control_data_s thrustcontroldata{};
 };
 
 } /* namespace gimbal */

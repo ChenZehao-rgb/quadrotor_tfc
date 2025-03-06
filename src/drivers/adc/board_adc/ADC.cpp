@@ -169,20 +169,20 @@ void ADC::update_adc_report(hrt_abstime now)
 
 	_to_adc_report.publish(adc);
 
-	force_data.timestamp = now;
-	static uint64_t last_timestamp = now;
-	force_data.force_max = 1.0f;
-	force_data.force_raw_data = force_data.force_max*(2048 - adc.raw_data[4])/2048.0f;
-	force_data.force_lowpass_filtered_data = _forcectl_lowpass_filter.apply(force_data.force_raw_data);
-	force_data.torque_max = 0.3f;
-	force_data.torque_raw_data = force_data.torque_max*(2048 - adc.raw_data[10])/2048.0f;
-	force_data.torque_lowpass_filtered_data = _forcectl_torque_lowpass_filter.apply(force_data.torque_raw_data);
+	// force_data.timestamp = now;
+	// static uint64_t last_timestamp = now;
+	// force_data.force_max = 1.0f;
+	// force_data.force_raw_data = force_data.force_max*(2048 - adc.raw_data[4])/2048.0f;
+	// force_data.force_lowpass_filtered_data = _forcectl_lowpass_filter.apply(force_data.force_raw_data);
+	// force_data.torque_max = 0.3f;
+	// force_data.torque_raw_data = force_data.torque_max*(2048 - adc.raw_data[10])/2048.0f;
+	// force_data.torque_lowpass_filtered_data = _forcectl_torque_lowpass_filter.apply(force_data.torque_raw_data);
 
-	float dt = (float)(force_data.timestamp - last_timestamp)/1000000.0f;
-	force_data.force_kf_filtered_data = forcectl_kf_filter.force_kf_filter(dt, force_data.force_raw_data);
-	force_data.torque_kf_filtered_data = forcectl_torque_kf_filter.force_kf_filter(dt, force_data.torque_raw_data);
-	last_timestamp = force_data.timestamp;
-	_to_forcedata_report.publish(force_data);
+	// float dt = (float)(force_data.timestamp - last_timestamp)/1000000.0f;
+	// force_data.force_kf_filtered_data = forcectl_kf_filter.force_kf_filter(dt, force_data.force_raw_data);
+	// force_data.torque_kf_filtered_data = forcectl_torque_kf_filter.force_kf_filter(dt, force_data.torque_raw_data);
+	// last_timestamp = force_data.timestamp;
+	// _to_forcedata_report.publish(force_data);
 }
 
 uint8_t ADC::read_gpio_value(int fd)

@@ -254,7 +254,7 @@ PARAM_DEFINE_FLOAT(FORCECTL_ADRC_B2, 100.0f);
  * @increment 0.1
  * @group Force Feedback Control
  */
-PARAM_DEFINE_FLOAT(FORCECTL_ADRC_B3, 200.0f);
+PARAM_DEFINE_FLOAT(FORCECTL_ADRC_B3, 80.0f);
 
 /**
  * ADRC controller kp gain
@@ -307,3 +307,55 @@ PARAM_DEFINE_FLOAT(FORCECTL_SD_ES, 5.0f);
  * @group Force Feedback Control
  */
 PARAM_DEFINE_FLOAT(FORCECTL_SD_ME, 0.05f);
+
+/**
+ * IOLC Coefficient k0
+ *
+ * Input-Output Linearization Controller Gain k0.
+ *
+ * @min 0.0
+ * @max 500.0
+ * @decimal 1
+ * @increment 1
+ * @group Force Feedback Control
+ */
+PARAM_DEFINE_FLOAT(FORCECTL_IOLC_K0, 5.0f);
+
+/**
+ * Extended Kalman Filter Observer Standard deviation of estimation
+ *
+ * force_feedback Kalman filter standard deviation of estimation. i.e. the standard deviation of the acceleration of the force.
+ *
+ * @min 0.0
+ * @max 100.0
+ * @decimal 3
+ * @increment 0.001
+ * @group Force Feedback Control
+ */
+PARAM_DEFINE_FLOAT(FORCECTL_IOLC_Q, 10.0f);
+
+/**
+ * Extended Kalman Filter Observer Standard deviation of estimation
+ *
+ * force_feedback Kalman filter standard deviation of measurement.
+ *
+ * @min 0.0
+ * @max 1.0
+ * @decimal 4
+ * @increment 0.0001
+ * @group Force Feedback Control
+ */
+PARAM_DEFINE_FLOAT(FORCECTL_IOLC_R, 0.01f);
+
+/**
+ * Desired Thrust
+ *
+ * set desired thrust.
+ *
+ * @min 0.0
+ * @max 1.0
+ * @decimal 4
+ * @increment 0.0001
+ * @group Force Feedback Control
+ */
+PARAM_DEFINE_FLOAT(FORCECTL_IOLC_D, 0.5f);

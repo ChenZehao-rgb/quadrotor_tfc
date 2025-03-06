@@ -84,42 +84,46 @@ void OutputRC::update(const ControlData &control_data, bool new_setpoints)
 	_forcectl_controldata_sub.update(&forcectl_control_data);
 	_rc_channels_sub.update(&rc_channals_data);
 	_vehicle_status_sub.update(&vehicle_status);
-
-	_thrust_control_data_sub.update(&thrustcontroldata);
+	_actuator_controls_sub.update(&actuator_controls_data);
+	// _thrust_control_data_sub.update(&thrustcontroldata);
 
 	/*Td=(1-alpha)*omiga + aplha*omiga2*/
-	// float forcectl_alpha = (rc_channals_data.channels[9] + 1.0f)/2.0f;
-	// forcectl_alpha = (forcectl_alpha < 0.01f) ? 0.01f : ((forcectl_alpha > 1.0f) ? 1.0f : forcectl_alpha);
-	// float forcectl_manual_control = ((float)sqrt((1.0f - forcectl_alpha)*(1.0f - forcectl_alpha) + 4.0f*forcectl_alpha*rc_channals_data.channels[2]) + (forcectl_alpha - 1.0f))/(2.0f * forcectl_alpha);
-	// forcectl_manual_control = (forcectl_manual_control < 0) ? 0 : ((forcectl_manual_control > 1.0f) ? 1.0f : forcectl_manual_control);
+	float forcectl_alpha = (rc_channals_data.channels[9] + 1.0f)/2.0f;
+	forcectl_alpha = (forcectl_alpha < 0.01f) ? 0.01f : ((forcectl_alpha > 1.0f) ? 1.0f : forcectl_alpha);
+	float forcectl_manual_control = ((float)sqrt((1.0f - forcectl_alpha)*(1.0f - forcectl_alpha) + 4.0f*forcectl_alpha*rc_channals_data.channels[2]) + (forcectl_alpha - 1.0f))/(2.0f * forcectl_alpha);
+	forcectl_manual_control = (forcectl_manual_control < 0) ? 0 : ((forcectl_manual_control > 1.0f) ? 1.0f : forcectl_manual_control);
+
+	// actuator_controls.control[0] = -1.0f;
+	// actuator_controls.control[1] = -1.0f;
+	// actuator_controls.control[2] = -1.0f;
+	// actuator_controls.control[3] = -1.0f;
 
 	actuator_controls.control[0] = -1.0f;
-	actuator_controls.control[1] = -1.0f;
-	actuator_controls.control[2] = -1.0f;
-	actuator_controls.control[3] = -1.0f;
 
-	// if(!vehicle_status.rc_signal_lost){
-	// 	if(rc_channals_data.channels[4] < 0.0f)
-	// 	{
-	// 		actuator_controls.control[0] = -1.0f;
-	// 	}
-	// 	else if(rc_channals_data.channels[4] > 0.0f)
-	// 	{
-	// 		if(rc_channals_data.channels[5] < -0.3f)
-	// 		{
-	// 			actuator_controls.control[0] = forcectl_manual_control*2.0f-1.0f;
-	// 		}
-	// 		else if(rc_channals_data.channels[5] > -0.3f)
-	// 		{
-	// 			actuator_controls.control[0] = forcectl_control_data.force_control_out*2.0f-1.0f;
-	// 		}
-	// 	}
-	// }
+	// actuator_controls.control[0] = forcectl_control_data.force_control_out*2.0f-1.0f;
 
-	actuator_controls.control[0] = thrustcontroldata.thrust_control_out1*2.0f-1.0f;
-	actuator_controls.control[1] = thrustcontroldata.thrust_control_out2*2.0f-1.0f;
-	actuator_controls.control[2] = thrustcontroldata.thrust_control_out3*2.0f-1.0f;
-	actuator_controls.control[3] = thrustcontroldata.thrust_control_out4*2.0f-1.0f;
+	if(!vehicle_status.rc_signal_lost){
+		if(rc_channals_data.channels[4] < 0.0f)
+		{
+			actuator_controls.control[0] = -1.0f;
+		}
+		else if(rc_channals_data.channels[4] > 0.0f)
+		{
+			if(rc_channals_data.channels[5] < -0.3f)
+			{
+				actuator_controls.control[0] = forcectl_manual_control*2.0f-1.0f;
+			}
+			else if(rc_channals_data.channels[5] > -0.3f)
+			{
+				actuator_controls.control[0] = forcectl_control_data.force_control_out*2.0f-1.0f;
+			}
+		}
+	}
+
+	// actuator_controls.control[0] = thrustcontroldata.thrust_control_out1*2.0f-1.0f;
+	// actuator_controls.control[1] = thrustcontroldata.thrust_control_out2*2.0f-1.0f;
+	// actuator_controls.control[2] = thrustcontroldata.thrust_control_out3*2.0f-1.0f;
+	// actuator_controls.control[3] = thrustcontroldata.thrust_control_out4*2.0f-1.0f;
 
 	_actuator_controls_pub.publish(actuator_controls);
 

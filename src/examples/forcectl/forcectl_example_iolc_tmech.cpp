@@ -96,6 +96,37 @@
 	 float u0_CTL;
 	 float output;
  }ADRC;
+
+ typedef struct
+{
+	uint64_t last_timestamp;
+	uint64_t count;
+
+    // IOLC
+	double a1, a2, a3;
+    double b0;
+	double c1, c2, c3;
+	double d0, d1, d2, d3;
+    float k0;
+    float err;
+    double motorSpeed;
+    double u, v;
+	double dt;
+    
+    // EKF
+    float EKFO_Q;
+    float EKFO_R;
+    double motorSpeedDot;
+    double motorSpeedPre;
+    double Jacobian_A;
+    double Jacobian_H;
+    double P_Pre;
+    float thrustPre;
+    float thrustReal;
+    double Gain_K;
+    double P_Cov;
+
+}IOLC_EKF;
  
  void Forcectl::parameters_update()
  {
@@ -226,15 +257,83 @@
 	 /*OUTPUT*/
 	 adrc->output = (u_CTL > 1.0f) ? 1.0f : ((u_CTL < 0.0f) ? 0.0f : u_CTL);
  }
+
+void IOLC_EKF_calculate(IOLC_EKF *iolc)
+{
+    if(iolc == NULL)
+    {
+        return;
+    }
+
+    uint64_t time_now = hrt_absolute_time();
+    double dt = math::constrain(((time_now - iolc->last_timestamp) * 1e-6f), 0.001f, 0.05f);
+	iolc->last_timestamp = time_now;
+	iolc->dt = dt;
+
+    // virtual control law
+    iolc->v = iolc->k0 * iolc->err;
+    // control law
+	double f_x = (3*iolc->c3*iolc->motorSpeed*iolc->motorSpeed + 2*iolc->c2*iolc->motorSpeed + iolc->c1)
+		*(iolc->a2*iolc->motorSpeed*iolc->motorSpeed + iolc->a1*iolc->motorSpeed);
+	double g_x = (iolc->b0*(3*iolc->c3*iolc->motorSpeed*iolc->motorSpeed + 2*iolc->c2*iolc->motorSpeed + iolc->c1));
+    iolc->u = (iolc->v - f_x) / g_x;
+	iolc->u = (iolc->u > 0.8) ? 0.8 : ((iolc->u < 0.0) ? 0.0 : iolc->u);
+
+	/* Using Euler Integration Method to Calculate the Motor Speed */
+	double motorSpeed_dot = (iolc->a2*iolc->motorSpeed*iolc->motorSpeed + iolc->a1*iolc->motorSpeed + iolc->b0*iolc->u);
+	iolc->motorSpeed = iolc->motorSpeed + motorSpeed_dot*dt;
+	iolc->motorSpeed = (iolc->motorSpeed > 600) ? 600 : ((iolc->motorSpeed < 10) ? 10 : iolc->motorSpeed);
+
+	// PX4_INFO("v u motorspeed motorSpeed_dot count:\t%.10f\t%.10f\t%.10f\t%.10f\t%.1f",static_cast<double>(iolc->v),
+	// 			static_cast<double>(iolc->u), static_cast<double>(iolc->motorSpeed),
+	// 			static_cast<double>(motorSpeed_dot), static_cast<double>(iolc->count));
+	// px4_usleep(1000000);
+	// PX4_INFO("a1 a2 b0 c1 c2 c3:\t%.10f\t%.10f\t%.10f\t%.10f\t%.10f\t%.10f",
+	// 			static_cast<double>(iolc->a1), static_cast<double>(iolc->a2), static_cast<double>(iolc->b0),
+	// 			static_cast<double>(iolc->c1), static_cast<double>(iolc->c2), static_cast<double>(iolc->c3));
+
+    /* using EKF to calculate the estimated value of motorspeed */
+    // prediction stage
+    // predict the prior state
+
+    // iolc->motorSpeedDot = iolc->a3*iolc->motorSpeed*iolc->motorSpeed*iolc->motorSpeed + iolc->a2*iolc->motorSpeed*iolc->motorSpeed + iolc->a1*iolc->motorSpeed + iolc->b0*iolc->u;
+    // iolc->motorSpeedPre = iolc->motorSpeed + iolc->motorSpeedDot*dt;
+    // // calculate Jacobian matrix A
+    // iolc->Jacobian_A = 3*iolc->a3*iolc->motorSpeed*iolc->motorSpeed + 2*iolc->a2*iolc->motorSpeed +iolc->a1;
+    // iolc->Jacobian_A = 1 + iolc->Jacobian_A*dt;
+    // // calculate the state covariance
+    // iolc->P_Pre = iolc->Jacobian_A*iolc->P_Cov*iolc->Jacobian_A + static_cast<double>(iolc->EKFO_Q);
+    // // update stage
+    // // predict thrust
+    // iolc->thrustPre = iolc->c3*iolc->motorSpeedPre*iolc->motorSpeedPre*iolc->motorSpeedPre + iolc->c2*iolc->motorSpeedPre*iolc->motorSpeedPre
+    //                 + iolc->c1*iolc->motorSpeedPre;
+    // // calculate Jacobian matrix H
+    // iolc->Jacobian_H = 3*iolc->c3*iolc->motorSpeedPre*iolc->motorSpeedPre + 2*iolc->c1*iolc->motorSpeedPre + iolc->c1;
+    // // calculate Kalman Gain
+    // iolc->Gain_K = iolc->P_Pre*iolc->Jacobian_H / (iolc->Jacobian_H*iolc->P_Pre*iolc->Jacobian_H + static_cast<double>(iolc->EKFO_R));
+    // // update state
+    // iolc->motorSpeed = iolc->motorSpeedPre + iolc->Gain_K*(static_cast<double>(iolc->thrustReal) - static_cast<double>(iolc->thrustPre));
+    // iolc->motorSpeed = (iolc->motorSpeed > 600) ? 600 : ((iolc->motorSpeed < 10) ? 10 : iolc->motorSpeed);
+	// // update covariance
+    // iolc->P_Cov = (1 - iolc->Gain_K*iolc->Jacobian_H)*iolc->P_Pre;
+
+    
+
+}
  
  int Forcectl::main()
  {
 	 appState.setRunning(true);
  
-	 /* subscribe to adc_report topic */
-	 int adcdata_sub_fd = orb_subscribe(ORB_ID(adc_report));
-	 /* limit the update rate to 200 Hz */
-	 orb_set_interval(adcdata_sub_fd, 5);
+    // advertise barometric_force_sensor topic
+    int thrustdata_sub_fd = orb_subscribe(ORB_ID(barometric_force_sensor));
+    // limit the update rate to 50 Hz
+    orb_set_interval(thrustdata_sub_fd, 20);
+
+	//  /* subscribe to adc_report topic */
+	//  int adcdata_sub_fd = orb_subscribe(ORB_ID(adc_report));
+	//  /* limit the update rate to 200 Hz */
+	//  orb_set_interval(adcdata_sub_fd, 5);
  
 	 /* subscribe to actuator_controls_3 topic */
 	 int forceexp_sub_rc_fd = orb_subscribe(ORB_ID(actuator_controls_3));
@@ -263,10 +362,15 @@
 	 /* advertise forcectl_controldata topic */
 	 memset(&control_data, 0, sizeof(control_data));
 	 orb_advert_t controldata_pub = orb_advertise(ORB_ID(forcectl_controldata), &control_data);
+
+     /* advertise thrust_iolc_ekf topic */
+	 memset(&iolc_ekf_data, 0, sizeof(iolc_ekf_data));
+	 orb_advert_t iolcekfdata_pub = orb_advertise(ORB_ID(thrust_iolc_ekf), &iolc_ekf_data);
  
 	 /* one could wait for multiple topics with this technique, just using one here */
 	 px4_pollfd_struct_t fds[] = {
-		 { .fd = adcdata_sub_fd,   .events = POLLIN },
+		//  { .fd = adcdata_sub_fd,   .events = POLLIN },
+         { .fd = thrustdata_sub_fd,   .events = POLLIN },
 		 { .fd = forceexp_sub_rc_fd,   .events = POLLIN },
 		 { .fd = forceexp_sub_fc_fd,   .events = POLLIN },
 	 };
@@ -274,7 +378,8 @@
 	 static incremental_PID incre_pid{};
 	 static positional_PID posi_pid{};
 	 static ADRC adrc{};
-	 float _battery_status_scale{0.0f};
+     static IOLC_EKF iolc_ekf{};
+	//  float _battery_status_scale{0.0f};
  
 	 _forcectl_lowpass_filter.reset(0.0);
 	 _forcectl_torque_lowpass_filter.reset(0.0);
@@ -295,21 +400,24 @@
 		 } else if (poll_ret > 0) {
  
 			 if (fds[0].revents & POLLIN) {
-				 orb_copy(ORB_ID(adc_report), adcdata_sub_fd, &adc);
-				 force_data.timestamp = adc.timestamp;
+				//  orb_copy(ORB_ID(adc_report), adcdata_sub_fd, &adc);
+                 orb_copy(ORB_ID(barometric_force_sensor), thrustdata_sub_fd, &sensordata);
+				 force_data.timestamp = hrt_absolute_time();
 				 static uint64_t forcedata_last_timestamp = force_data.timestamp;
 				 force_data.force_max = _param_forcectl_force_max.get();
-				 force_data.force_raw_data = force_data.force_max*(2048 - adc.raw_data[4])/2048.0f;
+				//  force_data.force_raw_data = force_data.force_max*(2048 - adc.raw_data[4])/2048.0f;
+                 force_data.force_raw_data = sensordata.data4 / 1000.0f;
 				 force_data.force_lowpass_filtered_data = _forcectl_lowpass_filter.apply(force_data.force_raw_data);
-				 /* force_data.torque_max = 0.3f * force_data.force_max;
-				 force_data.torque_raw_data = force_data.torque_max*(2048 - adc.raw_data[10])/2048.0f;
-				 force_data.torque_lowpass_filtered_data = _forcectl_torque_lowpass_filter.apply(force_data.torque_raw_data); */
- 
 				 float dt = (float)(force_data.timestamp - forcedata_last_timestamp)/1000000.0f;
 				 force_data.force_kf_filtered_data = forcectl_kf_filter.force_kf_filter(dt, force_data.force_raw_data);
 				 //force_data.torque_kf_filtered_data = forcectl_torque_kf_filter.force_kf_filter(dt, force_data.torque_raw_data);
 				 forcedata_last_timestamp = force_data.timestamp;
+                //  force_data.timestamp = hrt_absolute_time();
 				 orb_publish(ORB_ID(forcectl_forcedata), forcedata_pub, &force_data);
+                //  PX4_INFO("Raw_Data & Force_Data :\t%dg\t%.3fkg\t%.3fkg", sensordata.data4, 
+                //             static_cast<double>(force_data.force_raw_data),
+                //             static_cast<double>(force_data.force_kf_filtered_data));
+
 			 }
  
 			 if (fds[1].revents & POLLIN) {
@@ -322,37 +430,42 @@
 		 }
  
 		 parameters_update();
-		 orb_copy(ORB_ID(vehicle_attitude), atti_sub_fd, &vehicle_attitude);
-		 if(_param_forcectl_force_exp.get())
-		 {
-			 control_data.weight_com = _param_forcectl_weight.get();
-			 if(_param_forcectl_weight_compensation.get())
-			 {
-				 float pitch = asin(-2.0f * vehicle_attitude.q[1] * vehicle_attitude.q[3] + 2.0f * vehicle_attitude.q[0] * vehicle_attitude.q[2]);
-				 pitch = (pitch > 3.14159f/2) ? 3.14159f/2 : ((pitch < -3.14159f/2) ? -3.14159f/2 : pitch);
-				 control_data.weight_com = control_data.weight_com * (float)cos(pitch);
-			 }
-			 control_data.force_exp = (_param_forcectl_angacc_to_force.get() * force_exp_from_fc.control[1]) + control_data.weight_com;
-			 control_data.force_exp = (control_data.force_exp > force_data.force_max) ? force_data.force_max : ((control_data.force_exp < 0.0f) ? 0.0f : control_data.force_exp);
-		 }
-		 else
-		 {
-			 control_data.force_exp = force_data.force_max * force_exp_from_rc.control[3];
-			 control_data.force_exp = (control_data.force_exp > force_data.force_max) ? force_data.force_max : ((control_data.force_exp < 0.0f) ? 0.0f : control_data.force_exp);
-		 }
- 
+		//  orb_copy(ORB_ID(vehicle_attitude), atti_sub_fd, &vehicle_attitude);
+		//  if(_param_forcectl_force_exp.get())
+		//  {
+		// 	 control_data.weight_com = _param_forcectl_weight.get();
+		// 	 if(_param_forcectl_weight_compensation.get())
+		// 	 {
+		// 		 float pitch = asin(-2.0f * vehicle_attitude.q[1] * vehicle_attitude.q[3] + 2.0f * vehicle_attitude.q[0] * vehicle_attitude.q[2]);
+		// 		 pitch = (pitch > 3.14159f/2) ? 3.14159f/2 : ((pitch < -3.14159f/2) ? -3.14159f/2 : pitch);
+		// 		 control_data.weight_com = control_data.weight_com * (float)cos(pitch);
+		// 	 }
+		// 	 control_data.force_exp = (_param_forcectl_angacc_to_force.get() * force_exp_from_fc.control[1]) + control_data.weight_com;
+		// 	 control_data.force_exp = (control_data.force_exp > force_data.force_max) ? force_data.force_max : ((control_data.force_exp < 0.0f) ? 0.0f : control_data.force_exp);
+		//  }
+		//  else
+		//  {
+		// 	 control_data.force_exp = force_data.force_max * force_exp_from_rc.control[3];
+		// 	 control_data.force_exp = (control_data.force_exp > force_data.force_max) ? force_data.force_max : ((control_data.force_exp < 0.0f) ? 0.0f : control_data.force_exp);
+		//  }
+
+		// control_data.force_exp = _param_forcectl_iolc_d.get();
+		control_data.force_exp = force_data.force_max * force_exp_from_rc.control[3];
+		control_data.force_exp = (control_data.force_exp > force_data.force_max) ? force_data.force_max : ((control_data.force_exp < 0.0f) ? 0.0f : control_data.force_exp);
+
 		 orb_copy(ORB_ID(rc_channels), rc_sub_fd, &rc_channals_data);
-		 if((rc_channals_data.channels[4] < 0.0f)||(rc_channals_data.channels[5] < 0.3f))//||(rc_channals_data.channels[5] > 0.3f))
+		 if((rc_channals_data.channels[4] < 0.0f)||(rc_channals_data.channels[5] < 0.3f)||(rc_channals_data.channels[5] > 0.3f))
 		 {
 			 memset(&incre_pid, 0, sizeof(incre_pid));
 			 memset(&posi_pid, 0, sizeof(posi_pid));
+            //  memset(&iolc_ekf, 0, sizeof(iolc_ekf));
 		 }
 		 if((rc_channals_data.channels[4] < 0.0f)||(rc_channals_data.channels[5] < 0.3f))
 		 {
 			 memset(&adrc, 0, sizeof(adrc));
 		 }
  
-		 if(rc_channals_data.channels[5] > -0.3f)//&&(rc_channals_data.channels[5] < 0.3f))
+		 if((rc_channals_data.channels[5] > -0.3f)&&(rc_channals_data.channels[5] < 0.3f))
 		 {
 			 control_data.kp = _param_forcectl_pid_p.get();
 			 control_data.ki = _param_forcectl_pid_i.get();
@@ -387,6 +500,42 @@
 				 control_data.force_control_out = posi_pid.output;
 			 }
 		 }
+         else if(rc_channals_data.channels[5] > 0.3f)
+         {
+            iolc_ekf.a1 = iolc_ekf_a1;
+            iolc_ekf.a2 = iolc_ekf_a2;
+            iolc_ekf.a3 = iolc_ekf_a3;
+            iolc_ekf.b0 = iolc_ekf_b0;
+            iolc_ekf.c1 = iolc_ekf_c1;
+            iolc_ekf.c2 = iolc_ekf_c2;
+            iolc_ekf.c3 = iolc_ekf_c3;
+            iolc_ekf.k0 = _param_forcectl_iolc_k0.get();
+            iolc_ekf.EKFO_Q = _param_forcectl_iolc_q.get();
+            iolc_ekf.EKFO_R = _param_forcectl_iolc_r.get();
+
+            control_data.force_error = control_data.force_exp - force_data.force_kf_filtered_data;
+            
+            iolc_ekf.err = control_data.force_error;
+            iolc_ekf.thrustReal = force_data.force_kf_filtered_data;
+
+            IOLC_EKF_calculate(&iolc_ekf);
+
+			// iolc_ekf.count = iolc_ekf.count + 1;
+			// double motorSpeed_dot = (iolc_ekf.a2*iolc_ekf.motorSpeed*iolc_ekf.motorSpeed + iolc_ekf.a1*iolc_ekf.motorSpeed + iolc_ekf.b0*iolc_ekf.u);
+			// iolc_ekf.motorSpeed = iolc_ekf.motorSpeed + motorSpeed_dot*iolc_ekf.dt;
+			// iolc_ekf.motorSpeed = (iolc_ekf.motorSpeed > 500) ? 500 : ((iolc_ekf.motorSpeed < 10) ? 10 : iolc_ekf.motorSpeed);
+			// PX4_INFO("v u motorspeed motorSpeed_dot count:\t%.10f\t%.10f\t%.10f\t%.10f\t%.1f",static_cast<double>(iolc_ekf.v),
+			// 			static_cast<double>(iolc_ekf.u), static_cast<double>(iolc_ekf.motorSpeed),
+			// 			static_cast<double>(motorSpeed_dot), static_cast<double>(iolc_ekf.count));
+			control_data.force_control_out = iolc_ekf.u;
+
+            // control_data.force_control_out = 0.0f;
+			
+
+            // iolc_ekf_data.err = iolc_ekf.err;
+            // iolc_ekf_data.thrust_real = iolc_ekf.thrustReal;
+
+         }
 		 /* else if(rc_channals_data.channels[5] > 0.3f)
 		 {
 			 adrc.b0 = _param_forcectl_adrc_b0.get();
@@ -409,9 +558,44 @@
 		 {
 			 control_data.force_control_out = 0.0f;
 		 }
+
+		// iolc_ekf.a1 = iolc_ekf_a1;
+		// iolc_ekf.a2 = iolc_ekf_a2;
+		// iolc_ekf.a3 = iolc_ekf_a3;
+		// iolc_ekf.b0 = iolc_ekf_b0;
+		// iolc_ekf.c1 = iolc_ekf_c1;
+		// iolc_ekf.c2 = iolc_ekf_c2;
+		// iolc_ekf.c3 = iolc_ekf_c3;
+		// iolc_ekf.k0 = _param_forcectl_iolc_k0.get();
+		// iolc_ekf.EKFO_Q = _param_forcectl_iolc_q.get();
+		// iolc_ekf.EKFO_R = _param_forcectl_iolc_r.get();
+
+		// control_data.force_error = control_data.force_exp - force_data.force_kf_filtered_data;
+		
+		// iolc_ekf.err = control_data.force_error;
+		// iolc_ekf.thrustReal = force_data.force_kf_filtered_data;
+
+		// IOLC_EKF_calculate(&iolc_ekf);
+		// control_data.force_control_out = iolc_ekf.u;
+		// iolc_ekf.count = iolc_ekf.count + 1;
+		// double motorSpeed_dot = (iolc_ekf.a2*iolc_ekf.motorSpeed*iolc_ekf.motorSpeed + iolc_ekf.a1*iolc_ekf.motorSpeed + iolc_ekf.b0*iolc_ekf.u);
+		// iolc_ekf.motorSpeed = iolc_ekf.motorSpeed + motorSpeed_dot*iolc_ekf.dt;
+		// iolc_ekf.motorSpeed = (iolc_ekf.motorSpeed > 500) ? 500 : ((iolc_ekf.motorSpeed < 10) ? 10 : iolc_ekf.motorSpeed);
+		// PX4_INFO("v u motorspeed motorSpeed_dot count:\t%.10f\t%.10f\t%.10f\t%.10f\t%.1f",static_cast<double>(iolc_ekf.v),
+		// 			static_cast<double>(iolc_ekf.u), static_cast<double>(iolc_ekf.motorSpeed),
+		// 			static_cast<double>(motorSpeed_dot), static_cast<double>(iolc_ekf.count));
  
+         iolc_ekf_data.err = control_data.force_error;
+         iolc_ekf_data.thrust_real = force_data.force_kf_filtered_data;
+		 iolc_ekf_data.motorspeed = iolc_ekf.motorSpeed;//*9.5493;
+		 iolc_ekf_data.v = iolc_ekf.v;
+		 iolc_ekf_data.u = iolc_ekf.u;
+		 iolc_ekf_data.dt = iolc_ekf.dt;
+         iolc_ekf_data.timestamp = hrt_absolute_time();
+         orb_publish(ORB_ID(thrust_iolc_ekf), iolcekfdata_pub, &iolc_ekf_data);
+
 		 // scale effort by battery status if enabled
-		 if (_param_forcectl_battery_compensation.get()) {
+		 /* if (_param_forcectl_battery_compensation.get()) {
 			 if (_battery_status_sub.updated()) {
 				 if (_battery_status_sub.copy(&battery_status) && battery_status.connected && battery_status.scale > 0.f) {
 					 control_data.battery_scale = battery_status.scale;
@@ -421,13 +605,14 @@
 			 if (_battery_status_scale > 0.0f) {
 				 control_data.force_control_out *= control_data.battery_scale;
 			 }
-		 }
- 
+		 } */
+		//  control_data.force_control_out = 0.3f;
 		 /*Td=(1-alpha)*omiga + aplha*omiga2*/
-		 float forcectl_alpha = _param_forcectl_output_alpha.get();
-		 forcectl_alpha = (forcectl_alpha < 0.01f) ? 0.01f : ((forcectl_alpha > 1.0f) ? 1.0f : forcectl_alpha);
-		 control_data.force_control_out = ((float)sqrt((1.0f - forcectl_alpha)*(1.0f - forcectl_alpha) + 4.0f*forcectl_alpha*control_data.force_control_out) + (forcectl_alpha - 1.0f))/(2.0f * forcectl_alpha);
-		 control_data.force_control_out = (control_data.force_control_out < 0) ? 0 : ((control_data.force_control_out > 1.0f) ? 1.0f : control_data.force_control_out);
+		//  float forcectl_alpha = _param_forcectl_output_alpha.get();
+		//  forcectl_alpha = (forcectl_alpha < 0.01f) ? 0.01f : ((forcectl_alpha > 1.0f) ? 1.0f : forcectl_alpha);
+		//  control_data.force_control_out = ((float)sqrt((1.0f - forcectl_alpha)*(1.0f - forcectl_alpha) + 4.0f*forcectl_alpha*control_data.force_control_out) + (forcectl_alpha - 1.0f))/(2.0f * forcectl_alpha);
+		//  control_data.force_control_out = (control_data.force_control_out < 0) ? 0 : ((control_data.force_control_out > 1.0f) ? 1.0f : control_data.force_control_out);
+        //  PX4_INFO("force_control_out_2:\t%.1f", static_cast<double>(control_data.force_control_out));
  
  #if SAVE_FORCECTL_ADRC_DATA
 		 forcectl_ADRC_data.dt = adrc.dt;
@@ -450,6 +635,9 @@
  
 		 control_data.timestamp = hrt_absolute_time();
 		 orb_publish(ORB_ID(forcectl_controldata), controldata_pub, &control_data);
+
+        //  iolc_ekf_data.timestamp = hrt_absolute_time();
+		//  orb_publish(ORB_ID(thrust_iolc_ekf), iolcekfdata_pub, &iolc_ekf_data);
  
 		 px4_usleep(1000);
 	 }
