@@ -379,7 +379,7 @@ void IOLC_EKF_calculate(IOLC_EKF *iolc)
 	 static positional_PID posi_pid{};
 	 static ADRC adrc{};
      static IOLC_EKF iolc_ekf{};
-	//  float _battery_status_scale{0.0f};
+	 float _battery_status_scale{0.0f};
  
 	 _forcectl_lowpass_filter.reset(0.0);
 	 _forcectl_torque_lowpass_filter.reset(0.0);
@@ -430,28 +430,28 @@ void IOLC_EKF_calculate(IOLC_EKF *iolc)
 		 }
  
 		 parameters_update();
-		//  orb_copy(ORB_ID(vehicle_attitude), atti_sub_fd, &vehicle_attitude);
-		//  if(_param_forcectl_force_exp.get())
-		//  {
-		// 	 control_data.weight_com = _param_forcectl_weight.get();
-		// 	 if(_param_forcectl_weight_compensation.get())
-		// 	 {
-		// 		 float pitch = asin(-2.0f * vehicle_attitude.q[1] * vehicle_attitude.q[3] + 2.0f * vehicle_attitude.q[0] * vehicle_attitude.q[2]);
-		// 		 pitch = (pitch > 3.14159f/2) ? 3.14159f/2 : ((pitch < -3.14159f/2) ? -3.14159f/2 : pitch);
-		// 		 control_data.weight_com = control_data.weight_com * (float)cos(pitch);
-		// 	 }
-		// 	 control_data.force_exp = (_param_forcectl_angacc_to_force.get() * force_exp_from_fc.control[1]) + control_data.weight_com;
-		// 	 control_data.force_exp = (control_data.force_exp > force_data.force_max) ? force_data.force_max : ((control_data.force_exp < 0.0f) ? 0.0f : control_data.force_exp);
-		//  }
-		//  else
-		//  {
-		// 	 control_data.force_exp = force_data.force_max * force_exp_from_rc.control[3];
-		// 	 control_data.force_exp = (control_data.force_exp > force_data.force_max) ? force_data.force_max : ((control_data.force_exp < 0.0f) ? 0.0f : control_data.force_exp);
-		//  }
+		 orb_copy(ORB_ID(vehicle_attitude), atti_sub_fd, &vehicle_attitude);
+		 if(_param_forcectl_force_exp.get())
+		 {
+			 control_data.weight_com = _param_forcectl_weight.get();
+			 if(_param_forcectl_weight_compensation.get())
+			 {
+				 float pitch = asin(-2.0f * vehicle_attitude.q[1] * vehicle_attitude.q[3] + 2.0f * vehicle_attitude.q[0] * vehicle_attitude.q[2]);
+				 pitch = (pitch > 3.14159f/2) ? 3.14159f/2 : ((pitch < -3.14159f/2) ? -3.14159f/2 : pitch);
+				 control_data.weight_com = control_data.weight_com * (float)cos(pitch);
+			 }
+			 control_data.force_exp = (_param_forcectl_angacc_to_force.get() * force_exp_from_fc.control[1]) + control_data.weight_com;
+			 control_data.force_exp = (control_data.force_exp > force_data.force_max) ? force_data.force_max : ((control_data.force_exp < 0.0f) ? 0.0f : control_data.force_exp);
+		 }
+		 else
+		 {
+			 control_data.force_exp = force_data.force_max * force_exp_from_rc.control[3];
+			 control_data.force_exp = (control_data.force_exp > force_data.force_max) ? force_data.force_max : ((control_data.force_exp < 0.0f) ? 0.0f : control_data.force_exp);
+		 }
 
 		// control_data.force_exp = _param_forcectl_iolc_d.get();
-		control_data.force_exp = force_data.force_max * force_exp_from_rc.control[3];
-		control_data.force_exp = (control_data.force_exp > force_data.force_max) ? force_data.force_max : ((control_data.force_exp < 0.0f) ? 0.0f : control_data.force_exp);
+		// control_data.force_exp = force_data.force_max * force_exp_from_rc.control[3];
+		// control_data.force_exp = (control_data.force_exp > force_data.force_max) ? force_data.force_max : ((control_data.force_exp < 0.0f) ? 0.0f : control_data.force_exp);
 
 		 orb_copy(ORB_ID(rc_channels), rc_sub_fd, &rc_channals_data);
 		 if((rc_channals_data.channels[4] < 0.0f)||(rc_channals_data.channels[5] < 0.3f)||(rc_channals_data.channels[5] > 0.3f))
@@ -467,38 +467,45 @@ void IOLC_EKF_calculate(IOLC_EKF *iolc)
  
 		 if((rc_channals_data.channels[5] > -0.3f)&&(rc_channals_data.channels[5] < 0.3f))
 		 {
-			 control_data.kp = _param_forcectl_pid_p.get();
-			 control_data.ki = _param_forcectl_pid_i.get();
-			 control_data.kd = _param_forcectl_pid_d.get();
-			 control_data.force_error = control_data.force_exp - force_data.force_kf_filtered_data;
+			//  control_data.kp = _param_forcectl_pid_p.get();
+			//  control_data.ki = _param_forcectl_pid_i.get();
+			//  control_data.kd = _param_forcectl_pid_d.get();
+			//  control_data.force_error = control_data.force_exp - force_data.force_kf_filtered_data;
  
-			 if(_param_forcectl_pid_mode.get() == 0)
-			 {
-				 incre_pid.Kp = control_data.kp;
-				 incre_pid.Ki = control_data.ki;
-				 incre_pid.limit_i = _param_forcectl_pid_limit_i.get();
-				 incre_pid.Kd = control_data.kd;
-				 incre_pid.err = control_data.force_error;
+			//  if(_param_forcectl_pid_mode.get() == 0)
+			//  {
+			// 	 incre_pid.Kp = control_data.kp;
+			// 	 incre_pid.Ki = control_data.ki;
+			// 	 incre_pid.limit_i = _param_forcectl_pid_limit_i.get();
+			// 	 incre_pid.Kd = control_data.kd;
+			// 	 incre_pid.err = control_data.force_error;
  
-				 Incremental_PID_calculate(&incre_pid);
-				 control_data.i_output = incre_pid.i_out;
+			// 	 Incremental_PID_calculate(&incre_pid);
+			// 	 control_data.i_output = incre_pid.i_out;
  
-				 control_data.force_control_out = incre_pid.output;
-			 }
-			 else if(_param_forcectl_pid_mode.get() == 1)
-			 {
-				 posi_pid.Kp = control_data.kp;
-				 posi_pid.Ki = control_data.ki;
-				 posi_pid.limit_i = _param_forcectl_pid_limit_i.get();
-				 posi_pid.factorbase_i = _param_forcectl_pid_factorcase_i.get();
-				 posi_pid.Kd = control_data.kd;
-				 posi_pid.err = control_data.force_error;
+			// 	 control_data.force_control_out = incre_pid.output;
+			//  }
+			//  else if(_param_forcectl_pid_mode.get() == 1)
+			//  {
+			// 	 posi_pid.Kp = control_data.kp;
+			// 	 posi_pid.Ki = control_data.ki;
+			// 	 posi_pid.limit_i = _param_forcectl_pid_limit_i.get();
+			// 	 posi_pid.factorbase_i = _param_forcectl_pid_factorcase_i.get();
+			// 	 posi_pid.Kd = control_data.kd;
+			// 	 posi_pid.err = control_data.force_error;
  
-				 Positional_PID_calculate(&posi_pid);
-				 control_data.i_output = posi_pid.i_out;
+			// 	 Positional_PID_calculate(&posi_pid);
+			// 	 control_data.i_output = posi_pid.i_out;
  
-				 control_data.force_control_out = posi_pid.output;
-			 }
+			// 	 control_data.force_control_out = posi_pid.output;
+			//  }
+
+			/*Td=(1-alpha)*omiga + aplha*omiga2*/
+			float forcectl_alpha = _param_forcectl_output_alpha.get();
+			forcectl_alpha = (forcectl_alpha < 0.01f) ? 0.01f : ((forcectl_alpha > 1.0f) ? 1.0f : forcectl_alpha);
+			control_data.force_control_out = ((float)sqrt((1.0f - forcectl_alpha)*(1.0f - forcectl_alpha) + 4.0f*forcectl_alpha*control_data.force_exp) + (forcectl_alpha - 1.0f))/(2.0f * forcectl_alpha);
+			control_data.force_control_out = (control_data.force_control_out < 0) ? 0 : ((control_data.force_control_out > 1.0f) ? 1.0f : control_data.force_control_out);
+			// PX4_INFO("force_control_out_2:\t%.1f", static_cast<double>(control_data.force_control_out));
 		 }
          else if(rc_channals_data.channels[5] > 0.3f)
          {
@@ -595,7 +602,7 @@ void IOLC_EKF_calculate(IOLC_EKF *iolc)
          orb_publish(ORB_ID(thrust_iolc_ekf), iolcekfdata_pub, &iolc_ekf_data);
 
 		 // scale effort by battery status if enabled
-		 /* if (_param_forcectl_battery_compensation.get()) {
+		 if (_param_forcectl_battery_compensation.get()) {
 			 if (_battery_status_sub.updated()) {
 				 if (_battery_status_sub.copy(&battery_status) && battery_status.connected && battery_status.scale > 0.f) {
 					 control_data.battery_scale = battery_status.scale;
@@ -605,9 +612,9 @@ void IOLC_EKF_calculate(IOLC_EKF *iolc)
 			 if (_battery_status_scale > 0.0f) {
 				 control_data.force_control_out *= control_data.battery_scale;
 			 }
-		 } */
+		 }
 		//  control_data.force_control_out = 0.3f;
-		 /*Td=(1-alpha)*omiga + aplha*omiga2*/
+		/*Td=(1-alpha)*omiga + aplha*omiga2*/
 		//  float forcectl_alpha = _param_forcectl_output_alpha.get();
 		//  forcectl_alpha = (forcectl_alpha < 0.01f) ? 0.01f : ((forcectl_alpha > 1.0f) ? 1.0f : forcectl_alpha);
 		//  control_data.force_control_out = ((float)sqrt((1.0f - forcectl_alpha)*(1.0f - forcectl_alpha) + 4.0f*forcectl_alpha*control_data.force_control_out) + (forcectl_alpha - 1.0f))/(2.0f * forcectl_alpha);

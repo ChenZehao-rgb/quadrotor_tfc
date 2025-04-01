@@ -40,9 +40,128 @@
 
 #include "forcectl_kf_filter.hpp"
 
-// 构造函数初始化状态变量 _force 为 [0.0, 0.0]。
-// 将协方差矩阵的对角线元素设为 covInit，表示初始状态的不确定性
-ForcectlKfFilter::ForcectlKfFilter(float covInit)
+// // 构造函数初始化状态变量 _force 为 [0.0, 0.0]。
+// // 将协方差矩阵的对角线元素设为 covInit，表示初始状态的不确定性
+// ForcectlKfFilter::ForcectlKfFilter(float covInit)
+// {
+// 	_force(0) = 0.0f;
+// 	_force(1) = 0.0f;
+// 	_covariance(0,0) = covInit;
+// 	_covariance(1,1) = covInit;
+// }
+
+// // predict 函数更新 _force 的预测状态
+// void ForcectlKfFilter::predict(float dt, float acc, float acc_unc)
+// {
+// 	// _force(0) 表示位置，更新公式为位置加速度项
+// 	// _force(1) 表示速度，更新为当前速度加上加速度乘以时间 dt
+// 	_force(0) += _force(1) * dt + dt * dt / 2 * acc;
+// 	_force(1) += acc * dt;
+
+// 	// 定义状态转移矩阵 A，用于表示状态随时间变化的关系
+// 	matrix::Matrix<float, 2, 2> A; // propagation matrix
+// 	A(0, 0) = 1;
+// 	A(1, 1) = 1;
+// 	A(0, 1) = dt;
+
+// 	// 定义过程噪声矩阵 G，用于将加速度噪声映射到状态空间中
+// 	matrix::Matrix<float, 2, 1> G; // noise model
+// 	G(0, 0) = dt * dt / 2;
+// 	G(1, 0) = dt;
+
+// 	// 计算过程噪声 process_noise，基于 G 和加速度不确定性 acc_unc 的平方值
+// 	matrix::Matrix<float, 2, 2> process_noise = G * G.transpose() * (acc_unc * acc_unc);
+
+// 	// 更新协方差矩阵 _covariance，使用状态转移矩阵 A 和过程噪声 process_noise
+// 	_covariance = A * _covariance * A.transpose() + process_noise;
+// }
+
+// bool ForcectlKfFilter::update(float meas, float measUnc)
+// {
+// 	// H = [1, 0]
+// 	// update 函数计算测量偏差 _residual，即测量值 meas 与预测状态 _force(0) 的差
+// 	_residual = meas - _force(0);
+
+// 	// H * P * H^T simply selects P(0,0)
+// 	// 计算更新协方差 _innovCov，由 _covariance(0,0) 和测量不确定性 measUnc 决定
+// 	_innovCov = _covariance(0, 0) + (measUnc * measUnc);
+
+// 	// outlier rejection
+// 	float beta = _residual / _innovCov * _residual;
+
+// 	// 5% false alarm probability
+// 	if (beta > 3.84f) {
+// 		//return false;
+// 	}
+
+// 	matrix::Vector<float, 2> kalmanGain;
+// 	kalmanGain(0) = _covariance(0, 0);
+// 	kalmanGain(1) = _covariance(1, 0);
+// 	kalmanGain /= _innovCov;
+
+// 	_force += kalmanGain * _residual;
+
+// 	matrix::Matrix<float, 2, 2> identity;
+// 	identity.identity();
+
+// 	matrix::Matrix<float, 2, 2> KH; // kalmanGain * H
+// 	KH(0, 0) = kalmanGain(0);
+// 	KH(1, 0) = kalmanGain(1);
+
+// 	_covariance = (identity - KH) * _covariance;
+
+// 	return true;
+// }
+
+// void ForcectlKfFilter::getState(float &state0, float &state1)
+// {
+// 	state0 = _force(0);
+// 	state1 = _force(1);
+// }
+
+// void ForcectlKfFilter::getCovariance(float &cov00, float &cov11)
+// {
+// 	cov00 = _covariance(0, 0);
+// 	cov11 = _covariance(1, 1);
+// }
+
+// void ForcectlKfFilter::getInnovations(float &innov, float &innovCov)
+// {
+// 	innov = _residual;
+// 	innovCov = _innovCov;
+// }
+
+// float ForcectlKfFilter::force_kf_filter(float dt, float inputdata)
+// {
+// 	dt = (dt < 0.001f) ? 0.01f : dt;
+// 	predict(dt, 0.0f, _cov_estimate);
+
+// #if SAVE_FORCECTL_KF_FILTER_DATA
+// 	forcectl_kf_data.dt = dt;
+// 	forcectl_kf_data.force_estimate = _force(0);
+// 	forcectl_kf_data.force_v_estimate = _force(1);
+// 	forcectl_kf_data.cov_before = _covariance(0, 0);
+// 	forcectl_kf_data.kalman_gain = _covariance(0, 0) / (_covariance(0, 0) + (_cov_measure * _cov_measure));
+// #endif
+
+// 	update(inputdata, _cov_measure);
+
+// #if SAVE_FORCECTL_KF_FILTER_DATA
+// 	forcectl_kf_data.force_measure = inputdata;
+// 	forcectl_kf_data.innov_cov = _innovCov;
+// 	forcectl_kf_data.force = _force(0);
+// 	forcectl_kf_data.force_v = _force(1);
+// 	forcectl_kf_data.cov_after = _covariance(0, 0);
+
+// 	forcectl_kf_data.timestamp = hrt_absolute_time();
+// 	orb_publish(ORB_ID(forcectl_kf_filterdata), kf_filter_data_pub, &forcectl_kf_data);
+// #endif
+
+// 	return _force(0);
+// }
+
+
+ForcectlKfFilter::ForcectlKfFilter(float covInit) : ModuleParams(nullptr)
 {
 	_force(0) = 0.0f;
 	_force(1) = 0.0f;
@@ -50,40 +169,43 @@ ForcectlKfFilter::ForcectlKfFilter(float covInit)
 	_covariance(1,1) = covInit;
 }
 
-// predict 函数更新 _force 的预测状态
+void ForcectlKfFilter::parameters_update()
+{
+	// Check if parameters have changed
+	if (_parameter_update_sub.updated()) {
+		// clear update
+		parameter_update_s param_update;
+		_parameter_update_sub.copy(&param_update);
+
+		updateParams();
+	}
+}
+
 void ForcectlKfFilter::predict(float dt, float acc, float acc_unc)
 {
-	// _force(0) 表示位置，更新公式为位置加速度项
-	// _force(1) 表示速度，更新为当前速度加上加速度乘以时间 dt
 	_force(0) += _force(1) * dt + dt * dt / 2 * acc;
 	_force(1) += acc * dt;
 
-	// 定义状态转移矩阵 A，用于表示状态随时间变化的关系
 	matrix::Matrix<float, 2, 2> A; // propagation matrix
 	A(0, 0) = 1;
 	A(1, 1) = 1;
 	A(0, 1) = dt;
 
-	// 定义过程噪声矩阵 G，用于将加速度噪声映射到状态空间中
 	matrix::Matrix<float, 2, 1> G; // noise model
 	G(0, 0) = dt * dt / 2;
 	G(1, 0) = dt;
 
-	// 计算过程噪声 process_noise，基于 G 和加速度不确定性 acc_unc 的平方值
 	matrix::Matrix<float, 2, 2> process_noise = G * G.transpose() * (acc_unc * acc_unc);
 
-	// 更新协方差矩阵 _covariance，使用状态转移矩阵 A 和过程噪声 process_noise
 	_covariance = A * _covariance * A.transpose() + process_noise;
 }
 
 bool ForcectlKfFilter::update(float meas, float measUnc)
 {
 	// H = [1, 0]
-	// update 函数计算测量偏差 _residual，即测量值 meas 与预测状态 _force(0) 的差
 	_residual = meas - _force(0);
 
 	// H * P * H^T simply selects P(0,0)
-	// 计算更新协方差 _innovCov，由 _covariance(0,0) 和测量不确定性 measUnc 决定
 	_innovCov = _covariance(0, 0) + (measUnc * measUnc);
 
 	// outlier rejection
@@ -134,6 +256,9 @@ void ForcectlKfFilter::getInnovations(float &innov, float &innovCov)
 float ForcectlKfFilter::force_kf_filter(float dt, float inputdata)
 {
 	dt = (dt < 0.001f) ? 0.01f : dt;
+
+	parameters_update();
+	_cov_estimate = _param_forcekf_sd_estimate.get();
 	predict(dt, 0.0f, _cov_estimate);
 
 #if SAVE_FORCECTL_KF_FILTER_DATA
@@ -144,6 +269,7 @@ float ForcectlKfFilter::force_kf_filter(float dt, float inputdata)
 	forcectl_kf_data.kalman_gain = _covariance(0, 0) / (_covariance(0, 0) + (_cov_measure * _cov_measure));
 #endif
 
+	_cov_measure = _param_forcekf_sd_measure.get();
 	update(inputdata, _cov_measure);
 
 #if SAVE_FORCECTL_KF_FILTER_DATA
