@@ -441,6 +441,7 @@ void IOLC_EKF_calculate(IOLC_EKF *iolc)
 				 control_data.weight_com = control_data.weight_com * (float)cos(pitch);
 			 }
 			 control_data.force_exp = (_param_forcectl_angacc_to_force.get() * force_exp_from_fc.control[1]) + control_data.weight_com;
+			//  control_data.force_exp = control_data.force_exp * 0.5f;
 			 control_data.force_exp = (control_data.force_exp > force_data.force_max) ? force_data.force_max : ((control_data.force_exp < 0.0f) ? 0.0f : control_data.force_exp);
 		 }
 		 else
@@ -504,7 +505,8 @@ void IOLC_EKF_calculate(IOLC_EKF *iolc)
 			float forcectl_alpha = _param_forcectl_output_alpha.get();
 			forcectl_alpha = (forcectl_alpha < 0.01f) ? 0.01f : ((forcectl_alpha > 1.0f) ? 1.0f : forcectl_alpha);
 			control_data.force_control_out = ((float)sqrt((1.0f - forcectl_alpha)*(1.0f - forcectl_alpha) + 4.0f*forcectl_alpha*control_data.force_exp) + (forcectl_alpha - 1.0f))/(2.0f * forcectl_alpha);
-			control_data.force_control_out = (control_data.force_control_out < 0) ? 0 : ((control_data.force_control_out > 1.0f) ? 1.0f : control_data.force_control_out);
+			control_data.force_control_out = control_data.force_control_out * 0.56f;
+			control_data.force_control_out = (control_data.force_control_out < 0) ? 0 : ((control_data.force_control_out > 0.8f) ? 0.8f : control_data.force_control_out);
 			// PX4_INFO("force_control_out_2:\t%.1f", static_cast<double>(control_data.force_control_out));
 		 }
          else if(rc_channals_data.channels[5] > 0.3f)
