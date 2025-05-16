@@ -441,7 +441,9 @@ void IOLC_EKF_calculate(IOLC_EKF *iolc)
 				 control_data.weight_com = control_data.weight_com * (float)cos(pitch);
 			 }
 			 control_data.force_exp = (_param_forcectl_angacc_to_force.get() * force_exp_from_fc.control[1]) + control_data.weight_com;
-			//  control_data.force_exp = control_data.force_exp * 0.5f;
+			 control_data.force_exp_no_weightcom = (_param_forcectl_angacc_to_force.get() * force_exp_from_fc.control[1]);
+			 control_data.force_exp_torque = force_exp_from_fc.control[1];
+			 control_data.force_exp_new = (_param_forcectl_angacc_to_force.get() * (force_exp_from_fc.control[1] + 1.0f)) + control_data.weight_com;
 			 control_data.force_exp = (control_data.force_exp > force_data.force_max) ? force_data.force_max : ((control_data.force_exp < 0.0f) ? 0.0f : control_data.force_exp);
 		 }
 		 else

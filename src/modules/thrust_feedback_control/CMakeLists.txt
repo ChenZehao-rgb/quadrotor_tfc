@@ -39,5 +39,6 @@ px4_add_module(
         thrust_feedback_control.cpp
         thrust_feedback_control_start.cpp
         thrust_kalman_filter.cpp
+        # thrust_feedback_control_params.c
     DEPENDS
     )

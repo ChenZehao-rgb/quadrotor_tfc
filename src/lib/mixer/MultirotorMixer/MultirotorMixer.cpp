@@ -504,6 +504,34 @@ MultirotorMixer::mix(float *outputs, unsigned space)
 	// 应用以下推力模型，通过该推力模型，计算出PWM值
 	// 移项并解一元二次方程算出PWM值，如下所示
 
+	// if (_thrust_control_data_sub.update(&thrustcontroldata))
+	// {
+	// 	outputs[0] = thrustcontroldata.thrust_control_out1;
+	// 	outputs[1] = thrustcontroldata.thrust_control_out2;
+	// 	outputs[2] = thrustcontroldata.thrust_control_out3;
+	// 	outputs[3] = thrustcontroldata.thrust_control_out4;
+
+	// 	for (unsigned i = 0; i < _rotor_count; i++) 
+	// 	{
+	// 		outputs[i] = math::constrain((2.f * outputs[i] - 1.f), -1.f, 1.f);
+	// 	}
+	// }
+	// else
+	// {
+	// 	for (unsigned i = 0; i < _rotor_count; i++) 
+	// 	{
+	// 		// Implement simple model for static relationship between applied motor pwm and motor thrust
+	// 		// model: thrust = (1 - _thrust_factor) * PWM + _thrust_factor * PWM^2
+	// 		if (_thrust_factor > 0.0f) 
+	// 		{
+	// 			outputs[i] = -(1.0f - _thrust_factor) / (2.0f * _thrust_factor) + sqrtf((1.0f - _thrust_factor) *
+	// 					(1.0f - _thrust_factor) / (4.0f * _thrust_factor * _thrust_factor) + (outputs[i] < 0.0f ? 0.0f : outputs[i] /
+	// 							_thrust_factor));
+	// 		}
+	// 		// 将PWM值从[0,1]缩放至[-1,1]
+	// 		outputs[i] = math::constrain((2.f * outputs[i] - 1.f), -1.f, 1.f);
+	// 	}
+	// }
 	for (unsigned i = 0; i < _rotor_count; i++) 
 	{
 		// Implement simple model for static relationship between applied motor pwm and motor thrust

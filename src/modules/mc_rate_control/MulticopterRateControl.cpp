@@ -79,6 +79,10 @@ MulticopterRateControl::parameters_updated()
 	// to the ideal (K * [1 + 1/sTi + sTd]) form
 	const Vector3f rate_k = Vector3f(_param_mc_rollrate_k.get(), _param_mc_pitchrate_k.get(), _param_mc_yawrate_k.get());
 
+	// 比例因子rate_k乘以PID增益以得到最终的PID增益
+	// 这里的rate_k是一个向量，包含了roll、pitch和yaw的比例因子
+	// 通过emult函数将rate_k与PID增益进行逐元素相乘，得到最终的PID增益
+	// 这里的emult函数是一个矩阵运算函数，用于逐元素相乘
 	_rate_control.setGains(
 		rate_k.emult(Vector3f(_param_mc_rollrate_p.get(), _param_mc_pitchrate_p.get(), _param_mc_yawrate_p.get())),
 		rate_k.emult(Vector3f(_param_mc_rollrate_i.get(), _param_mc_pitchrate_i.get(), _param_mc_yawrate_i.get())),

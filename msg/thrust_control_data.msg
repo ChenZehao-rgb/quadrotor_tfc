@@ -8,6 +8,10 @@ float32 thrust_control_out1
 float32 thrust_control_out2
 float32 thrust_control_out3
 float32 thrust_control_out4
+float32 thrust_desired1
+float32 thrust_desired2
+float32 thrust_desired3
+float32 thrust_desired4
 
 float32 kp
 float32 ki

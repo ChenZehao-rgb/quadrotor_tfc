@@ -35,12 +35,19 @@
 #include <mathlib/mathlib.h>
 #include <matrix/Matrix.hpp>
 #include <matrix/Vector.hpp>
-// #include <uORB/uORB.h>
+#include <uORB/uORB.h>
+#include <px4_platform_common/module.h>
+#include <px4_platform_common/module_params.h>
+#include <uORB/SubscriptionInterval.hpp>
+#include <drivers/drv_hrt.h>
+#include <uORB/topics/parameter_update.h>
 
-class ThrustKalmanFilter
+using namespace time_literals;
+
+class ThrustKalmanFilter : public ModuleBase<ThrustKalmanFilter>, public ModuleParams
 {
 public:
-    ThrustKalmanFilter() 
+    ThrustKalmanFilter() : ModuleParams(nullptr)
     {
 		_thrust_BFS1(0) = 0.0f;
 		_thrust_BFS1(1) = 0.0f;
@@ -62,7 +69,7 @@ public:
 
     ThrustKalmanFilter(float covInit);
 
-    ~ThrustKalmanFilter() {}
+    ~ThrustKalmanFilter() override {}
 
     float thrust_kalman_filter_BFS1(float dt, float inputdata);
     float thrust_kalman_filter_BFS2(float dt, float inputdata);
@@ -116,13 +123,20 @@ private:
     float _residual_BFS4{0.0f};
     float _innovCov_BFS4{0.0f};
     
-
-    
-
     // 一阶卡尔曼
     float BFS1_forcekalman_t_1 = 0.0f;
     float BFS1_Pkalman_t_1 = 2.0f;
     float BFS1_Q = 0.005f;
     float BFS1_R = 0.36f;
+
+    /**
+	 * initialize some vectors/matrices from parameters
+	 */
+	void	parameters_update();
+    DEFINE_PARAMETERS(
+       (ParamFloat<px4::params::TFC_SD_ES>) _param_sd_estimate,
+       (ParamFloat<px4::params::TFC_SD_ME>) _param_sd_measure
+    )
+    uORB::SubscriptionInterval	_parameter_update_sub{ORB_ID(parameter_update), 1_s};
 };
 

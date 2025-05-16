@@ -214,6 +214,7 @@ set(msg_files
 	thrust_control_data.msg
 	thrust_desired_data.msg
 	thrust_iolc_ekf.msg
+	esc_input.msg
 )
 
 if(NOT px4_constrained_flash_build)

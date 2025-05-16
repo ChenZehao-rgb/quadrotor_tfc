@@ -44,6 +44,8 @@
 #include <uORB/topics/rc_channels.h>
 #include <uORB/topics/vehicle_status.h>
 #include <uORB/topics/thrust_control_data.h>
+#include <uORB/topics/thrust_data.h>
+#include <uORB/topics/esc_input.h>
 
 namespace gimbal
 {
@@ -61,6 +63,9 @@ public:
 private:
 	void _stream_device_attitude_status();
 
+    esc_input_s escinputpwm = {};
+    uORB::Publication<esc_input_s> _escinputpwm_pub{ORB_ID(esc_input)};
+
 	uORB::Publication <actuator_controls_s>	_actuator_controls_pub{ORB_ID(actuator_controls_2)};
 	uORB::Publication <gimbal_device_attitude_status_s>	_attitude_status_pub{ORB_ID(gimbal_device_attitude_status)};
 
@@ -76,8 +81,11 @@ private:
 	uORB::Subscription _actuator_controls_sub{ORB_ID(actuator_controls_0)};
 	actuator_controls_s actuator_controls_data{};
 
-	// uORB::Subscription _thrust_control_data_sub{ORB_ID(thrust_control_data)};
-	// thrust_control_data_s thrustcontroldata{};
+	uORB::Subscription _thrust_control_data_sub{ORB_ID(thrust_control_data)};
+	thrust_control_data_s thrustcontroldata{};
+
+	uORB::Subscription  _thrustdata_sub{ORB_ID(thrust_data)};
+	thrust_data_s thrustdata = {};
 };
 
 } /* namespace gimbal */

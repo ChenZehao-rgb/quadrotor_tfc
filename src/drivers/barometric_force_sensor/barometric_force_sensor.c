@@ -217,13 +217,14 @@ int barometric_force_sensor_thread_main(int argc, char *argv[])
             sensordata.data2 = (buffer[4]-'0') * 1000 + (buffer[5]-'0') * 100 + (buffer[6]-'0') * 10 + (buffer[7]-'0');
             sensordata.data3 = (buffer[8]-'0') * 1000 + (buffer[9]-'0') * 100 + (buffer[10]-'0') * 10 + (buffer[11]-'0');
             sensordata.data4 = (buffer[12]-'0') * 1000 + (buffer[13]-'0') * 100 + (buffer[14]-'0') * 10 + (buffer[15]-'0');
+
             // strncpy(sensordata.data_,buffer,16); // 将读取的数据复制到sensordata.datastr中
             // sensordata.data = atoi(sensordata.datastr); // 将字符串转换为整数存入sensordata.data
 
             // force_1 = buffer[0] * 1000 + buffer[1] * 100 + buffer[2] * 10 + buffer[3];
             // force_1 = atoi(buffer);
             // printf("force_sensor_1: %dg\n",force_1); // 打印读取到的4个字节数据
-            // printf("force_sensor_1: %dg\n",sensordata.data); // 打印读取到的4个字节数据
+            // printf("force_sensor: %dg\t%dg\t%dg\t%dg\t",sensordata.data1,sensordata.data2,sensordata.data3,sensordata.data4); // 打印读取到的4个字节数据
             sensordata.timestamp = hrt_absolute_time();
             orb_publish(ORB_ID(barometric_force_sensor), barometric_force_sensor_pub, &sensordata); // 用orb_publish函数发布新的传感器数据
             // if (ret < 0)

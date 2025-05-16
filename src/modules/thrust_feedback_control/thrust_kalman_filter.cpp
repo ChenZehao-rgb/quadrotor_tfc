@@ -33,12 +33,24 @@
 
 #include "thrust_kalman_filter.hpp"
 
-ThrustKalmanFilter::ThrustKalmanFilter(float covInit)
+ThrustKalmanFilter::ThrustKalmanFilter(float covInit) : ModuleParams(nullptr)
 {
     _thrust_BFS1(0) = 0.0f;
     _thrust_BFS1(1) = 0.0f;
     _covariance_BFS1(0,0) = covInit;
     _covariance_BFS1(1,1) = covInit;
+}
+
+void ThrustKalmanFilter::parameters_update()
+{
+	// Check if parameters have changed
+	if (_parameter_update_sub.updated()) {
+		// clear update
+		parameter_update_s param_update;
+		_parameter_update_sub.copy(&param_update);
+
+		updateParams();
+	}
 }
 
 /*
@@ -92,8 +104,11 @@ float ThrustKalmanFilter::thrust_kalman_filter_BFS1(float dt, float inputdata)
 {
     dt = (dt < 0.001f) ? 0.01f : dt;
 
-    predict_BFS1(dt, 0.0f, _cov_estimate);
+    parameters_update();
+	_cov_estimate = _param_sd_estimate.get();
+    _cov_measure = _param_sd_measure.get();
 
+    predict_BFS1(dt, 0.0f, _cov_estimate);
     update_BFS1(inputdata, _cov_measure);
 
     return _thrust_BFS1(0);
@@ -150,8 +165,11 @@ float ThrustKalmanFilter::thrust_kalman_filter_BFS2(float dt, float inputdata)
 {
     dt = (dt < 0.001f) ? 0.01f : dt;
 
-    predict_BFS2(dt, 0.0f, _cov_estimate);
+    parameters_update();
+	_cov_estimate = _param_sd_estimate.get();
+    _cov_measure = _param_sd_measure.get();
 
+    predict_BFS2(dt, 0.0f, _cov_estimate);
     update_BFS2(inputdata, _cov_measure);
 
     return _thrust_BFS2(0);
@@ -208,8 +226,11 @@ float ThrustKalmanFilter::thrust_kalman_filter_BFS3(float dt, float inputdata)
 {
     dt = (dt < 0.001f) ? 0.01f : dt;
 
-    predict_BFS3(dt, 0.0f, _cov_estimate);
+    parameters_update();
+	_cov_estimate = _param_sd_estimate.get();
+    _cov_measure = _param_sd_measure.get();
 
+    predict_BFS3(dt, 0.0f, _cov_estimate);
     update_BFS3(inputdata, _cov_measure);
 
     return _thrust_BFS3(0);
@@ -265,9 +286,12 @@ bool ThrustKalmanFilter::update_BFS4(float meas, float measUnc)
 float ThrustKalmanFilter::thrust_kalman_filter_BFS4(float dt, float inputdata)
 {
     dt = (dt < 0.001f) ? 0.01f : dt;
+    
+    parameters_update();
+	_cov_estimate = _param_sd_estimate.get();
+    _cov_measure = _param_sd_measure.get();
 
     predict_BFS4(dt, 0.0f, _cov_estimate);
-
     update_BFS4(inputdata, _cov_measure);
 
     return _thrust_BFS4(0);

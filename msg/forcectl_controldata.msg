@@ -1,5 +1,8 @@
 uint64 timestamp # time since system start (microseconds)
 float32 force_exp
+float32 force_exp_no_weightcom
+float32 force_exp_torque
+float32 force_exp_new
 float32 force_error
 float32 force_control_out
 float32 kp

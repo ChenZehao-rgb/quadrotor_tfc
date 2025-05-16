@@ -51,6 +51,12 @@ void LoggedTopics::add_default_topics()
 	add_topic("forcectl_forcedata", 10);
 	add_topic("forcectl_controldata", 10);
 	add_topic("forcectl_adrc_data", 10);
+
+	add_topic("thrust_data", 10);
+	add_topic("thrust_control_data", 10);
+	add_topic("thrust_desired_data", 10);
+	add_topic("esc_input", 10);
+	
 	//add_topic("forcectl_kf_filterdata", 10);
 	/* add_topic("action_request");
 	add_topic("actuator_armed");

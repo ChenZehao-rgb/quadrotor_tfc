@@ -30,6 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
+#pragma once
 
 #include <stdio.h>                     // 标准输入输出库
 #include <termios.h>                   // 终端I/O接口
@@ -65,33 +66,66 @@
 #include <uORB/topics/thrust_desired_data.h>
 #include <uORB/topics/actuator_controls.h>
 
+#include <uORB/topics/parameter_update.h>
+#include <px4_platform_common/module.h>
+#include <px4_platform_common/module_params.h>
+#include <uORB/Subscription.hpp>
+#include <uORB/SubscriptionInterval.hpp>
+
+#include <uORB/topics/rc_channels.h>
 #include "thrust_kalman_filter.hpp"
 
-class ThrustFeedbackControl
+using namespace time_literals;
+
+class ThrustFeedbackControl : public ModuleBase<ThrustFeedbackControl>, public ModuleParams
 {
 public:
-    ThrustFeedbackControl() {}
-    ~ThrustFeedbackControl() {}
+    ThrustFeedbackControl() : ModuleParams(nullptr) {}
+    ~ThrustFeedbackControl() override {}
 
     int main();
     
     static px4::AppState appState;
 
 private:
+
+    void	parameters_update();
+
+    DEFINE_PARAMETERS(
+        (ParamFloat<px4::params::TFC_THRUST_MAX>) _param_tfc_thrust_max,
+        (ParamFloat<px4::params::TFC_IOLC_K0>) _param_tfc_iolc_k0,
+        (ParamFloat<px4::params::TFC_ALPHA>) _param_tfc_alpha,
+        (ParamFloat<px4::params::TFC_IOLC_KP1>) _param_tfc_iolc_kp1,
+        (ParamFloat<px4::params::TFC_IOLC_KP2>) _param_tfc_iolc_kp2,
+        (ParamFloat<px4::params::TFC_IOLC_KP3>) _param_tfc_iolc_kp3,
+        (ParamFloat<px4::params::TFC_IOLC_KP4>) _param_tfc_iolc_kp4
+    )
+
+    uORB::SubscriptionInterval	_parameter_update_sub{ORB_ID(parameter_update), 1_s};
+
     thrust_data_s thrustdata = {};
     uORB::Publication<thrust_data_s>  _thrustdata_pub{ORB_ID(thrust_data)};
     ThrustKalmanFilter thrust_kalman_filter{1.0f};
+
+    struct actuator_controls_s force_exp_from_rc{};
 
     
     // 发布控制数据话题
     thrust_control_data_s thrustcontroldata = {};
     uORB::Publication<thrust_control_data_s> _thrustcontroldata_pub{ORB_ID(thrust_control_data)};
 
-    float pos_PID_kp = 1.0f;
-    float pos_PID_ki = 0.8f;
-    float pos_PID_kd = 0.15f;
-    float Thrust_Max = 2; // 单轴最大升力为2kg
+    double iolc_a3 = 0;
+    double iolc_a2 = -0.1663;
+    double iolc_a1 = -71.6385;
+    double iolc_b0 = 6.0018e4;
+    double iolc_c3 = 3.379e-10*9.5493*9.5493*9.5493;
+    double iolc_c2 = -1.518e-6*9.5493*9.5493;
+    double iolc_c1 = 3.573e-3*9.5493;
+    float Thrust_Max; // 单轴最大升力为2kg
 
     matrix::Vector<float, 4> _thrust_desired;
     matrix::Vector<float, 4> _thrust_measure;
+    matrix::Vector<float, 4> _control_output;
+
+    struct rc_channels_s rc_channals_data{};
 };

@@ -38,6 +38,8 @@
 #include <uORB/Publication.hpp>
 #include <uORB/topics/thrust_desired_data.h>
 #include <uORB/topics/thrust_control_data.h>
+#include <uORB/Subscription.hpp>
+
 
 /**
  * Supported multirotor geometries.
@@ -262,6 +264,9 @@ private:
 	 * **/
 	thrust_desired_data_s thrustdesireddata = {};
     uORB::Publication<thrust_desired_data_s>  _to_thrustdesireddata_report{ORB_ID(thrust_desired_data)};
+
+	uORB::Subscription _thrust_control_data_sub{ORB_ID(thrust_control_data)};
+	thrust_control_data_s thrustcontroldata{};
 
 	// struct thrust_control_data_s thrustcontroldata = {};
 };
