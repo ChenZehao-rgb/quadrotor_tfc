@@ -93,12 +93,15 @@ private:
 
     DEFINE_PARAMETERS(
         (ParamFloat<px4::params::TFC_THRUST_MAX>) _param_tfc_thrust_max,
-        (ParamFloat<px4::params::TFC_IOLC_K0>) _param_tfc_iolc_k0,
+        (ParamFloat<px4::params::TFC_IOLC_KP>) _param_tfc_iolc_kp,
+        (ParamFloat<px4::params::TFC_IOLC_KI>) _param_tfc_iolc_ki,
+        (ParamFloat<px4::params::TFC_LIM_I>) _param_tfc_lim_i,
         (ParamFloat<px4::params::TFC_ALPHA>) _param_tfc_alpha,
         (ParamFloat<px4::params::TFC_IOLC_KP1>) _param_tfc_iolc_kp1,
         (ParamFloat<px4::params::TFC_IOLC_KP2>) _param_tfc_iolc_kp2,
         (ParamFloat<px4::params::TFC_IOLC_KP3>) _param_tfc_iolc_kp3,
-        (ParamFloat<px4::params::TFC_IOLC_KP4>) _param_tfc_iolc_kp4
+        (ParamFloat<px4::params::TFC_IOLC_KP4>) _param_tfc_iolc_kp4,
+        (ParamFloat<px4::params::TFC_START>) _param_tfc_start
     )
 
     uORB::SubscriptionInterval	_parameter_update_sub{ORB_ID(parameter_update), 1_s};
@@ -123,9 +126,14 @@ private:
     double iolc_c1 = 3.573e-3*9.5493;
     float Thrust_Max; // 单轴最大升力为2kg
 
+    float iolc_d1 = 1.755;
+    float iolc_d2 = 0.745;
+
     matrix::Vector<float, 4> _thrust_desired;
     matrix::Vector<float, 4> _thrust_measure;
     matrix::Vector<float, 4> _control_output;
+    matrix::Vector<float, 4> _total_output;
+    matrix::Vector<float, 4> _iolc_u_ff;
 
     struct rc_channels_s rc_channals_data{};
 };

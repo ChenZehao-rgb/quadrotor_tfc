@@ -138,7 +138,7 @@ int ThrustFeedbackControl::main()
     };
 
     int error_counter = 0;
-    int _rotor_count;
+    // int _rotor_count = 4;
     // 气压式力传感器的读数
     struct barometric_force_sensor_s sensordata;
     struct thrust_desired_data_s thrustdesireddata;
@@ -214,33 +214,37 @@ int ThrustFeedbackControl::main()
         /*
             获取期望升力和滤波后的升力测量值
         */
-        _thrust_desired(0) = _param_tfc_thrust_max.get() * force_exp_from_rc.control[3];
-        _thrust_desired(1) = _param_tfc_thrust_max.get() * force_exp_from_rc.control[3];
-        _thrust_desired(2) = _param_tfc_thrust_max.get() * force_exp_from_rc.control[3];
-        _thrust_desired(3) = _param_tfc_thrust_max.get() * force_exp_from_rc.control[3];
-        _thrust_desired(0) = ( _thrust_desired(0) > _param_tfc_thrust_max.get()) ? _param_tfc_thrust_max.get() : ((_thrust_desired(0) < 0.0f) ? 0.0f : _thrust_desired(0));
-        _thrust_desired(1) = ( _thrust_desired(1) > _param_tfc_thrust_max.get()) ? _param_tfc_thrust_max.get() : ((_thrust_desired(1) < 0.0f) ? 0.0f : _thrust_desired(1));
-        _thrust_desired(2) = ( _thrust_desired(2) > _param_tfc_thrust_max.get()) ? _param_tfc_thrust_max.get() : ((_thrust_desired(2) < 0.0f) ? 0.0f : _thrust_desired(2));
-        _thrust_desired(3) = ( _thrust_desired(3) > _param_tfc_thrust_max.get()) ? _param_tfc_thrust_max.get() : ((_thrust_desired(3) < 0.0f) ? 0.0f : _thrust_desired(3));
-        // _thrust_desired(0) = thrustdesireddata.thrust_desired1;
+        // _thrust_desired(0) = _param_tfc_thrust_max.get() * force_exp_from_rc.control[3];
+        // _thrust_desired(1) = _param_tfc_thrust_max.get() * force_exp_from_rc.control[3];
+        // _thrust_desired(2) = _param_tfc_thrust_max.get() * force_exp_from_rc.control[3];
+        // _thrust_desired(3) = _param_tfc_thrust_max.get() * force_exp_from_rc.control[3];
+        _thrust_desired(0) = _param_tfc_thrust_max.get();
+        _thrust_desired(1) = _param_tfc_thrust_max.get();
+        _thrust_desired(2) = _param_tfc_thrust_max.get();
+        _thrust_desired(3) = _param_tfc_thrust_max.get();
+        // _thrust_desired(0) = ( _thrust_desired(0) > _param_tfc_thrust_max.get()) ? _param_tfc_thrust_max.get() : ((_thrust_desired(0) < 0.0f) ? 0.0f : _thrust_desired(0));
+        // _thrust_desired(1) = ( _thrust_desired(1) > _param_tfc_thrust_max.get()) ? _param_tfc_thrust_max.get() : ((_thrust_desired(1) < 0.0f) ? 0.0f : _thrust_desired(1));
+        // _thrust_desired(2) = ( _thrust_desired(2) > _param_tfc_thrust_max.get()) ? _param_tfc_thrust_max.get() : ((_thrust_desired(2) < 0.0f) ? 0.0f : _thrust_desired(2));
+        // _thrust_desired(3) = ( _thrust_desired(3) > _param_tfc_thrust_max.get()) ? _param_tfc_thrust_max.get() : ((_thrust_desired(3) < 0.0f) ? 0.0f : _thrust_desired(3));
+        // // _thrust_desired(0) = thrustdesireddata.thrust_desired1;
         // _thrust_desired(1) = thrustdesireddata.thrust_desired2;
         // _thrust_desired(2) = thrustdesireddata.thrust_desired3;
         // _thrust_desired(3) = thrustdesireddata.thrust_desired4;
 
-        _thrust_measure(0) = thrustdata.thrust_kalman_filter_data_1;
-        _thrust_measure(1) = thrustdata.thrust_kalman_filter_data_2;
-        _thrust_measure(2) = thrustdata.thrust_kalman_filter_data_3;
-        _thrust_measure(3) = thrustdata.thrust_kalman_filter_data_4;
+        _thrust_measure(0) = thrustdata.thrust_kalman_filter_data_2;
+        _thrust_measure(1) = thrustdata.thrust_kalman_filter_data_4;
+        _thrust_measure(2) = thrustdata.thrust_kalman_filter_data_1;
+        _thrust_measure(3) = thrustdata.thrust_kalman_filter_data_3;
 
         orb_copy(ORB_ID(rc_channels), rc_sub_fd, &rc_channals_data);
         if((rc_channals_data.channels[5] > -0.3f)&&(rc_channals_data.channels[5] < 0.3f))
         {
             float forcectl_alpha = _param_tfc_alpha.get();
             forcectl_alpha = (forcectl_alpha < 0.01f) ? 0.01f : ((forcectl_alpha > 1.0f) ? 1.0f : forcectl_alpha);
-            for (_rotor_count = 0; _rotor_count < 4; _rotor_count ++)
+            for (unsigned i = 0; i < 4; i++)
             {
-                _control_output(_rotor_count) = ((float)sqrt((1.0f - forcectl_alpha)*(1.0f - forcectl_alpha) + 
-                    4.0f*forcectl_alpha*_thrust_desired(_rotor_count)) + (forcectl_alpha - 1.0f))/(2.0f * forcectl_alpha);
+                _control_output(i) = ((float)sqrt((1.0f - forcectl_alpha)*(1.0f - forcectl_alpha) + 
+                    4.0f*forcectl_alpha*_thrust_desired(i)) + (forcectl_alpha - 1.0f))/(2.0f * forcectl_alpha);
             }
             thrustcontroldata.thrust_control_out1 = _control_output(0);
             thrustcontroldata.thrust_control_out2 = _control_output(1);
@@ -267,13 +271,13 @@ int ThrustFeedbackControl::main()
 
             // Thrust_Max = _param_tfc_thrust_max.get();
 
-            for (_rotor_count = 0; _rotor_count < 4; _rotor_count ++)
+            for (unsigned i = 0; i < 4; i++)
             {
                 // _iolc.k0 = _param_tfc_iolc_k0.get() * _iolc.kp(_rotor_count);
-                _iolc.thrust_des(_rotor_count) = _thrust_desired(_rotor_count);
-                _iolc.thrust_mea(_rotor_count) = _thrust_measure(_rotor_count);
-                _iolc.thrust_err(_rotor_count) = _iolc.thrust_des(_rotor_count) - _iolc.thrust_mea(_rotor_count);
-                IOLC_Calculate(&_iolc, _rotor_count);
+                _iolc.thrust_des(i) = _thrust_desired(i);
+                _iolc.thrust_mea(i) = _thrust_measure(i);
+                _iolc.thrust_err(i) = _iolc.thrust_des(i) - _iolc.thrust_mea(i);
+                IOLC_Calculate(&_iolc, i);
             }
 
             thrustcontroldata.thrust_error1 = _iolc.thrust_err(0);
@@ -290,6 +294,10 @@ int ThrustFeedbackControl::main()
             thrustcontroldata.thrust_control_out2 = _iolc.u(1);
             thrustcontroldata.thrust_control_out3 = _iolc.u(2);
             thrustcontroldata.thrust_control_out4 = _iolc.u(3);
+            // thrustcontroldata.thrust_control_out1 = _param_tfc_thrust_max.get();
+            // thrustcontroldata.thrust_control_out2 = _param_tfc_thrust_max.get();
+            // thrustcontroldata.thrust_control_out3 = _param_tfc_thrust_max.get();
+            // thrustcontroldata.thrust_control_out4 = _param_tfc_thrust_max.get();
         }
         else if(rc_channals_data.channels[5] < -0.3f)
         {

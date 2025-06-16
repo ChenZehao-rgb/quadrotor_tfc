@@ -29,10 +29,23 @@ param set-default GPS_UBX_DYNMODEL 6
 #
 # This is the gimbal pass mixer.
 #
-set MIXER_AUX pass
+# set MIXER_AUX pass
 
 set MIXER quad_x
 
 set PWM_OUT 1234
 
+# set PWM_AUX_OUT 1234
+
+#
+# This is the gimbal to motor mixer.
+#
+set MIXER_AUX gimbal_motor
+
 set PWM_AUX_OUT 1234
+
+set PWM_AUX_MAX 2000
+
+set PWM_AUX_MIN 1000
+
+set PWM_AUX_DISARMED 1000

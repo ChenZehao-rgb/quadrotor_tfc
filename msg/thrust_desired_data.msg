@@ -4,3 +4,15 @@ float32 thrust_desired1
 float32 thrust_desired2
 float32 thrust_desired3
 float32 thrust_desired4
+
+float32 torque_pitch_desired
+
+float32 open_loop_control_output1
+float32 open_loop_control_output2
+float32 open_loop_control_output3
+float32 open_loop_control_output4
+
+float32 full_process_output1
+float32 full_process_output2
+float32 full_process_output3
+float32 full_process_output4

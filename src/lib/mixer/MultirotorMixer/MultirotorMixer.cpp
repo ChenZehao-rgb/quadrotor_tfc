@@ -444,6 +444,7 @@ MultirotorMixer::mix(float *outputs, unsigned space)
 	// 订阅力控制数据
 	// int thrustcontroldata_sub_fd = orb_subscribe(ORB_ID(thrust_control_data));
 	// orb_set_interval(thrustcontroldata_sub_fd, 20);
+	_thrust_control_data_sub.update(&thrustcontroldata);
 
 	// px4_pollfd_struct_t fds[] =
 	// {
@@ -462,6 +463,8 @@ MultirotorMixer::mix(float *outputs, unsigned space)
 	float pitch   = math::constrain(get_control(0, 1), -1.0f, 1.0f);
 	float yaw     = math::constrain(get_control(0, 2), -1.0f, 1.0f);
 	float thrust  = math::constrain(get_control(0, 3), 0.0f, 1.0f);
+
+	// thrustdesireddata.torque_pitch_desired = pitch;
 
 	// clean out class variable used to capture saturation
 	// 电机饱和度清零
@@ -490,11 +493,15 @@ MultirotorMixer::mix(float *outputs, unsigned space)
 	}
 
 	// 发布各轴期望升力
+	// thrustdesireddata.thrust_desired1 = 0.1f;
+	// thrustdesireddata.thrust_desired2 = 0.2f;
+	// thrustdesireddata.thrust_desired3 = 0.3f;
+	// thrustdesireddata.thrust_desired4 = 0.4f;
+
 	thrustdesireddata.thrust_desired1 = outputs[0];
 	thrustdesireddata.thrust_desired2 = outputs[1];
 	thrustdesireddata.thrust_desired3 = outputs[2];
 	thrustdesireddata.thrust_desired4 = outputs[3];
-	_to_thrustdesireddata_report.publish(thrustdesireddata);
 
 	// outputs[0] = thrustcontroldata.thrust_control_out1;
 	// outputs[0] = math::constrain((2.f * outputs[0] - 1.f), -1.f, 1.f);
@@ -506,10 +513,10 @@ MultirotorMixer::mix(float *outputs, unsigned space)
 
 	// if (_thrust_control_data_sub.update(&thrustcontroldata))
 	// {
-	// 	outputs[0] = thrustcontroldata.thrust_control_out1;
-	// 	outputs[1] = thrustcontroldata.thrust_control_out2;
-	// 	outputs[2] = thrustcontroldata.thrust_control_out3;
-	// 	outputs[3] = thrustcontroldata.thrust_control_out4;
+	// 	outputs[0] = thrustcontroldata.thrust_control_out_pwm1;
+	// 	outputs[1] = thrustcontroldata.thrust_control_out_pwm2;
+	// 	outputs[2] = thrustcontroldata.thrust_control_out_pwm3;
+	// 	outputs[3] = thrustcontroldata.thrust_control_out_pwm4;
 
 	// 	for (unsigned i = 0; i < _rotor_count; i++) 
 	// 	{
@@ -545,6 +552,27 @@ MultirotorMixer::mix(float *outputs, unsigned space)
 		// 将PWM值从[0,1]缩放至[-1,1]
 		outputs[i] = math::constrain((2.f * outputs[i] - 1.f), -1.f, 1.f);
 	}
+
+	thrustdesireddata.open_loop_control_output1 = outputs[0];
+	thrustdesireddata.open_loop_control_output2 = outputs[1];
+	thrustdesireddata.open_loop_control_output3 = outputs[2];
+	thrustdesireddata.open_loop_control_output4 = outputs[3];
+
+	if (thrustcontroldata.thrust_start > 0.5f)
+	{
+		outputs[0] = thrustcontroldata.thrust_control_out_pwm1;
+		outputs[1] = thrustcontroldata.thrust_control_out_pwm2;
+		outputs[2] = thrustcontroldata.thrust_control_out_pwm3;
+		outputs[3] = thrustcontroldata.thrust_control_out_pwm4;
+	}
+
+	thrustdesireddata.full_process_output1 = outputs[0];
+	thrustdesireddata.full_process_output2 = outputs[1];
+	thrustdesireddata.full_process_output3 = outputs[2];
+	thrustdesireddata.full_process_output4 = outputs[3];
+	
+	thrustdesireddata.timestamp = hrt_absolute_time();
+	_to_thrustdesireddata_report.publish(thrustdesireddata);
 
 	// Slew rate limiting and saturation checking
 	// 将最终的输出进行抗负向饱和以及变化速率限幅

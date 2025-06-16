@@ -98,53 +98,53 @@ private:
 		// }
 
 		/* 单轴力反馈 */
-		forcectl_forcedata_s forcedata = {};
-		forcectl_controldata_s control_data = {};
-		if (_forcedata_sub.update(&forcedata)) {
-			mavlink_wind_cov_t msg{};
-			_controldata_sub.copy(&control_data);
-
-			msg.time_usec = hrt_absolute_time();
-
-			msg.wind_x = control_data.force_exp;
-			msg.wind_y = forcedata.force_kf_filtered_data;
-			msg.wind_z = control_data.force_error;
-
-			msg.var_horiz = forcedata.force_raw_data;
-			msg.var_vert = control_data.force_control_out;
-
-			msg.wind_alt = control_data.kp;
-			msg.horiz_accuracy = control_data.ki;
-			msg.vert_accuracy = control_data.kd;
-
-			mavlink_msg_wind_cov_send_struct(_mavlink->get_channel(), &msg);
-
-			return true;
-		}
-
-		/* 整机力反馈 */
-		// thrust_data_s thrustdata = {};
-		// thrust_control_data_s thrustcontroldata = {};
-		// if (_thrustdata_sub.update(&thrustdata)) {
+		// forcectl_forcedata_s forcedata = {};
+		// forcectl_controldata_s control_data = {};
+		// if (_forcedata_sub.update(&forcedata)) {
 		// 	mavlink_wind_cov_t msg{};
-		// 	_thrustcontroldata_sub.copy(&thrustcontroldata);
+		// 	_controldata_sub.copy(&control_data);
 
 		// 	msg.time_usec = hrt_absolute_time();
 
-		// 	msg.wind_x = thrustdata.thrust_kalman_filter_data_1;
-		// 	msg.wind_y = thrustdata.thrust_kalman_filter_data_2;
-		// 	msg.wind_z = thrustdata.thrust_kalman_filter_data_3;
-		// 	msg.var_horiz = thrustdata.thrust_kalman_filter_data_4;
+		// 	msg.wind_x = control_data.force_exp;
+		// 	msg.wind_y = forcedata.force_kf_filtered_data;
+		// 	msg.wind_z = control_data.force_error;
 
-		// 	msg.var_vert = thrustcontroldata.thrust_error1;
-		// 	msg.wind_alt = thrustcontroldata.thrust_error2;
-		// 	msg.horiz_accuracy = thrustcontroldata.thrust_error3;
-		// 	msg.vert_accuracy = thrustcontroldata.thrust_error4;
+		// 	msg.var_horiz = forcedata.force_raw_data;
+		// 	msg.var_vert = control_data.force_control_out;
+
+		// 	msg.wind_alt = control_data.kp;
+		// 	msg.horiz_accuracy = control_data.ki;
+		// 	msg.vert_accuracy = control_data.kd;
 
 		// 	mavlink_msg_wind_cov_send_struct(_mavlink->get_channel(), &msg);
 
 		// 	return true;
 		// }
+
+		/* 整机力反馈 */
+		thrust_data_s thrustdata = {};
+		thrust_control_data_s thrustcontroldata = {};
+		if (_thrustdata_sub.update(&thrustdata)) {
+			mavlink_wind_cov_t msg{};
+			_thrustcontroldata_sub.copy(&thrustcontroldata);
+
+			msg.time_usec = hrt_absolute_time();
+
+			msg.wind_x = thrustdata.thrust_kalman_filter_data_1;
+			msg.wind_y = thrustdata.thrust_kalman_filter_data_2;
+			msg.wind_z = thrustdata.thrust_kalman_filter_data_3;
+			msg.var_horiz = thrustdata.thrust_kalman_filter_data_4;
+
+			msg.var_vert = thrustcontroldata.thrust_error1;
+			msg.wind_alt = thrustcontroldata.thrust_error2;
+			msg.horiz_accuracy = thrustcontroldata.thrust_error3;
+			msg.vert_accuracy = thrustcontroldata.thrust_error4;
+
+			mavlink_msg_wind_cov_send_struct(_mavlink->get_channel(), &msg);
+
+			return true;
+		}
 
 		return false;
 	}

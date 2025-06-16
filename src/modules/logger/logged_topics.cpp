@@ -58,13 +58,13 @@ void LoggedTopics::add_default_topics()
 	add_topic("esc_input", 10);
 	
 	//add_topic("forcectl_kf_filterdata", 10);
-	/* add_topic("action_request");
+	add_topic("action_request");
 	add_topic("actuator_armed");
 	add_topic("actuator_controls_0", 50);
-	add_topic("actuator_controls_1", 100); */
+	add_topic("actuator_controls_1", 100);
 	add_topic("actuator_controls_2", 10);
 	add_topic("actuator_controls_3", 10);
-	/* add_optional_topic("actuator_controls_status_0", 300);
+	add_optional_topic("actuator_controls_status_0", 300);
 	add_topic("airspeed", 1000);
 	add_optional_topic("airspeed_validated", 200);
 	add_optional_topic("autotune_attitude_control_status", 100);
@@ -80,7 +80,8 @@ void LoggedTopics::add_default_topics()
 	add_optional_topic("gps_dump");
 	add_optional_topic("heater_status");
 	add_topic("home_position");
-	add_topic("hover_thrust_estimate", 100);*/
+	add_topic("hover_thrust_estimate", 100);
+
 	add_topic("input_rc", 10);
 	add_topic("vehicle_angular_velocity", 20);
 	add_topic("vehicle_attitude", 50);
@@ -88,7 +89,8 @@ void LoggedTopics::add_default_topics()
 	add_topic("vehicle_rates_setpoint", 20);
 	add_topic("vehicle_angular_acceleration", 20);
 	add_topic("vehicle_angular_acceleration_setpoint", 20);
-/*	add_optional_topic("internal_combustion_engine_status", 10);
+
+	add_optional_topic("internal_combustion_engine_status", 10);
 	add_optional_topic("irlock_report", 1000);
 	add_optional_topic("landing_target_pose", 1000);
 	add_optional_topic("magnetometer_bias_estimate", 200);
@@ -141,7 +143,7 @@ void LoggedTopics::add_default_topics()
 	add_optional_topic_multi("rate_ctrl_status", 200, 2);
 	add_optional_topic_multi("sensor_hygrometer", 500, 4);
 	add_optional_topic_multi("rpm", 200);
-	add_optional_topic_multi("telemetry_status", 1000, 4); */
+	add_optional_topic_multi("telemetry_status", 1000, 4); 
 
 	// EKF multi topics (currently max 9 estimators)
 /* #if CONSTRAINED_MEMORY

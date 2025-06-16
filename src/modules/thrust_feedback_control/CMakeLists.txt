@@ -36,9 +36,9 @@ px4_add_module(
     MAIN thrust_feedback_control
     COMPILE_FLAGS
     SRCS
-        thrust_feedback_control.cpp
+        # thrust_feedback_control.cpp
+        thrust_feedback_control_test.cpp
         thrust_feedback_control_start.cpp
         thrust_kalman_filter.cpp
-        # thrust_feedback_control_params.c
     DEPENDS
     )

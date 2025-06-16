@@ -13,6 +13,13 @@ float32 thrust_desired2
 float32 thrust_desired3
 float32 thrust_desired4
 
+float32 thrust_control_out_pwm1
+float32 thrust_control_out_pwm2
+float32 thrust_control_out_pwm3
+float32 thrust_control_out_pwm4
+
+float32 thrust_start
+
 float32 kp
 float32 ki
 float32 kd

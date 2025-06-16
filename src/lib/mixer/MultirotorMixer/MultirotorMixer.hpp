@@ -40,6 +40,17 @@
 #include <uORB/topics/thrust_control_data.h>
 #include <uORB/Subscription.hpp>
 
+// #include <px4_platform_common/log.h>
+// #include <px4_platform_common/px4_config.h>
+// #include <px4_platform_common/tasks.h>
+// #include <px4_platform_common/posix.h>
+// #include <px4_platform_common/app.h>
+// #include <px4_platform_common/time.h>
+// #include <px4_platform_common/init.h>
+// #include <px4_platform_common/module.h>
+// #include <px4_platform_common/module_params.h>
+
+
 
 /**
  * Supported multirotor geometries.
@@ -267,6 +278,18 @@ private:
 
 	uORB::Subscription _thrust_control_data_sub{ORB_ID(thrust_control_data)};
 	thrust_control_data_s thrustcontroldata{};
+
+	// void	parameters_update();
+
+	// DEFINE_PARAMETERS(
+    //     (ParamFloat<px4::params::TFC_THRUST_MAX>) _param_tfc_thrust_max,
+    //     (ParamFloat<px4::params::TFC_IOLC_K0>) _param_tfc_iolc_k0,
+    //     (ParamFloat<px4::params::TFC_ALPHA>) _param_tfc_alpha,
+    //     (ParamFloat<px4::params::TFC_IOLC_KP1>) _param_tfc_iolc_kp1,
+    //     (ParamFloat<px4::params::TFC_IOLC_KP2>) _param_tfc_iolc_kp2,
+    //     (ParamFloat<px4::params::TFC_IOLC_KP3>) _param_tfc_iolc_kp3,
+    //     (ParamFloat<px4::params::TFC_IOLC_KP4>) _param_tfc_iolc_kp4
+    // )
 
 	// struct thrust_control_data_s thrustcontroldata = {};
 };

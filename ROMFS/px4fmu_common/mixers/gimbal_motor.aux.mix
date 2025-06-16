@@ -1,19 +1,17 @@
-# Mount Mixer (e.g. Gimbal, servo-controlled gimbal, etc...)
+# Gimbal for motor outputs 1-4
 
-
-# pitch
+# AUX1 channel
 M: 1
 S: 2 0  10000  10000      0 -10000  10000
 
-# roll
+# AUX2 channel
 M: 1
 S: 2 1  10000  10000      0 -10000  10000
 
-# yaw
+# AUX3 channel
 M: 1
 S: 2 2  10000  10000      0 -10000  10000
 
-# Shutter/retract
+# AUX4 channel
 M: 1
 S: 2 3  10000  10000      0 -10000  10000
-
