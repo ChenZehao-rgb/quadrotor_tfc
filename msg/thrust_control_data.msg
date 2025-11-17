@@ -18,6 +18,36 @@ float32 thrust_control_out_pwm2
 float32 thrust_control_out_pwm3
 float32 thrust_control_out_pwm4
 
+float32 thrust_feedforward_out1
+float32 thrust_feedforward_out2
+float32 thrust_feedforward_out3
+float32 thrust_feedforward_out4
+
+float32 thrust_feedback_out1
+float32 thrust_feedback_out2
+float32 thrust_feedback_out3
+float32 thrust_feedback_out4
+
+float32 thrust_kalman_filter_control_out_pwm1
+float32 thrust_kalman_filter_control_out_pwm2
+float32 thrust_kalman_filter_control_out_pwm3
+float32 thrust_kalman_filter_control_out_pwm4
+
+float32 motor_speed_dot1
+float32 motor_speed_dot2
+float32 motor_speed_dot3
+float32 motor_speed_dot4
+
+float32 motor_speed1
+float32 motor_speed2
+float32 motor_speed3
+float32 motor_speed4
+
+float32 deta_t_1
+float32 deta_t_2
+float32 deta_t_3
+float32 deta_t_4
+
 float32 thrust_start
 
 float32 kp

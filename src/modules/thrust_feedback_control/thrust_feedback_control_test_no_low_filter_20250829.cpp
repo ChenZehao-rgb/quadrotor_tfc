@@ -43,11 +43,6 @@ math::LowPassFilter2p<float>	_thrust_desired_2_lowpass_filter{100.f, 5.f};
 math::LowPassFilter2p<float>	_thrust_desired_3_lowpass_filter{100.f, 5.f};
 math::LowPassFilter2p<float>	_thrust_desired_4_lowpass_filter{100.f, 5.f};
 
-math::LowPassFilter2p<float>    _output_1_lowpass_filter{100.f, 15.f};
-math::LowPassFilter2p<float>    _output_2_lowpass_filter{100.f, 15.f};
-math::LowPassFilter2p<float>    _output_3_lowpass_filter{100.f, 15.f};
-math::LowPassFilter2p<float>    _output_4_lowpass_filter{100.f, 15.f};
-
 typedef struct
 {
     uint64_t last_timestamp;
@@ -491,20 +486,14 @@ int ThrustFeedbackControl::main()
         thrustcontroldata.thrust_desired2 = _thrust_desired(1);
         thrustcontroldata.thrust_desired3 = _thrust_desired(2);
         thrustcontroldata.thrust_desired4 = _thrust_desired(3);
-        thrustcontroldata.thrust_feedback_out1 = _param_tfc_iolc_k1.get() * static_cast<float>(_iolc.u);
-        thrustcontroldata.thrust_feedback_out2 = _param_tfc_iolc_k2.get() * static_cast<float>(_iolc2.u);
-        thrustcontroldata.thrust_feedback_out3 = _param_tfc_iolc_k3.get() * static_cast<float>(_iolc3.u);
-        thrustcontroldata.thrust_feedback_out4 = _param_tfc_iolc_k4.get() * static_cast<float>(_iolc4.u);
-        _total_output(0) = _param_tfc_iolc_k1.get() * static_cast<float>(_iolc.u) + _iolc_u_ff(0);
-        _total_output(1) = _param_tfc_iolc_k2.get() * static_cast<float>(_iolc2.u) + _iolc_u_ff(1);
-        _total_output(2) = _param_tfc_iolc_k3.get() * static_cast<float>(_iolc3.u) + _iolc_u_ff(2);
-        _total_output(3) = _param_tfc_iolc_k4.get() * static_cast<float>(_iolc4.u) + _iolc_u_ff(3);
-
-        // _total_output(0) = _output_1_lowpass_filter.apply(_total_output(0));
-        // _total_output(1) = _output_2_lowpass_filter.apply(_total_output(1));
-        // _total_output(2) = _output_3_lowpass_filter.apply(_total_output(2));
-        // _total_output(3) = _output_4_lowpass_filter.apply(_total_output(3));
-
+        thrustcontroldata.thrust_feedback_out1 = _iolc.u;
+        thrustcontroldata.thrust_feedback_out2 = _iolc2.u;
+        thrustcontroldata.thrust_feedback_out3 = _iolc3.u;
+        thrustcontroldata.thrust_feedback_out4 = _iolc4.u;
+        _total_output(0) = static_cast<float>(_iolc.u) + _iolc_u_ff(0);
+        _total_output(1) = static_cast<float>(_iolc2.u) + _iolc_u_ff(1);
+        _total_output(2) = static_cast<float>(_iolc3.u) + _iolc_u_ff(2);
+        _total_output(3) = static_cast<float>(_iolc4.u) + _iolc_u_ff(3);
         thrustcontroldata.thrust_feedforward_out1 = _iolc_u_ff(0);
         thrustcontroldata.thrust_feedforward_out2 = _iolc_u_ff(1);
         thrustcontroldata.thrust_feedforward_out3 = _iolc_u_ff(2);

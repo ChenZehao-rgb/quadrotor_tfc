@@ -88,6 +88,27 @@ public:
     float BFS1_forcePredictive_t, BFS1_PPredictive_t, BFS1_Kg_t;
     float BFS1_One_Order_Kalman(float inputdata);
 
+    // u_1一阶卡尔曼
+    float U1_forcekalman_t;
+    float U1_PKalman_t;
+    float U1_PPredictive_t, U1_Kg_t;
+    float thrust_kalman_filter_u1(float mea, float pre);
+    // u_2一阶卡尔曼
+    float U2_forcekalman_t;
+    float U2_PKalman_t;
+    float U2_PPredictive_t, U2_Kg_t;
+    float thrust_kalman_filter_u2(float mea, float pre);
+    // u_3一阶卡尔曼
+    float U3_forcekalman_t;
+    float U3_PKalman_t;
+    float U3_PPredictive_t, U3_Kg_t;
+    float thrust_kalman_filter_u3(float mea, float pre);
+    // u_4一阶卡尔曼
+    float U4_forcekalman_t;
+    float U4_PKalman_t;
+    float U4_PPredictive_t, U4_Kg_t;
+    float thrust_kalman_filter_u4(float mea, float pre);
+
 private:
     // R
     float _cov_measure{0.05f};
@@ -129,13 +150,23 @@ private:
     float BFS1_Q = 0.005f;
     float BFS1_R = 0.36f;
 
+    // u_1
+    float _cov_estimate_u{0.36f};
+    float _cov_measure_u{0.005f};
+    float U1_Pkalman_t_1 = 2.0f;
+    float U2_Pkalman_t_1 = 2.0f;
+    float U3_Pkalman_t_1 = 2.0f;
+    float U4_Pkalman_t_1 = 2.0f;
+
     /**
 	 * initialize some vectors/matrices from parameters
 	 */
 	void	parameters_update();
     DEFINE_PARAMETERS(
        (ParamFloat<px4::params::TFC_SD_ES>) _param_sd_estimate,
-       (ParamFloat<px4::params::TFC_SD_ME>) _param_sd_measure
+       (ParamFloat<px4::params::TFC_SD_ME>) _param_sd_measure,
+       (ParamFloat<px4::params::TFC_ME_U>) _param_measure_u,
+       (ParamFloat<px4::params::TFC_ES_U>) _param_estimate_u
     )
     uORB::SubscriptionInterval	_parameter_update_sub{ORB_ID(parameter_update), 1_s};
 };

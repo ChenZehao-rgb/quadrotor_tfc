@@ -43,6 +43,11 @@
 #include <matrix/matrix/math.hpp>
 #include <uORB/topics/vehicle_attitude_setpoint.h>
 #include <uORB/topics/vehicle_local_position_setpoint.h>
+#include <uORB/topics/robust_control_state_error.h>
+#include <uORB/uORB.h>
+#include <uORB/Publication.hpp>
+#include <uORB/topics/robust_control_position_error.h>
+#include <uORB/topics/robust_control_velocity_error.h>
 
 struct PositionControlStates 
 {
@@ -217,4 +222,10 @@ private:
 	matrix::Vector3f _thr_sp; /**< desired thrust */
 	float _yaw_sp{}; /**< desired heading */
 	float _yawspeed_sp{}; /** desired yaw-speed */
+
+	robust_control_position_error_s _position_error = {};
+	uORB::Publication<robust_control_position_error_s> _robust_control_position_error_pub {ORB_ID(robust_control_position_error)};
+
+	robust_control_velocity_error_s _velocity_error = {};
+	uORB::Publication<robust_control_velocity_error_s> _robust_control_velocity_error_pub {ORB_ID(robust_control_velocity_error)};
 };

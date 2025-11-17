@@ -38,16 +38,6 @@ math::LowPassFilter2p<float>	_position_pid_dout_lowpass_filter{100.f, 10.f};
 
 px4::AppState ThrustFeedbackControl::appState;
 
-math::LowPassFilter2p<float>	_thrust_desired_1_lowpass_filter{100.f, 5.f};
-math::LowPassFilter2p<float>	_thrust_desired_2_lowpass_filter{100.f, 5.f};
-math::LowPassFilter2p<float>	_thrust_desired_3_lowpass_filter{100.f, 5.f};
-math::LowPassFilter2p<float>	_thrust_desired_4_lowpass_filter{100.f, 5.f};
-
-math::LowPassFilter2p<float>    _output_1_lowpass_filter{100.f, 15.f};
-math::LowPassFilter2p<float>    _output_2_lowpass_filter{100.f, 15.f};
-math::LowPassFilter2p<float>    _output_3_lowpass_filter{100.f, 15.f};
-math::LowPassFilter2p<float>    _output_4_lowpass_filter{100.f, 15.f};
-
 typedef struct
 {
     uint64_t last_timestamp;
@@ -63,7 +53,6 @@ typedef struct
     double u, v, u_ff;
 	double dt;
     float thrust_desired;
-    double motorSpeed_ff;
 
 }IOLC;
 
@@ -82,7 +71,6 @@ typedef struct
     double u, v, u_ff;
 	double dt;
     float thrust_desired;
-    double motorSpeed_ff;
 
 }IOLC2;
 
@@ -101,7 +89,6 @@ typedef struct
     double u, v, u_ff;
 	double dt;
     float thrust_desired;
-    double motorSpeed_ff;
 
 }IOLC3;
 
@@ -120,7 +107,6 @@ typedef struct
     double u, v, u_ff;
 	double dt;
     float thrust_desired;
-    double motorSpeed_ff;
 
 }IOLC4;
 
@@ -132,7 +118,7 @@ void IOLC_Calculate(IOLC *iolc)
     }
 
     uint64_t time_now = hrt_absolute_time();
-    double dt = math::constrain(((time_now - iolc->last_timestamp) * 1e-6f), 0.001f, 0.0025f);
+    double dt = math::constrain(((time_now - iolc->last_timestamp) * 1e-6f), 0.001f, 0.05f);
     iolc->last_timestamp = time_now;
     iolc->dt = dt;
 
@@ -145,7 +131,7 @@ void IOLC_Calculate(IOLC *iolc)
 		*(iolc->a2*iolc->motorSpeed*iolc->motorSpeed + iolc->a1*iolc->motorSpeed);
 	double g_x = (iolc->b0*(3*iolc->c3*iolc->motorSpeed*iolc->motorSpeed + 2*iolc->c2*iolc->motorSpeed + iolc->c1));
     iolc->u = ((iolc->v - f_x) / g_x);
-	iolc->u = (iolc->u > 0.3) ? 0.3 : ((iolc->u < 0.0) ? 0.0 : iolc->u);
+	iolc->u = (iolc->u > 0.8) ? 0.8 : ((iolc->u < 0.0) ? 0.0 : iolc->u);
 
 	/* Using Euler Integration Method to Calculate the Motor Speed */
 	double motorSpeed_dot = (iolc->a2*iolc->motorSpeed*iolc->motorSpeed + iolc->a1*iolc->motorSpeed + iolc->b0*iolc->u);
@@ -161,7 +147,7 @@ void IOLC_Calculate2(IOLC2 *iolc)
     }
 
     uint64_t time_now = hrt_absolute_time();
-    double dt = math::constrain(((time_now - iolc->last_timestamp) * 1e-6f), 0.001f, 0.0025f);
+    double dt = math::constrain(((time_now - iolc->last_timestamp) * 1e-6f), 0.001f, 0.05f);
     iolc->last_timestamp = time_now;
     iolc->dt = dt;
 
@@ -174,7 +160,7 @@ void IOLC_Calculate2(IOLC2 *iolc)
 		*(iolc->a2*iolc->motorSpeed*iolc->motorSpeed + iolc->a1*iolc->motorSpeed);
 	double g_x = (iolc->b0*(3*iolc->c3*iolc->motorSpeed*iolc->motorSpeed + 2*iolc->c2*iolc->motorSpeed + iolc->c1));
     iolc->u = ((iolc->v - f_x) / g_x);
-	iolc->u = (iolc->u > 0.3) ? 0.3 : ((iolc->u < 0.0) ? 0.0 : iolc->u);
+	iolc->u = (iolc->u > 0.8) ? 0.8 : ((iolc->u < 0.0) ? 0.0 : iolc->u);
 
 	/* Using Euler Integration Method to Calculate the Motor Speed */
 	double motorSpeed_dot = (iolc->a2*iolc->motorSpeed*iolc->motorSpeed + iolc->a1*iolc->motorSpeed + iolc->b0*iolc->u);
@@ -190,7 +176,7 @@ void IOLC_Calculate3(IOLC3 *iolc)
     }
 
     uint64_t time_now = hrt_absolute_time();
-    double dt = math::constrain(((time_now - iolc->last_timestamp) * 1e-6f), 0.001f, 0.0025f);
+    double dt = math::constrain(((time_now - iolc->last_timestamp) * 1e-6f), 0.001f, 0.05f);
     iolc->last_timestamp = time_now;
     iolc->dt = dt;
 
@@ -203,7 +189,7 @@ void IOLC_Calculate3(IOLC3 *iolc)
 		*(iolc->a2*iolc->motorSpeed*iolc->motorSpeed + iolc->a1*iolc->motorSpeed);
 	double g_x = (iolc->b0*(3*iolc->c3*iolc->motorSpeed*iolc->motorSpeed + 2*iolc->c2*iolc->motorSpeed + iolc->c1));
     iolc->u = ((iolc->v - f_x) / g_x);
-	iolc->u = (iolc->u > 0.3) ? 0.3 : ((iolc->u < 0.0) ? 0.0 : iolc->u);
+	iolc->u = (iolc->u > 0.8) ? 0.8 : ((iolc->u < 0.0) ? 0.0 : iolc->u);
 
 	/* Using Euler Integration Method to Calculate the Motor Speed */
 	double motorSpeed_dot = (iolc->a2*iolc->motorSpeed*iolc->motorSpeed + iolc->a1*iolc->motorSpeed + iolc->b0*iolc->u);
@@ -219,7 +205,7 @@ void IOLC_Calculate4(IOLC4 *iolc)
     }
 
     uint64_t time_now = hrt_absolute_time();
-    double dt = math::constrain(((time_now - iolc->last_timestamp) * 1e-6f), 0.001f, 0.0025f);
+    double dt = math::constrain(((time_now - iolc->last_timestamp) * 1e-6f), 0.001f, 0.05f);
     iolc->last_timestamp = time_now;
     iolc->dt = dt;
 
@@ -232,7 +218,7 @@ void IOLC_Calculate4(IOLC4 *iolc)
 		*(iolc->a2*iolc->motorSpeed*iolc->motorSpeed + iolc->a1*iolc->motorSpeed);
 	double g_x = (iolc->b0*(3*iolc->c3*iolc->motorSpeed*iolc->motorSpeed + 2*iolc->c2*iolc->motorSpeed + iolc->c1));
     iolc->u = ((iolc->v - f_x) / g_x);
-	iolc->u = (iolc->u > 0.3) ? 0.3 : ((iolc->u < 0.0) ? 0.0 : iolc->u);
+	iolc->u = (iolc->u > 0.8) ? 0.8 : ((iolc->u < 0.0) ? 0.0 : iolc->u);
 
 	/* Using Euler Integration Method to Calculate the Motor Speed */
 	double motorSpeed_dot = (iolc->a2*iolc->motorSpeed*iolc->motorSpeed + iolc->a1*iolc->motorSpeed + iolc->b0*iolc->u);
@@ -288,7 +274,6 @@ int ThrustFeedbackControl::main()
     _iolc.c3 = iolc_c3;
     _iolc.d1 = iolc_d1;
     _iolc.d2 = iolc_d2;
-    _iolc.motorSpeed = motorSpeed_FF;
 
     _iolc2.a1 = iolc_a1;
     _iolc2.a2 = iolc_a2;
@@ -299,7 +284,6 @@ int ThrustFeedbackControl::main()
     _iolc2.c3 = iolc_c3;
     _iolc2.d1 = iolc_d1;
     _iolc2.d2 = iolc_d2;
-    _iolc2.motorSpeed = motorSpeed_FF;
 
     _iolc3.a1 = iolc_a1;
     _iolc3.a2 = iolc_a2;
@@ -310,7 +294,6 @@ int ThrustFeedbackControl::main()
     _iolc3.c3 = iolc_c3;
     _iolc3.d1 = iolc_d1;
     _iolc3.d2 = iolc_d2;
-    _iolc3.motorSpeed = motorSpeed_FF;
 
     _iolc4.a1 = iolc_a1;
     _iolc4.a2 = iolc_a2;
@@ -321,7 +304,6 @@ int ThrustFeedbackControl::main()
     _iolc4.c3 = iolc_c3;
     _iolc4.d1 = iolc_d1;
     _iolc4.d2 = iolc_d2;
-    _iolc4.motorSpeed = motorSpeed_FF;
 
     while(appState.isRunning())
     {
@@ -355,10 +337,10 @@ int ThrustFeedbackControl::main()
                 thrustdata.thrust_raw_data_2 = sensordata.data2 / 1000.0f;
                 thrustdata.thrust_raw_data_3 = sensordata.data3 / 1000.0f;
                 thrustdata.thrust_raw_data_4 = sensordata.data4 / 1000.0f;
-                thrustdata.thrust_raw_data_1 = (thrustdata.thrust_raw_data_1 > 2.0f) ? 2.0f : ((thrustdata.thrust_raw_data_1 < 0.0f) ? 0.0f : thrustdata.thrust_raw_data_1);
-                thrustdata.thrust_raw_data_2 = (thrustdata.thrust_raw_data_2 > 2.0f) ? 2.0f : ((thrustdata.thrust_raw_data_2 < 0.0f) ? 0.0f : thrustdata.thrust_raw_data_2);
-                thrustdata.thrust_raw_data_3 = (thrustdata.thrust_raw_data_3 > 2.0f) ? 2.0f : ((thrustdata.thrust_raw_data_3 < 0.0f) ? 0.0f : thrustdata.thrust_raw_data_3);
-                thrustdata.thrust_raw_data_4 = (thrustdata.thrust_raw_data_4 > 2.0f) ? 2.0f : ((thrustdata.thrust_raw_data_4 < 0.0f) ? 0.0f : thrustdata.thrust_raw_data_4);
+                thrustdata.thrust_raw_data_1 = (thrustdata.thrust_raw_data_1 > 2.0f) ? 2.0f : ((thrustdata.thrust_raw_data_1 < 0.2f) ? 0.2f : thrustdata.thrust_raw_data_1);
+                thrustdata.thrust_raw_data_2 = (thrustdata.thrust_raw_data_2 > 2.0f) ? 2.0f : ((thrustdata.thrust_raw_data_2 < 0.2f) ? 0.2f : thrustdata.thrust_raw_data_2);
+                thrustdata.thrust_raw_data_3 = (thrustdata.thrust_raw_data_3 > 2.0f) ? 2.0f : ((thrustdata.thrust_raw_data_3 < 0.2f) ? 0.2f : thrustdata.thrust_raw_data_3);
+                thrustdata.thrust_raw_data_4 = (thrustdata.thrust_raw_data_4 > 2.0f) ? 2.0f : ((thrustdata.thrust_raw_data_4 < 0.2f) ? 0.2f : thrustdata.thrust_raw_data_4);
 
                 float dt = (float)(thrustdata.timestamp - last_timestamp) / 1000000.0f;
                 // second order kalman filter
@@ -366,10 +348,10 @@ int ThrustFeedbackControl::main()
                 thrustdata.thrust_kalman_filter_data_2 = thrust_kalman_filter.thrust_kalman_filter_BFS2(dt, thrustdata.thrust_raw_data_2);
                 thrustdata.thrust_kalman_filter_data_3 = thrust_kalman_filter.thrust_kalman_filter_BFS3(dt, thrustdata.thrust_raw_data_3);
                 thrustdata.thrust_kalman_filter_data_4 = thrust_kalman_filter.thrust_kalman_filter_BFS4(dt, thrustdata.thrust_raw_data_4);
-                thrustdata.thrust_kalman_filter_data_1 = (thrustdata.thrust_kalman_filter_data_1 > 2.0f) ? 2.0f : ((thrustdata.thrust_kalman_filter_data_1 < 0.0f) ? 0.0f : thrustdata.thrust_kalman_filter_data_1);
-                thrustdata.thrust_kalman_filter_data_2 = (thrustdata.thrust_kalman_filter_data_2 > 2.0f) ? 2.0f : ((thrustdata.thrust_kalman_filter_data_2 < 0.0f) ? 0.0f : thrustdata.thrust_kalman_filter_data_2);
-                thrustdata.thrust_kalman_filter_data_3 = (thrustdata.thrust_kalman_filter_data_3 > 2.0f) ? 2.0f : ((thrustdata.thrust_kalman_filter_data_3 < 0.0f) ? 0.0f : thrustdata.thrust_kalman_filter_data_3);
-                thrustdata.thrust_kalman_filter_data_4 = (thrustdata.thrust_kalman_filter_data_4 > 2.0f) ? 2.0f : ((thrustdata.thrust_kalman_filter_data_4 < 0.0f) ? 0.0f : thrustdata.thrust_kalman_filter_data_4);
+                thrustdata.thrust_kalman_filter_data_1 = (thrustdata.thrust_kalman_filter_data_1 > 2.0f) ? 2.0f : ((thrustdata.thrust_kalman_filter_data_1 < 0.2f) ? 0.2f : thrustdata.thrust_kalman_filter_data_1);
+                thrustdata.thrust_kalman_filter_data_2 = (thrustdata.thrust_kalman_filter_data_2 > 2.0f) ? 2.0f : ((thrustdata.thrust_kalman_filter_data_2 < 0.2f) ? 0.2f : thrustdata.thrust_kalman_filter_data_2);
+                thrustdata.thrust_kalman_filter_data_3 = (thrustdata.thrust_kalman_filter_data_3 > 2.0f) ? 2.0f : ((thrustdata.thrust_kalman_filter_data_3 < 0.2f) ? 0.2f : thrustdata.thrust_kalman_filter_data_3);
+                thrustdata.thrust_kalman_filter_data_4 = (thrustdata.thrust_kalman_filter_data_4 > 2.0f) ? 2.0f : ((thrustdata.thrust_kalman_filter_data_4 < 0.2f) ? 0.2f : thrustdata.thrust_kalman_filter_data_4);
 
                 last_timestamp = thrustdata.timestamp;
                 _thrustdata_pub.publish(thrustdata);
@@ -394,14 +376,10 @@ int ThrustFeedbackControl::main()
         // _thrust_desired(2) = ( _thrust_desired(2) > _param_tfc_thrust_max.get()) ? _param_tfc_thrust_max.get() : ((_thrust_desired(2) < 0.0f) ? 0.0f : _thrust_desired(2));
         // _thrust_desired(3) = ( _thrust_desired(3) > _param_tfc_thrust_max.get()) ? _param_tfc_thrust_max.get() : ((_thrust_desired(3) < 0.0f) ? 0.0f : _thrust_desired(3));
 
-        _thrust_desired(0) = _param_tfc_pwm_to_thrust_factor1.get() * thrustdesireddata.thrust_desired1 - 0.3f;
-        _thrust_desired(1) = _param_tfc_pwm_to_thrust_factor2.get() * thrustdesireddata.thrust_desired2 - 0.3f;
-        _thrust_desired(2) = _param_tfc_pwm_to_thrust_factor3.get() * thrustdesireddata.thrust_desired3 - 0.3f;
-        _thrust_desired(3) = _param_tfc_pwm_to_thrust_factor4.get() * thrustdesireddata.thrust_desired4 - 0.3f;
-        // _thrust_desired(0) = _thrust_desired_1_lowpass_filter.apply(_thrust_desired(0));
-        // _thrust_desired(1) = _thrust_desired_2_lowpass_filter.apply(_thrust_desired(1));
-        // _thrust_desired(2) = _thrust_desired_3_lowpass_filter.apply(_thrust_desired(2));
-        // _thrust_desired(3) = _thrust_desired_4_lowpass_filter.apply(_thrust_desired(3));
+        _thrust_desired(0) = _param_tfc_pwm_to_thrust_factor1.get() * thrustdesireddata.thrust_desired1;
+        _thrust_desired(1) = _param_tfc_pwm_to_thrust_factor2.get() * thrustdesireddata.thrust_desired2;
+        _thrust_desired(2) = _param_tfc_pwm_to_thrust_factor3.get() * thrustdesireddata.thrust_desired3;
+        _thrust_desired(3) = _param_tfc_pwm_to_thrust_factor4.get() * thrustdesireddata.thrust_desired4;
         _thrust_desired(0) = ( _thrust_desired(0) > _param_tfc_thrust_max.get()) ? _param_tfc_thrust_max.get() : ((_thrust_desired(0) < 0.0f) ? 0.0f : _thrust_desired(0));
         _thrust_desired(1) = ( _thrust_desired(1) > _param_tfc_thrust_max.get()) ? _param_tfc_thrust_max.get() : ((_thrust_desired(1) < 0.0f) ? 0.0f : _thrust_desired(1));
         _thrust_desired(2) = ( _thrust_desired(2) > _param_tfc_thrust_max.get()) ? _param_tfc_thrust_max.get() : ((_thrust_desired(2) < 0.0f) ? 0.0f : _thrust_desired(2));
@@ -479,10 +457,6 @@ int ThrustFeedbackControl::main()
         // thrustcontroldata.motor_speed2 = _iolc2.motorSpeed;
         // thrustcontroldata.motor_speed3 = _iolc3.motorSpeed;
         // thrustcontroldata.motor_speed4 = _iolc4.motorSpeed;
-        thrustcontroldata.deta_t_1 = _iolc.dt;
-        thrustcontroldata.deta_t_2 = _iolc2.dt;
-        thrustcontroldata.deta_t_3 = _iolc3.dt;
-        thrustcontroldata.deta_t_4 = _iolc4.dt;
         thrustcontroldata.thrust_error1 = _iolc.err;
         thrustcontroldata.thrust_error2 = _iolc2.err;
         thrustcontroldata.thrust_error3 = _iolc3.err;
@@ -491,20 +465,14 @@ int ThrustFeedbackControl::main()
         thrustcontroldata.thrust_desired2 = _thrust_desired(1);
         thrustcontroldata.thrust_desired3 = _thrust_desired(2);
         thrustcontroldata.thrust_desired4 = _thrust_desired(3);
-        thrustcontroldata.thrust_feedback_out1 = _param_tfc_iolc_k1.get() * static_cast<float>(_iolc.u);
-        thrustcontroldata.thrust_feedback_out2 = _param_tfc_iolc_k2.get() * static_cast<float>(_iolc2.u);
-        thrustcontroldata.thrust_feedback_out3 = _param_tfc_iolc_k3.get() * static_cast<float>(_iolc3.u);
-        thrustcontroldata.thrust_feedback_out4 = _param_tfc_iolc_k4.get() * static_cast<float>(_iolc4.u);
-        _total_output(0) = _param_tfc_iolc_k1.get() * static_cast<float>(_iolc.u) + _iolc_u_ff(0);
-        _total_output(1) = _param_tfc_iolc_k2.get() * static_cast<float>(_iolc2.u) + _iolc_u_ff(1);
-        _total_output(2) = _param_tfc_iolc_k3.get() * static_cast<float>(_iolc3.u) + _iolc_u_ff(2);
-        _total_output(3) = _param_tfc_iolc_k4.get() * static_cast<float>(_iolc4.u) + _iolc_u_ff(3);
-
-        // _total_output(0) = _output_1_lowpass_filter.apply(_total_output(0));
-        // _total_output(1) = _output_2_lowpass_filter.apply(_total_output(1));
-        // _total_output(2) = _output_3_lowpass_filter.apply(_total_output(2));
-        // _total_output(3) = _output_4_lowpass_filter.apply(_total_output(3));
-
+        thrustcontroldata.thrust_feedback_out1 = _iolc.u;
+        thrustcontroldata.thrust_feedback_out2 = _iolc2.u;
+        thrustcontroldata.thrust_feedback_out3 = _iolc3.u;
+        thrustcontroldata.thrust_feedback_out4 = _iolc4.u;
+        _total_output(0) = static_cast<float>(_iolc.u) + _iolc_u_ff(0);
+        _total_output(1) = static_cast<float>(_iolc2.u) + _iolc_u_ff(1);
+        _total_output(2) = static_cast<float>(_iolc3.u) + _iolc_u_ff(2);
+        _total_output(3) = static_cast<float>(_iolc4.u) + _iolc_u_ff(3);
         thrustcontroldata.thrust_feedforward_out1 = _iolc_u_ff(0);
         thrustcontroldata.thrust_feedforward_out2 = _iolc_u_ff(1);
         thrustcontroldata.thrust_feedforward_out3 = _iolc_u_ff(2);

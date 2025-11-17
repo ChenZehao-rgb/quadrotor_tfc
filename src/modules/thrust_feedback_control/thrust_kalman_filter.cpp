@@ -331,3 +331,71 @@ float ThrustKalmanFilter::BFS1_One_Order_Kalman(float inputdata)
 	
 	return BFS1_forcekalman_t;
 }
+
+// 输出信号u1进行卡尔曼滤波
+float ThrustKalmanFilter::thrust_kalman_filter_u1(float mea, float pre)
+{
+    parameters_update();
+    _cov_estimate_u = _param_estimate_u.get();
+    _cov_measure_u = _param_measure_u.get();
+
+    U1_PPredictive_t = U1_Pkalman_t_1 + _cov_estimate_u;
+    U1_Kg_t = U1_PPredictive_t / (U1_PPredictive_t + _cov_measure_u);
+    U1_forcekalman_t = pre + U1_Kg_t * (mea - pre);
+    U1_PKalman_t = (1 - U1_Kg_t) * U1_PPredictive_t;
+
+    U1_Pkalman_t_1 = U1_PKalman_t;
+
+    return U1_forcekalman_t;
+}
+
+// 输出信号u2进行卡尔曼滤波
+float ThrustKalmanFilter::thrust_kalman_filter_u2(float mea, float pre)
+{
+    parameters_update();
+    _cov_estimate_u = _param_estimate_u.get();
+    _cov_measure_u = _param_measure_u.get();
+
+    U2_PPredictive_t = U2_Pkalman_t_1 + _cov_estimate_u;
+    U2_Kg_t = U2_PPredictive_t / (U2_PPredictive_t + _cov_measure_u);
+    U2_forcekalman_t = pre + U2_Kg_t * (mea - pre);
+    U2_PKalman_t = (1 - U2_Kg_t) * U2_PPredictive_t;
+
+    U2_Pkalman_t_1 = U2_PKalman_t;
+
+    return U2_forcekalman_t;
+}
+
+// 输出信号u3进行卡尔曼滤波
+float ThrustKalmanFilter::thrust_kalman_filter_u3(float mea, float pre)
+{
+    parameters_update();
+    _cov_estimate_u = _param_estimate_u.get();
+    _cov_measure_u = _param_measure_u.get();
+
+    U3_PPredictive_t = U3_Pkalman_t_1 + _cov_estimate_u;
+    U3_Kg_t = U3_PPredictive_t / (U3_PPredictive_t + _cov_measure_u);
+    U3_forcekalman_t = pre + U3_Kg_t * (mea - pre);
+    U3_PKalman_t = (1 - U3_Kg_t) * U3_PPredictive_t;
+
+    U3_Pkalman_t_1 = U3_PKalman_t;
+
+    return U3_forcekalman_t;
+}
+
+// 输出信号u4进行卡尔曼滤波
+float ThrustKalmanFilter::thrust_kalman_filter_u4(float mea, float pre)
+{
+    parameters_update();
+    _cov_estimate_u = _param_estimate_u.get();
+    _cov_measure_u = _param_measure_u.get();
+
+    U4_PPredictive_t = U4_Pkalman_t_1 + _cov_estimate_u;
+    U4_Kg_t = U4_PPredictive_t / (U4_PPredictive_t + _cov_measure_u);
+    U4_forcekalman_t = pre + U4_Kg_t * (mea - pre);
+    U4_PKalman_t = (1 - U4_Kg_t) * U4_PPredictive_t;
+
+    U4_Pkalman_t_1 = U4_PKalman_t;
+
+    return U4_forcekalman_t;
+}

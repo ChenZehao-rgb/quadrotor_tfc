@@ -60,6 +60,19 @@ Vector3f RateControl::update(const Vector3f &rate, const Vector3f &rate_sp, cons
 	// angular rates error
 	Vector3f rate_error = rate_sp - rate;
 
+	_rate_error.rate_error_roll  = rate_error(0);
+	_rate_error.rate_error_pitch = rate_error(1);
+	_rate_error.rate_error_yaw   = rate_error(2);
+	_rate_error.rate_sp_roll 	 = rate_sp(0);
+	_rate_error.rate_sp_pitch 	 = rate_sp(1);
+	_rate_error.rate_sp_yaw 	 = rate_sp(2);
+	_rate_error.rate_roll 		 = rate(0);
+	_rate_error.rate_pitch 		 = rate(1);
+	_rate_error.rate_yaw 		 = rate(2);
+
+	_rate_error.timestamp = hrt_absolute_time();
+	_robust_control_rate_error_pub.publish(_rate_error);
+
 	// PID control with feed forward
 	const Vector3f torque = _gain_p.emult(rate_error) + _rate_int - _gain_d.emult(angular_accel) + _gain_ff.emult(rate_sp);
 

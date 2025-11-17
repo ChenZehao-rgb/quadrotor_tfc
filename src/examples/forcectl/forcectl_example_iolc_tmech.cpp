@@ -406,7 +406,8 @@ void IOLC_EKF_calculate(IOLC_EKF *iolc)
 				 static uint64_t forcedata_last_timestamp = force_data.timestamp;
 				 force_data.force_max = _param_forcectl_force_max.get();
 				//  force_data.force_raw_data = force_data.force_max*(2048 - adc.raw_data[4])/2048.0f;
-                 force_data.force_raw_data = sensordata.data4 / 1000.0f;
+                 force_data.force_raw_data = sensordata.data4 / 1000.0f; // barometric force sensor data
+				//  force_data.force_raw_data = sensordata.data1 / 1000.0f; // commercial force sensor data
 				 force_data.force_lowpass_filtered_data = _forcectl_lowpass_filter.apply(force_data.force_raw_data);
 				 float dt = (float)(force_data.timestamp - forcedata_last_timestamp)/1000000.0f;
 				 force_data.force_kf_filtered_data = forcectl_kf_filter.force_kf_filter(dt, force_data.force_raw_data);
@@ -431,30 +432,30 @@ void IOLC_EKF_calculate(IOLC_EKF *iolc)
  
 		 parameters_update();
 		 orb_copy(ORB_ID(vehicle_attitude), atti_sub_fd, &vehicle_attitude);
-		 if(_param_forcectl_force_exp.get())
-		 {
-			 control_data.weight_com = _param_forcectl_weight.get();
-			 if(_param_forcectl_weight_compensation.get())
-			 {
-				 float pitch = asin(-2.0f * vehicle_attitude.q[1] * vehicle_attitude.q[3] + 2.0f * vehicle_attitude.q[0] * vehicle_attitude.q[2]);
-				 pitch = (pitch > 3.14159f/2) ? 3.14159f/2 : ((pitch < -3.14159f/2) ? -3.14159f/2 : pitch);
-				 control_data.weight_com = control_data.weight_com * (float)cos(pitch);
-			 }
-			 float torque_deisred = force_exp_from_fc.control[1];
-			 torque_deisred = (torque_deisred > 1.0f) ? 1.0f : ((torque_deisred < -1.0f) ? -1.0f : torque_deisred);
-			 control_data.force_exp = (_param_forcectl_angacc_to_force.get() * torque_deisred) + control_data.weight_com;
-			 control_data.force_exp_no_weightcom = (_param_forcectl_angacc_to_force.get() * force_exp_from_fc.control[1]);
-			 control_data.force_exp_torque = force_exp_from_fc.control[1];
-			 control_data.force_exp_new = (_param_forcectl_angacc_to_force.get() * (force_exp_from_fc.control[1] + 1.0f)) + control_data.weight_com;
-			 control_data.force_exp = (control_data.force_exp > force_data.force_max) ? force_data.force_max : ((control_data.force_exp < 0.0f) ? 0.0f : control_data.force_exp);
-		 }
-		 else
-		 {
-			 control_data.force_exp = force_data.force_max * force_exp_from_rc.control[3];
-			 control_data.force_exp = (control_data.force_exp > force_data.force_max) ? force_data.force_max : ((control_data.force_exp < 0.0f) ? 0.0f : control_data.force_exp);
-		 }
+		//  if(_param_forcectl_force_exp.get())
+		//  {
+		// 	 control_data.weight_com = _param_forcectl_weight.get();
+		// 	 if(_param_forcectl_weight_compensation.get())
+		// 	 {
+		// 		 float pitch = asin(-2.0f * vehicle_attitude.q[1] * vehicle_attitude.q[3] + 2.0f * vehicle_attitude.q[0] * vehicle_attitude.q[2]);
+		// 		 pitch = (pitch > 3.14159f/2) ? 3.14159f/2 : ((pitch < -3.14159f/2) ? -3.14159f/2 : pitch);
+		// 		 control_data.weight_com = control_data.weight_com * (float)cos(pitch);
+		// 	 }
+		// 	 float torque_deisred = force_exp_from_fc.control[1];
+		// 	 torque_deisred = (torque_deisred > 1.0f) ? 1.0f : ((torque_deisred < -1.0f) ? -1.0f : torque_deisred);
+		// 	 control_data.force_exp = (_param_forcectl_angacc_to_force.get() * torque_deisred) + control_data.weight_com;
+		// 	 control_data.force_exp_no_weightcom = (_param_forcectl_angacc_to_force.get() * force_exp_from_fc.control[1]);
+		// 	 control_data.force_exp_torque = force_exp_from_fc.control[1];
+		// 	 control_data.force_exp_new = (_param_forcectl_angacc_to_force.get() * (force_exp_from_fc.control[1] + 1.0f)) + control_data.weight_com;
+		// 	 control_data.force_exp = (control_data.force_exp > force_data.force_max) ? force_data.force_max : ((control_data.force_exp < 0.0f) ? 0.0f : control_data.force_exp);
+		//  }
+		//  else
+		//  {
+		// 	 control_data.force_exp = force_data.force_max * force_exp_from_rc.control[3];
+		// 	 control_data.force_exp = (control_data.force_exp > force_data.force_max) ? force_data.force_max : ((control_data.force_exp < 0.0f) ? 0.0f : control_data.force_exp);
+		//  }
 
-		// control_data.force_exp = _param_forcectl_iolc_d.get();
+		control_data.force_exp = _param_forcectl_iolc_d.get();
 		// control_data.force_exp = force_data.force_max * force_exp_from_rc.control[3];
 		// control_data.force_exp = (control_data.force_exp > force_data.force_max) ? force_data.force_max : ((control_data.force_exp < 0.0f) ? 0.0f : control_data.force_exp);
 
@@ -472,10 +473,10 @@ void IOLC_EKF_calculate(IOLC_EKF *iolc)
  
 		 if((rc_channals_data.channels[5] > -0.3f)&&(rc_channals_data.channels[5] < 0.3f))
 		 {
-			//  control_data.kp = _param_forcectl_pid_p.get();
-			//  control_data.ki = _param_forcectl_pid_i.get();
-			//  control_data.kd = _param_forcectl_pid_d.get();
-			//  control_data.force_error = control_data.force_exp - force_data.force_kf_filtered_data;
+			 control_data.kp = _param_forcectl_pid_p.get();
+			 control_data.ki = _param_forcectl_pid_i.get();
+			 control_data.kd = _param_forcectl_pid_d.get();
+			 control_data.force_error = control_data.force_exp - force_data.force_kf_filtered_data;
  
 			//  if(_param_forcectl_pid_mode.get() == 0)
 			//  {
@@ -492,25 +493,25 @@ void IOLC_EKF_calculate(IOLC_EKF *iolc)
 			//  }
 			//  else if(_param_forcectl_pid_mode.get() == 1)
 			//  {
-			// 	 posi_pid.Kp = control_data.kp;
-			// 	 posi_pid.Ki = control_data.ki;
-			// 	 posi_pid.limit_i = _param_forcectl_pid_limit_i.get();
-			// 	 posi_pid.factorbase_i = _param_forcectl_pid_factorcase_i.get();
-			// 	 posi_pid.Kd = control_data.kd;
-			// 	 posi_pid.err = control_data.force_error;
+				 posi_pid.Kp = control_data.kp;
+				 posi_pid.Ki = control_data.ki;
+				 posi_pid.limit_i = _param_forcectl_pid_limit_i.get();
+				 posi_pid.factorbase_i = _param_forcectl_pid_factorcase_i.get();
+				 posi_pid.Kd = control_data.kd;
+				 posi_pid.err = control_data.force_error;
  
-			// 	 Positional_PID_calculate(&posi_pid);
-			// 	 control_data.i_output = posi_pid.i_out;
+				 Positional_PID_calculate(&posi_pid);
+				 control_data.i_output = posi_pid.i_out;
  
-			// 	 control_data.force_control_out = posi_pid.output;
+				 control_data.force_control_out = posi_pid.output;
 			//  }
 
 			/*Td=(1-alpha)*omiga + aplha*omiga2*/
-			float forcectl_alpha = _param_forcectl_output_alpha.get();
-			forcectl_alpha = (forcectl_alpha < 0.01f) ? 0.01f : ((forcectl_alpha > 1.0f) ? 1.0f : forcectl_alpha);
-			control_data.force_control_out = ((float)sqrt((1.0f - forcectl_alpha)*(1.0f - forcectl_alpha) + 4.0f*forcectl_alpha*control_data.force_exp) + (forcectl_alpha - 1.0f))/(2.0f * forcectl_alpha);
-			control_data.force_control_out = control_data.force_control_out * 0.56f;
-			control_data.force_control_out = (control_data.force_control_out < 0) ? 0 : ((control_data.force_control_out > 0.8f) ? 0.8f : control_data.force_control_out);
+			// float forcectl_alpha = _param_forcectl_output_alpha.get();
+			// forcectl_alpha = (forcectl_alpha < 0.01f) ? 0.01f : ((forcectl_alpha > 1.0f) ? 1.0f : forcectl_alpha);
+			// control_data.force_control_out = ((float)sqrt((1.0f - forcectl_alpha)*(1.0f - forcectl_alpha) + 4.0f*forcectl_alpha*control_data.force_exp) + (forcectl_alpha - 1.0f))/(2.0f * forcectl_alpha);
+			// control_data.force_control_out = control_data.force_control_out * 0.56f;
+			// control_data.force_control_out = (control_data.force_control_out < 0) ? 0 : ((control_data.force_control_out > 0.8f) ? 0.8f : control_data.force_control_out);
 			// PX4_INFO("force_control_out_2:\t%.1f", static_cast<double>(control_data.force_control_out));
 		 }
          else if(rc_channals_data.channels[5] > 0.3f)

@@ -215,6 +215,13 @@ set(msg_files
 	thrust_desired_data.msg
 	thrust_iolc_ekf.msg
 	esc_input.msg
+	robust_control_state_error.msg
+	robust_control_position_error.msg
+	robust_control_velocity_error.msg
+	robust_control_attitude_error.msg
+	robust_control_rate_error.msg
+	robust_control_data.msg
+	robust_control_data_pid.msg
 )
 
 if(NOT px4_constrained_flash_build)

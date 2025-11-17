@@ -1,0 +1,5 @@
+menuconfig MODULES_MC_ROBUST_CONTROL
+	bool "mc_robust_control"
+	default n
+	---help---
+		Enable support for mc_robust_control

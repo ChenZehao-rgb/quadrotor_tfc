@@ -116,6 +116,13 @@ matrix::Vector3f AttitudeControl::update(const Quatf &q) const
 	// 2.f 作为比例常数，表示将四元数误差转换为实际的角度误差。
 	const Vector3f eq = 2.f * qe.canonical().imag();
 
+	_attitude_error.attitude_error_roll = eq(0);
+	_attitude_error.attitude_error_pitch = eq(1);
+	_attitude_error.attitude_error_yaw = eq(2);
+
+	_attitude_error.timestamp = hrt_absolute_time();
+	_robust_control_attitude_error_pub.publish(_attitude_error);
+
 	// calculate angular rates setpoint
 	// 将姿态误差向量 eq 乘以比例增益 _proportional_gain，生成角速度设定值 rate_setpoint。
 	// 这是基于比例控制律的姿态控制输出。

@@ -75,6 +75,8 @@
 #include <uORB/topics/rc_channels.h>
 #include "thrust_kalman_filter.hpp"
 
+#include <lib/mathlib/math/filter/LowPassFilter2p.hpp>
+
 using namespace time_literals;
 
 class ThrustFeedbackControl : public ModuleBase<ThrustFeedbackControl>, public ModuleParams
@@ -93,7 +95,7 @@ private:
 
     DEFINE_PARAMETERS(
         (ParamFloat<px4::params::TFC_THRUST_MAX>) _param_tfc_thrust_max,
-        (ParamFloat<px4::params::TFC_IOLC_KP>) _param_tfc_iolc_kp,
+        (ParamFloat<px4::params::TFC_IOLC_K>) _param_tfc_iolc_k,
         (ParamFloat<px4::params::TFC_IOLC_KI>) _param_tfc_iolc_ki,
         (ParamFloat<px4::params::TFC_LIM_I>) _param_tfc_lim_i,
         (ParamFloat<px4::params::TFC_ALPHA>) _param_tfc_alpha,
@@ -101,7 +103,26 @@ private:
         (ParamFloat<px4::params::TFC_IOLC_KP2>) _param_tfc_iolc_kp2,
         (ParamFloat<px4::params::TFC_IOLC_KP3>) _param_tfc_iolc_kp3,
         (ParamFloat<px4::params::TFC_IOLC_KP4>) _param_tfc_iolc_kp4,
-        (ParamFloat<px4::params::TFC_START>) _param_tfc_start
+        (ParamFloat<px4::params::TFC_START>) _param_tfc_start,
+        (ParamFloat<px4::params::TFC_IOLC_KFF>) _param_tfc_iolc_kff,
+        (ParamFloat<px4::params::TFC_IOLC_KFF_1>) _param_tfc_iolc_kff_1,
+        (ParamFloat<px4::params::TFC_IOLC_KFF_2>) _param_tfc_iolc_kff_2,
+        (ParamFloat<px4::params::TFC_IOLC_KFF_3>) _param_tfc_iolc_kff_3,
+        (ParamFloat<px4::params::TFC_IOLC_KFF_4>) _param_tfc_iolc_kff_4,
+        (ParamFloat<px4::params::TFC_PWM_TO_THR_1>) _param_tfc_pwm_to_thrust_factor1,
+        (ParamFloat<px4::params::TFC_PWM_TO_THR_2>) _param_tfc_pwm_to_thrust_factor2,
+        (ParamFloat<px4::params::TFC_PWM_TO_THR_3>) _param_tfc_pwm_to_thrust_factor3,
+        (ParamFloat<px4::params::TFC_PWM_TO_THR_4>) _param_tfc_pwm_to_thrust_factor4,
+        (ParamFloat<px4::params::TFC_MS_FF>) _param_tfc_ms_ff,
+        (ParamFloat<px4::params::TFC_PID_KP>) _param_tfc_pid_kp,
+        (ParamFloat<px4::params::TFC_PID_KI>) _param_tfc_pid_ki,
+        (ParamFloat<px4::params::TFC_PID_KD>) _param_tfc_pid_kd,
+        (ParamFloat<px4::params::TFC_FAC_I>) _param_tfc_fac_i,
+        (ParamFloat<px4::params::TFC_PID_LIM_I>) _param_tfc_pid_lim_i,
+        (ParamFloat<px4::params::TFC_IOLC_K1>) _param_tfc_iolc_k1,
+        (ParamFloat<px4::params::TFC_IOLC_K2>) _param_tfc_iolc_k2,
+        (ParamFloat<px4::params::TFC_IOLC_K3>) _param_tfc_iolc_k3,
+        (ParamFloat<px4::params::TFC_IOLC_K4>) _param_tfc_iolc_k4
     )
 
     uORB::SubscriptionInterval	_parameter_update_sub{ORB_ID(parameter_update), 1_s};
@@ -125,6 +146,7 @@ private:
     double iolc_c2 = -1.518e-6*9.5493*9.5493;
     double iolc_c1 = 3.573e-3*9.5493;
     float Thrust_Max; // 单轴最大升力为2kg
+    double motorSpeed_FF = 50.0;
 
     float iolc_d1 = 1.755;
     float iolc_d2 = 0.745;
@@ -134,6 +156,7 @@ private:
     matrix::Vector<float, 4> _control_output;
     matrix::Vector<float, 4> _total_output;
     matrix::Vector<float, 4> _iolc_u_ff;
+    matrix::Vector<float, 4> _thrust_kalman_filter_control_out;
 
     struct rc_channels_s rc_channals_data{};
 };

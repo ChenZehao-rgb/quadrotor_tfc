@@ -45,6 +45,7 @@ using namespace px4::logger;
 
 void LoggedTopics::add_default_topics()
 {
+	add_topic("rpm", 10);
 	add_topic("thrust_iolc_ekf", 10);
 	add_topic("barometric_force_sensor", 10);
 	add_topic("adc_report", 10);
@@ -56,6 +57,9 @@ void LoggedTopics::add_default_topics()
 	add_topic("thrust_control_data", 10);
 	add_topic("thrust_desired_data", 10);
 	add_topic("esc_input", 10);
+
+	add_topic("robust_control_data_pid", 10);
+	add_topic("robust_control_data", 10);
 	
 	//add_topic("forcectl_kf_filterdata", 10);
 	add_topic("action_request");

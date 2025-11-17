@@ -445,6 +445,7 @@ MultirotorMixer::mix(float *outputs, unsigned space)
 	// int thrustcontroldata_sub_fd = orb_subscribe(ORB_ID(thrust_control_data));
 	// orb_set_interval(thrustcontroldata_sub_fd, 20);
 	_thrust_control_data_sub.update(&thrustcontroldata);
+	_robust_control_data_sub.update(&_robust_control_data);
 
 	// px4_pollfd_struct_t fds[] =
 	// {
@@ -463,6 +464,28 @@ MultirotorMixer::mix(float *outputs, unsigned space)
 	float pitch   = math::constrain(get_control(0, 1), -1.0f, 1.0f);
 	float yaw     = math::constrain(get_control(0, 2), -1.0f, 1.0f);
 	float thrust  = math::constrain(get_control(0, 3), 0.0f, 1.0f);
+
+	robust_control_data_pid.pid_desired_total_force = thrust;
+	robust_control_data_pid.pid_desired_torque_x = roll;
+	robust_control_data_pid.pid_desired_torque_y = pitch;
+	robust_control_data_pid.pid_desired_torque_z = yaw;
+
+	// 发布PID期望升力和力矩
+	robust_control_data_pid.timestamp = hrt_absolute_time();
+	_to_robust_control_data_pid_report.publish(robust_control_data_pid);
+
+	if (_robust_control_data.robust_control_start > 0.5f) 
+	{
+		// roll   = _robust_control_data.desired_torque_x;
+		// pitch  = _robust_control_data.desired_torque_y;
+		// yaw    = _robust_control_data.desired_torque_z;
+		// // thrust = _robust_control_data.desired_total_force;
+
+		// thrust = _robust_control_data.total_desired_total_force;
+		roll   = _robust_control_data.total_desired_torque_x;
+		pitch  = _robust_control_data.total_desired_torque_y;
+		yaw    = _robust_control_data.total_desired_torque_z;
+	}
 
 	// thrustdesireddata.torque_pitch_desired = pitch;
 
@@ -558,12 +581,19 @@ MultirotorMixer::mix(float *outputs, unsigned space)
 	thrustdesireddata.open_loop_control_output3 = outputs[2];
 	thrustdesireddata.open_loop_control_output4 = outputs[3];
 
-	if (thrustcontroldata.thrust_start > 0.5f)
+	if ((thrustcontroldata.thrust_start > 0.5f)&&(thrustcontroldata.thrust_start < 1.5f))
 	{
 		outputs[0] = thrustcontroldata.thrust_control_out_pwm1;
 		outputs[1] = thrustcontroldata.thrust_control_out_pwm2;
 		outputs[2] = thrustcontroldata.thrust_control_out_pwm3;
 		outputs[3] = thrustcontroldata.thrust_control_out_pwm4;
+	}
+	else if(thrustcontroldata.thrust_start > 1.6f)
+	{
+		outputs[0] = thrustcontroldata.thrust_kalman_filter_control_out_pwm1;
+		outputs[1] = thrustcontroldata.thrust_kalman_filter_control_out_pwm2;
+		outputs[2] = thrustcontroldata.thrust_kalman_filter_control_out_pwm3;
+		outputs[3] = thrustcontroldata.thrust_kalman_filter_control_out_pwm4;
 	}
 
 	thrustdesireddata.full_process_output1 = outputs[0];

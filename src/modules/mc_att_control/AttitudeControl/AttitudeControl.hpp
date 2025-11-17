@@ -50,6 +50,9 @@
 
 #include <matrix/matrix/math.hpp>
 #include <mathlib/math/Limits.hpp>
+#include <uORB/uORB.h>
+#include <uORB/Publication.hpp>
+#include <uORB/topics/robust_control_attitude_error.h>
 
 class AttitudeControl
 {
@@ -107,4 +110,7 @@ private:
 
 	matrix::Quatf _attitude_setpoint_q; ///< latest known attitude setpoint e.g. from position control
 	float _yawspeed_setpoint{0.f}; ///< latest known yawspeed feed-forward setpoint
+
+	mutable robust_control_attitude_error_s _attitude_error = {};
+	mutable uORB::Publication<robust_control_attitude_error_s> _robust_control_attitude_error_pub {ORB_ID(robust_control_attitude_error)};
 };

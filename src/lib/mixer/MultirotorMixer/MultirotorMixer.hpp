@@ -39,6 +39,8 @@
 #include <uORB/topics/thrust_desired_data.h>
 #include <uORB/topics/thrust_control_data.h>
 #include <uORB/Subscription.hpp>
+#include <uORB/topics/robust_control_data.h>
+#include <uORB/topics/robust_control_data_pid.h>
 
 // #include <px4_platform_common/log.h>
 // #include <px4_platform_common/px4_config.h>
@@ -276,8 +278,15 @@ private:
 	thrust_desired_data_s thrustdesireddata = {};
     uORB::Publication<thrust_desired_data_s>  _to_thrustdesireddata_report{ORB_ID(thrust_desired_data)};
 
+	// 发布PID计算出的期望升力和力矩
+	robust_control_data_pid_s robust_control_data_pid = {};
+	uORB::Publication<robust_control_data_pid_s>  _to_robust_control_data_pid_report{ORB_ID(robust_control_data_pid)};
+
 	uORB::Subscription _thrust_control_data_sub{ORB_ID(thrust_control_data)};
 	thrust_control_data_s thrustcontroldata{};
+
+	uORB::Subscription _robust_control_data_sub{ORB_ID(robust_control_data)};
+	robust_control_data_s _robust_control_data{};
 
 	// void	parameters_update();
 

@@ -43,6 +43,9 @@
 
 #include <lib/mixer/MultirotorMixer/MultirotorMixer.hpp>
 #include <uORB/topics/rate_ctrl_status.h>
+#include <uORB/uORB.h>
+#include <uORB/Publication.hpp>
+#include <uORB/topics/robust_control_rate_error.h>
 
 class RateControl
 {
@@ -116,4 +119,7 @@ private:
 	// Feedback from control allocation
 	matrix::Vector<bool, 3> _control_allocator_saturation_negative;
 	matrix::Vector<bool, 3> _control_allocator_saturation_positive;
+
+	robust_control_rate_error_s _rate_error = {};
+	uORB::Publication<robust_control_rate_error_s> _robust_control_rate_error_pub {ORB_ID(robust_control_rate_error)};
 };

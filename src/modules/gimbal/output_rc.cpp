@@ -79,71 +79,72 @@ void OutputRC::update(const ControlData &control_data, bool new_setpoints)
 	forcectl_manual_control = (forcectl_manual_control < 0) ? 0 : ((forcectl_manual_control > 1.0f) ? 1.0f : forcectl_manual_control);
 
 	/* 单轴力反馈 */
-	// actuator_controls.control[0] = -1.0f;
-
-	// if(!vehicle_status.rc_signal_lost){
-	// 	if(rc_channals_data.channels[4] < 0.0f)
-	// 	{
-	// 		actuator_controls.control[0] = -1.0f;
-	// 	}
-	// 	else if(rc_channals_data.channels[4] > 0.0f)
-	// 	{
-	// 		if(rc_channals_data.channels[5] < -0.3f)
-	// 		{
-	// 			actuator_controls.control[0] = forcectl_manual_control*2.0f-1.0f;
-	// 		}
-	// 		else if(rc_channals_data.channels[5] > -0.3f)
-	// 		{
-	// 			actuator_controls.control[0] = forcectl_control_data.force_control_out*2.0f-1.0f;
-	// 		}
-	// 	}
-	// }
-
-	/* 整机力反馈 */
 	actuator_controls.control[0] = -1.0f;
-	actuator_controls.control[1] = -1.0f;
-	actuator_controls.control[2] = -1.0f;
-	actuator_controls.control[3] = -1.0f;
 
-	if(!vehicle_status.rc_signal_lost)
-	{
+	if(!vehicle_status.rc_signal_lost){
 		if(rc_channals_data.channels[4] < 0.0f)
 		{
 			actuator_controls.control[0] = -1.0f;
-			actuator_controls.control[1] = -1.0f;
-			actuator_controls.control[2] = -1.0f;
-			actuator_controls.control[3] = -1.0f;
 		}
 		else if(rc_channals_data.channels[4] > 0.0f)
 		{
 			if(rc_channals_data.channels[5] < -0.3f)
 			{
 				actuator_controls.control[0] = forcectl_manual_control*2.0f-1.0f;
-				actuator_controls.control[1] = forcectl_manual_control*2.0f-1.0f;
-				actuator_controls.control[2] = forcectl_manual_control*2.0f-1.0f;
-				actuator_controls.control[3] = forcectl_manual_control*2.0f-1.0f;
-				escinputpwm.manual_control_1 = actuator_controls.control[0];
-				escinputpwm.manual_control_2 = actuator_controls.control[1];
-				escinputpwm.manual_control_3 = actuator_controls.control[2];
-				escinputpwm.manual_control_4 = actuator_controls.control[3];
+				// actuator_controls.control[0] = -0.8f;
 			}
 			else if(rc_channals_data.channels[5] > -0.3f)
 			{
-				actuator_controls.control[0] = thrustcontroldata.thrust_control_out1*2.0f-1.0f;
-				actuator_controls.control[1] = thrustcontroldata.thrust_control_out2*2.0f-1.0f;
-				actuator_controls.control[2] = thrustcontroldata.thrust_control_out3*2.0f-1.0f;
-				actuator_controls.control[3] = thrustcontroldata.thrust_control_out4*2.0f-1.0f;
-				// actuator_controls.control[0] = -1.0f;
-				// actuator_controls.control[1] = -1.0f;
-				// actuator_controls.control[2] = -1.0f;
-				// actuator_controls.control[3] = -0.8f;
-				escinputpwm.thrust_control_1 = actuator_controls.control[0];
-				escinputpwm.thrust_control_2 = actuator_controls.control[1];
-				escinputpwm.thrust_control_3 = actuator_controls.control[2];
-				escinputpwm.thrust_control_4 = actuator_controls.control[3];
+				actuator_controls.control[0] = forcectl_control_data.force_control_out*2.0f-1.0f;
 			}
 		}
 	}
+
+	/* 整机力反馈 */
+	// actuator_controls.control[0] = -1.0f;
+	// actuator_controls.control[1] = -1.0f;
+	// actuator_controls.control[2] = -1.0f;
+	// actuator_controls.control[3] = -1.0f;
+
+	// if(!vehicle_status.rc_signal_lost)
+	// {
+	// 	if(rc_channals_data.channels[4] < 0.0f)
+	// 	{
+	// 		actuator_controls.control[0] = -1.0f;
+	// 		actuator_controls.control[1] = -1.0f;
+	// 		actuator_controls.control[2] = -1.0f;
+	// 		actuator_controls.control[3] = -1.0f;
+	// 	}
+	// 	else if(rc_channals_data.channels[4] > 0.0f)
+	// 	{
+	// 		if(rc_channals_data.channels[5] < -0.3f)
+	// 		{
+	// 			actuator_controls.control[0] = forcectl_manual_control*2.0f-1.0f;
+	// 			actuator_controls.control[1] = forcectl_manual_control*2.0f-1.0f;
+	// 			actuator_controls.control[2] = forcectl_manual_control*2.0f-1.0f;
+	// 			actuator_controls.control[3] = forcectl_manual_control*2.0f-1.0f;
+	// 			escinputpwm.manual_control_1 = actuator_controls.control[0];
+	// 			escinputpwm.manual_control_2 = actuator_controls.control[1];
+	// 			escinputpwm.manual_control_3 = actuator_controls.control[2];
+	// 			escinputpwm.manual_control_4 = actuator_controls.control[3];
+	// 		}
+	// 		else if(rc_channals_data.channels[5] > -0.3f)
+	// 		{
+	// 			actuator_controls.control[0] = thrustcontroldata.thrust_control_out1*2.0f-1.0f;
+	// 			actuator_controls.control[1] = thrustcontroldata.thrust_control_out2*2.0f-1.0f;
+	// 			actuator_controls.control[2] = thrustcontroldata.thrust_control_out3*2.0f-1.0f;
+	// 			actuator_controls.control[3] = thrustcontroldata.thrust_control_out4*2.0f-1.0f;
+	// 			// actuator_controls.control[0] = -1.0f;
+	// 			// actuator_controls.control[1] = -1.0f;
+	// 			// actuator_controls.control[2] = -1.0f;
+	// 			// actuator_controls.control[3] = -0.8f;
+	// 			escinputpwm.thrust_control_1 = actuator_controls.control[0];
+	// 			escinputpwm.thrust_control_2 = actuator_controls.control[1];
+	// 			escinputpwm.thrust_control_3 = actuator_controls.control[2];
+	// 			escinputpwm.thrust_control_4 = actuator_controls.control[3];
+	// 		}
+	// 	}
+	// }
 
 	// actuator_controls.control[4] = -0.8f;
 	// actuator_controls.control[5] = -0.8f;

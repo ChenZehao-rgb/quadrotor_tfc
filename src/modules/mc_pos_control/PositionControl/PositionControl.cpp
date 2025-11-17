@@ -147,6 +147,13 @@ void PositionControl::_positionControl()
 	// P 控制器的核心思想是根据误差的大小直接计算输出，控制器增益决定了误差变化引起的速度设定点变化幅度。
 	// 这个操作得到的 vel_sp_position 是位置控制器输出的速度设定值，它是通过位置误差乘以增益计算得到的。
 	Vector3f vel_sp_position = (_pos_sp - _pos).emult(_gain_pos_p);
+
+	_position_error.position_error_x = _pos_sp(0) - _pos(0);
+	_position_error.position_error_y = _pos_sp(1) - _pos(1);
+	_position_error.position_error_z = _pos_sp(2) - _pos(2);
+
+	_position_error.timestamp = hrt_absolute_time();
+	_robust_control_position_error_pub.publish(_position_error);
 	// Position and feed-forward velocity setpoints or position states being NAN results in them not having an influence
 	/* 处理 NaN 值，防止不合法的数值影响控制计算
 	addIfNotNanVector3f: 如果 vel_sp_position 中的元素不是 NaN（Not-a-Number，表示无效数值），
@@ -181,6 +188,14 @@ void PositionControl::_velocityControl(const float dt)
 	/* _vel_sp - _vel: 计算目标速度 _vel_sp 和当前速度 _vel 之间的误差 vel_error。
 	这是 PID 控制器的输入，误差越大，调整的加速度设定点越大。 */
 	Vector3f vel_error = _vel_sp - _vel;
+
+	_velocity_error.velocity_error_x = vel_error(0);
+	_velocity_error.velocity_error_y = vel_error(1);
+	_velocity_error.velocity_error_z = vel_error(2);
+
+	_velocity_error.timestamp = hrt_absolute_time();
+	_robust_control_velocity_error_pub.publish(_velocity_error);
+
 	/* vel_error.emult(_gain_vel_p): 速度误差通过 P 控制器的比例增益 _gain_vel_p 进行调节，计算出速度误差对应的加速度。
 	_vel_int: 积分控制器部分，积累过去的误差，修正稳态误差。
 	_vel_dot.emult(_gain_vel_d): 使用 D 控制器对速度变化率（加速度）进行抑制，避免系统过冲。

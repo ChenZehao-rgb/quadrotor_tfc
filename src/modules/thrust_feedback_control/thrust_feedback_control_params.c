@@ -44,12 +44,72 @@
  * @reboot_required true
  * @group Thrust Feedback Control
  */
-PARAM_DEFINE_FLOAT(TFC_THRUST_MAX, 0.2f);
+PARAM_DEFINE_FLOAT(TFC_THRUST_MAX, 2.0f);
+
+ /**
+ * PWM to thrust conversion factor
+ *
+ * PWM to thrust conversion factor of the mortor 1.
+ *
+ * @unit kg
+ * @min 0.0
+ * @max 20.0
+ * @decimal 2
+ * @increment 0.01
+ * @reboot_required true
+ * @group Thrust Feedback Control
+ */
+PARAM_DEFINE_FLOAT(TFC_PWM_TO_THR_1, 3.7873f);
+
+ /**
+ * PWM to thrust conversion factor
+ *
+ * PWM to thrust conversion factor of the mortor 2.
+ *
+ * @unit kg
+ * @min 0.0
+ * @max 20.0
+ * @decimal 2
+ * @increment 0.01
+ * @reboot_required true
+ * @group Thrust Feedback Control
+ */
+PARAM_DEFINE_FLOAT(TFC_PWM_TO_THR_2, 3.5007f);
+
+ /**
+ * PWM to thrust conversion factor
+ *
+ * PWM to thrust conversion factor of the mortor 3.
+ *
+ * @unit kg
+ * @min 0.0
+ * @max 20.0
+ * @decimal 2
+ * @increment 0.01
+ * @reboot_required true
+ * @group Thrust Feedback Control
+ */
+PARAM_DEFINE_FLOAT(TFC_PWM_TO_THR_3, 4.3695f);
+
+ /**
+ * PWM to thrust conversion factor
+ *
+ * PWM to thrust conversion factor of the mortor 4.
+ *
+ * @unit kg
+ * @min 0.0
+ * @max 20.0
+ * @decimal 2
+ * @increment 0.01
+ * @reboot_required true
+ * @group Thrust Feedback Control
+ */
+PARAM_DEFINE_FLOAT(TFC_PWM_TO_THR_4, 3.7632f);
 
 /**
- * IOLC Coefficient kp
+ * IOLC Coefficient K
  *
- * Input-Output Linearization Controller Gain kp.
+ * Input-Output Linearization Controller Gain K.
  *
  * @min 0.0
  * @max 500.0
@@ -57,7 +117,7 @@ PARAM_DEFINE_FLOAT(TFC_THRUST_MAX, 0.2f);
  * @increment 1
  * @group Thrust Feedback Control
  */
-PARAM_DEFINE_FLOAT(TFC_IOLC_KP, 3.0f);
+PARAM_DEFINE_FLOAT(TFC_IOLC_K, 1.0f);
 
 /**
  * IOLC Coefficient ki
@@ -84,6 +144,71 @@ PARAM_DEFINE_FLOAT(TFC_IOLC_KI, 0.1f);
  * @group Thrust Feedback Control
  */
 PARAM_DEFINE_FLOAT(TFC_LIM_I, 1.0f);
+
+/**
+ * IOLC Coefficient kff
+ *
+ * Feedforward Gain kff.
+ *
+ * @min 0.0
+ * @max 1.0
+ * @decimal 1
+ * @increment 0.1
+ * @group Thrust Feedback Control
+ */
+PARAM_DEFINE_FLOAT(TFC_IOLC_KFF, 0.6f);
+
+/**
+ * IOLC Coefficient kff
+ *
+ * Feedforward Gain kff.
+ *
+ * @min 0.0
+ * @max 1.0
+ * @decimal 1
+ * @increment 0.1
+ * @group Thrust Feedback Control
+ */
+PARAM_DEFINE_FLOAT(TFC_IOLC_KFF_1, 0.6f);
+
+/**
+ * IOLC Coefficient kff
+ *
+ * Feedforward Gain kff.
+ *
+ * @min 0.0
+ * @max 1.0
+ * @decimal 1
+ * @increment 0.1
+ * @group Thrust Feedback Control
+ */
+PARAM_DEFINE_FLOAT(TFC_IOLC_KFF_2, 0.6f);
+
+/**
+ * IOLC Coefficient kff
+ *
+ * Feedforward Gain kff.
+ *
+ * @min 0.0
+ * @max 1.0
+ * @decimal 1
+ * @increment 0.1
+ * @group Thrust Feedback Control
+ */
+PARAM_DEFINE_FLOAT(TFC_IOLC_KFF_3, 0.6f);
+
+/**
+ * IOLC Coefficient kff
+ *
+ * Feedforward Gain kff.
+ *
+ * @min 0.0
+ * @max 1.0
+ * @decimal 1
+ * @increment 0.1
+ * @group Thrust Feedback Control
+ */
+PARAM_DEFINE_FLOAT(TFC_IOLC_KFF_4, 0.6f);
 
 /**
  * Kalman Filter Standard deviation of estimation
@@ -135,7 +260,7 @@ PARAM_DEFINE_FLOAT(TFC_ALPHA, 0.0f);
  * @increment 1
  * @group Thrust Feedback Control
  */
-PARAM_DEFINE_FLOAT(TFC_IOLC_KP1, 5.0f);
+PARAM_DEFINE_FLOAT(TFC_IOLC_KP1, 0.8f);
 
 /**
  * IOLC Coefficient kp2
@@ -148,7 +273,7 @@ PARAM_DEFINE_FLOAT(TFC_IOLC_KP1, 5.0f);
  * @increment 1
  * @group Thrust Feedback Control
  */
-PARAM_DEFINE_FLOAT(TFC_IOLC_KP2, 5.0f);
+PARAM_DEFINE_FLOAT(TFC_IOLC_KP2, 0.8f);
 
 /**
  * IOLC Coefficient kp3
@@ -161,7 +286,7 @@ PARAM_DEFINE_FLOAT(TFC_IOLC_KP2, 5.0f);
  * @increment 1
  * @group Thrust Feedback Control
  */
-PARAM_DEFINE_FLOAT(TFC_IOLC_KP3, 5.0f);
+PARAM_DEFINE_FLOAT(TFC_IOLC_KP3, 0.8f);
 
 /**
  * IOLC Coefficient kp4
@@ -174,17 +299,173 @@ PARAM_DEFINE_FLOAT(TFC_IOLC_KP3, 5.0f);
  * @increment 1
  * @group Thrust Feedback Control
  */
-PARAM_DEFINE_FLOAT(TFC_IOLC_KP4, 5.0f);
+PARAM_DEFINE_FLOAT(TFC_IOLC_KP4, 0.8f);
 
 /**
- * Coefficient
+ * IOLC Coefficient K1
  *
- * Determine whether to adopt thrust feedback control.
+ * Input-Output Linearization Controller Gain K1.
  *
  * @min 0.0
- * @max 1.0
+ * @max 500.0
+ * @decimal 1
+ * @increment 1
+ * @group Thrust Feedback Control
+ */
+PARAM_DEFINE_FLOAT(TFC_IOLC_K1, 1.0f);
+
+/**
+ * IOLC Coefficient K2
+ *
+ * Input-Output Linearization Controller Gain K2.
+ *
+ * @min 0.0
+ * @max 500.0
+ * @decimal 1
+ * @increment 1
+ * @group Thrust Feedback Control
+ */
+PARAM_DEFINE_FLOAT(TFC_IOLC_K2, 1.0f);
+
+/**
+ * IOLC Coefficient K3
+ *
+ * Input-Output Linearization Controller Gain K3.
+ *
+ * @min 0.0
+ * @max 500.0
+ * @decimal 1
+ * @increment 1
+ * @group Thrust Feedback Control
+ */
+PARAM_DEFINE_FLOAT(TFC_IOLC_K3, 1.0f);
+
+/**
+ * IOLC Coefficient K4
+ *
+ * Input-Output Linearization Controller Gain K4.
+ *
+ * @min 0.0
+ * @max 500.0
+ * @decimal 1
+ * @increment 1
+ * @group Thrust Feedback Control
+ */
+PARAM_DEFINE_FLOAT(TFC_IOLC_K4, 1.0f);
+
+/**
+ * Mode Switching Coefficient
+ *
+ * thrust open-loop and thrust closed-loop and thrust output Kalman filter control.
+ *
+ * @min 0.0
+ * @max 2.0
  * @decimal 1
  * @increment 0.01
  * @group Thrust Feedback Control
  */
 PARAM_DEFINE_FLOAT(TFC_START, 0.0f);
+
+/**
+ * Kalman Filter Standard deviation of estimation
+ *
+ * force_feedback Kalman filter standard deviation of estimation. i.e. the standard deviation of the acceleration of the force.
+ *
+ * @min 0.0
+ * @max 100.0
+ * @decimal 3
+ * @increment 0.001
+ * @group Thrust Feedback Control
+ */
+PARAM_DEFINE_FLOAT(TFC_ES_U, 0.1f);
+
+/**
+ * Kalman Filter Standard deviation of measurement
+ *
+ * force_feedback Kalman filter standard deviation of measurement.
+ *
+ * @min 0.0
+ * @max 1.0
+ * @decimal 4
+ * @increment 0.0001
+ * @group Thrust Feedback Control
+ */
+PARAM_DEFINE_FLOAT(TFC_ME_U, 0.1f);
+
+/**
+ * Motorspeed Desired
+ *
+ * force_feedback Kalman filter standard deviation of measurement.
+ *
+ * @min 0.0
+ * @max 100.0
+ * @decimal 4
+ * @increment 0.0001
+ * @group Thrust Feedback Control
+ */
+PARAM_DEFINE_FLOAT(TFC_MS_FF, 50.0f);
+
+/**
+ * PID Coefficient kp
+ *
+ * Input-Output Linearization Controller Gain kp.
+ *
+ * @min 0.0
+ * @max 20.0
+ * @decimal 3
+ * @increment 0.001
+ * @group Thrust Feedback Control
+ */
+PARAM_DEFINE_FLOAT(TFC_PID_KP, 0.05f);
+
+/**
+ * PID Coefficient ki
+ *
+ * Input-Output Linearization Controller Gain ki.
+ *
+ * @min 0.0
+ * @max 5.0
+ * @decimal 4
+ * @increment 0.0001
+ * @group Thrust Feedback Control
+ */
+PARAM_DEFINE_FLOAT(TFC_PID_KI, 0.015f);
+
+/**
+ * PID Coefficient kd
+ *
+ * Input-Output Linearization Controller Gain kd.
+ *
+ * @min 0.0
+ * @max 20.0
+ * @decimal 4
+ * @increment 0.0001
+ * @group Thrust Feedback Control
+ */
+PARAM_DEFINE_FLOAT(TFC_PID_KD, 0.003f);
+
+/**
+ * The Limit value of I_out
+ *
+ * The limit value of the PID controller I_out, i.e. I_out=[-limit,limit].
+ *
+ * @min 0.0
+ * @max 1.0
+ * @decimal 3
+ * @increment 0.001
+ * @group Force Feedback Control
+ */
+PARAM_DEFINE_FLOAT(TFC_PID_LIM_I, 1.0f);
+
+/**
+ * The Base_value of the i_factor
+ *
+ * Ki = Ki * i_factor, where i_factor = force_error / FORCECTL_FAC_I,
+ *
+ * @min 0.0
+ * @max 5.0
+ * @decimal 3
+ * @increment 0.001
+ * @group Force Feedback Control
+ */
+PARAM_DEFINE_FLOAT(TFC_FAC_I, 0.7f);
