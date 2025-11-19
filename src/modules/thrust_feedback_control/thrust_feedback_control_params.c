@@ -59,7 +59,7 @@ PARAM_DEFINE_FLOAT(TFC_THRUST_MAX, 2.0f);
  * @reboot_required true
  * @group Thrust Feedback Control
  */
-PARAM_DEFINE_FLOAT(TFC_PWM_TO_THR_1, 3.7873f);
+PARAM_DEFINE_FLOAT(TFC_PWM_TO_THR_1, 2.312f);
 
  /**
  * PWM to thrust conversion factor
@@ -74,7 +74,7 @@ PARAM_DEFINE_FLOAT(TFC_PWM_TO_THR_1, 3.7873f);
  * @reboot_required true
  * @group Thrust Feedback Control
  */
-PARAM_DEFINE_FLOAT(TFC_PWM_TO_THR_2, 3.5007f);
+PARAM_DEFINE_FLOAT(TFC_PWM_TO_THR_2, 1.954f);
 
  /**
  * PWM to thrust conversion factor
@@ -89,7 +89,7 @@ PARAM_DEFINE_FLOAT(TFC_PWM_TO_THR_2, 3.5007f);
  * @reboot_required true
  * @group Thrust Feedback Control
  */
-PARAM_DEFINE_FLOAT(TFC_PWM_TO_THR_3, 4.3695f);
+PARAM_DEFINE_FLOAT(TFC_PWM_TO_THR_3, 2.544f);
 
  /**
  * PWM to thrust conversion factor
@@ -104,7 +104,7 @@ PARAM_DEFINE_FLOAT(TFC_PWM_TO_THR_3, 4.3695f);
  * @reboot_required true
  * @group Thrust Feedback Control
  */
-PARAM_DEFINE_FLOAT(TFC_PWM_TO_THR_4, 3.7632f);
+PARAM_DEFINE_FLOAT(TFC_PWM_TO_THR_4, 2.517f);
 
 /**
  * IOLC Coefficient K
@@ -424,7 +424,10 @@ PARAM_DEFINE_FLOAT(TFC_PID_KP, 0.05f);
  * Input-Output Linearization Controller Gain ki.
  *
  * @min 0.0
- * @max 5.0
+ * @max 5.0_thrust_measure(0) = thrustdata.thrust_kalman_filter_data_1; // motor 1 corresponds to sensor 1
+        _thrust_measure(1) = thrustdata.thrust_kalman_filter_data_2; // motor 2 corresponds to sensor 2
+        _thrust_measure(2) = thrustdata.thrust_kalman_filter_data_3; // motor 3 corresponds to sensor 3
+        _thrust_measure(3) = thrustdata.thrust_kalman_filter_data_4; // motor 4 corresponds to sensor 4
  * @decimal 4
  * @increment 0.0001
  * @group Thrust Feedback Control
@@ -469,3 +472,60 @@ PARAM_DEFINE_FLOAT(TFC_PID_LIM_I, 1.0f);
  * @group Force Feedback Control
  */
 PARAM_DEFINE_FLOAT(TFC_FAC_I, 0.7f);
+
+/**
+ * Sensor1 Bias1
+ *
+ * @group Thrust Feedback Control
+ */
+PARAM_DEFINE_FLOAT(SENSOR1_BIAS1, 260.0f);
+/**
+ * Sensor1 Bias2
+ *
+ * @group Thrust Feedback Control
+ */
+PARAM_DEFINE_FLOAT(SENSOR1_BIAS2, -635.0f);
+/**
+ * Sensor2 Bias1
+ *
+ * @group Thrust Feedback Control
+ */
+PARAM_DEFINE_FLOAT(SENSOR2_BIAS1, 0.0f);
+/**
+ * Sensor2 Bias2
+ *
+ * @group Thrust Feedback Control
+ */
+PARAM_DEFINE_FLOAT(SENSOR2_BIAS2, -785.0f);
+
+/**
+ * Sensor3 Bias1
+ *
+ * @group Thrust Feedback Control
+ */
+PARAM_DEFINE_FLOAT(SENSOR3_BIAS1, 156.0f);
+/**
+ * Sensor3 Bias2
+ *
+ * @group Thrust Feedback Control
+ */
+PARAM_DEFINE_FLOAT(SENSOR3_BIAS2, -566.0f);
+/**
+ * Sensor4 Bias1
+ *
+ * @group Thrust Feedback Control
+ */
+PARAM_DEFINE_FLOAT(SENSOR4_BIAS1, 261.0f);
+/**
+ * Sensor4 Bias2
+ *
+ * @group Thrust Feedback Control
+ */
+PARAM_DEFINE_FLOAT(SENSOR4_BIAS2, -465.0f);
+
+/**
+ * Use filtered thrust data or not
+ *
+ * @group Thrust Feedback Control
+ */
+PARAM_DEFINE_FLOAT(THR_USE_FIL, 0.0f);

@@ -86,7 +86,7 @@ public:
     ~ThrustFeedbackControl() override {}
 
     int main();
-    
+
     static px4::AppState appState;
 
 private:
@@ -122,7 +122,16 @@ private:
         (ParamFloat<px4::params::TFC_IOLC_K1>) _param_tfc_iolc_k1,
         (ParamFloat<px4::params::TFC_IOLC_K2>) _param_tfc_iolc_k2,
         (ParamFloat<px4::params::TFC_IOLC_K3>) _param_tfc_iolc_k3,
-        (ParamFloat<px4::params::TFC_IOLC_K4>) _param_tfc_iolc_k4
+        (ParamFloat<px4::params::TFC_IOLC_K4>) _param_tfc_iolc_k4,
+        (ParamFloat<px4::params::SENSOR1_BIAS1>) _param_sensor1_bias1,
+        (ParamFloat<px4::params::SENSOR1_BIAS2>) _param_sensor1_bias2,
+        (ParamFloat<px4::params::SENSOR2_BIAS1>) _param_sensor2_bias1,
+        (ParamFloat<px4::params::SENSOR2_BIAS2>) _param_sensor2_bias2,
+        (ParamFloat<px4::params::SENSOR3_BIAS1>) _param_sensor3_bias1,
+        (ParamFloat<px4::params::SENSOR3_BIAS2>) _param_sensor3_bias2,
+        (ParamFloat<px4::params::SENSOR4_BIAS1>) _param_sensor4_bias1,
+        (ParamFloat<px4::params::SENSOR4_BIAS2>) _param_sensor4_bias2,
+        (ParamFloat<px4::params::THR_USE_FIL>) _param_tfc_use_filtered_thrust
     )
 
     uORB::SubscriptionInterval	_parameter_update_sub{ORB_ID(parameter_update), 1_s};
@@ -133,7 +142,7 @@ private:
 
     struct actuator_controls_s force_exp_from_rc{};
 
-    
+
     // 发布控制数据话题
     thrust_control_data_s thrustcontroldata = {};
     uORB::Publication<thrust_control_data_s> _thrustcontroldata_pub{ORB_ID(thrust_control_data)};

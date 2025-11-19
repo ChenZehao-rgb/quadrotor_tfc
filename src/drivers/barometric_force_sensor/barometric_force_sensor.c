@@ -112,6 +112,23 @@ static void usage(const char *reason) // 定义一个静态函数，用于打印
     exit(1); // 以状态码1退出程序，表示异常终止
 }
 
+// 放在文件顶部或函数上方：大小端转换
+static inline int32_t be_i32(const uint8_t *p) {
+    return (int32_t)(((uint32_t)p[0] << 24) | ((uint32_t)p[1] << 16) |
+                     ((uint32_t)p[2] << 8)  |  (uint32_t)p[3]);
+}
+static inline int32_t le_i32(const uint8_t *p) {
+    return (int32_t)((uint32_t)p[0] | ((uint32_t)p[1] << 8) |
+                     ((uint32_t)p[2] << 16) | ((uint32_t)p[3] << 24));
+}
+
+// 负数→0，并为 uint16_t 做上界钳制
+static inline uint16_t clamp_u16_from_i32(int32_t x) {
+    if (x <= 0) return 0;
+    if (x > 65535) return 65535;
+    return (uint16_t)x;
+}
+
 int barometric_force_sensor_main(int argc, char *argv[]) // 处理命令行参数并启动、停止或查看守护进程状态
 {
     if (argc < 2) // 如果命令行参数少于两个，调佣sage函数并打印错误信息
@@ -172,8 +189,8 @@ int barometric_force_sensor_thread_main(int argc, char *argv[])
 
     warnx("opening port %s", uart_name); // 打印要打开的串口设备名称
 
-    char data = '0'; // 临时存储单字节数据
-    char buffer[16] = ""; // 存储从串口读取的4字节数据
+    // char data = '0'; // 临时存储单字节数据
+    // char buffer[16] = ""; // 存储从串口读取的4字节数据
     // int force_1 = 0;
     /*
      * TELEM1 : /dev/ttyS1
@@ -201,44 +218,141 @@ int barometric_force_sensor_thread_main(int argc, char *argv[])
     /* 公告主题 */
     orb_advert_t barometric_force_sensor_pub = orb_advertise(ORB_ID(barometric_force_sensor), &sensordata);
 
-    while(!thread_should_exit) // 无线循环
-    {
-        read(uart_read,&data,1); // 从串口读一个字节
-        if(data == 'R') // 如果读取的字节是 R
-        {
-            for(int i = 0;i <16;++i) // 读取接下来的4个字节
-            {
-                read(uart_read,&data,1);
-                buffer[i] = data;
-                data = '0'; // 重置 data 为 0
-            }
-            // buffer[0]-'0' 其中 -'0' 的目的是将字符型转换为整数型
-            sensordata.data1 = (buffer[0]-'0') * 1000 + (buffer[1]-'0') * 100 + (buffer[2]-'0') * 10 + (buffer[3]-'0');
-            sensordata.data2 = (buffer[4]-'0') * 1000 + (buffer[5]-'0') * 100 + (buffer[6]-'0') * 10 + (buffer[7]-'0');
-            sensordata.data3 = (buffer[8]-'0') * 1000 + (buffer[9]-'0') * 100 + (buffer[10]-'0') * 10 + (buffer[11]-'0');
-            sensordata.data4 = (buffer[12]-'0') * 1000 + (buffer[13]-'0') * 100 + (buffer[14]-'0') * 10 + (buffer[15]-'0');
+    // while(!thread_should_exit) // 无线循环
+    // {
+    //     read(uart_read,&data,1); // 从串口读一个字节
+    //     if(data == 'R') // 如果读取的字节是 R
+    //     {
+    //         for(int i = 0;i <16;++i) // 读取接下来的4个字节
+    //         {
+    //             read(uart_read,&data,1);
+    //             buffer[i] = data;
+    //             data = '0'; // 重置 data 为 0
+    //         }
+    //         // buffer[0]-'0' 其中 -'0' 的目的是将字符型转换为整数型
+    //         sensordata.data1 = (buffer[0]-'0') * 1000 + (buffer[1]-'0') * 100 + (buffer[2]-'0') * 10 + (buffer[3]-'0');
+    //         sensordata.data2 = (buffer[4]-'0') * 1000 + (buffer[5]-'0') * 100 + (buffer[6]-'0') * 10 + (buffer[7]-'0');
+    //         sensordata.data3 = (buffer[8]-'0') * 1000 + (buffer[9]-'0') * 100 + (buffer[10]-'0') * 10 + (buffer[11]-'0');
+    //         sensordata.data4 = (buffer[12]-'0') * 1000 + (buffer[13]-'0') * 100 + (buffer[14]-'0') * 10 + (buffer[15]-'0');
 
-            // strncpy(sensordata.data_,buffer,16); // 将读取的数据复制到sensordata.datastr中
-            // sensordata.data = atoi(sensordata.datastr); // 将字符串转换为整数存入sensordata.data
+    //         // strncpy(sensordata.data_,buffer,16); // 将读取的数据复制到sensordata.datastr中
+    //         // sensordata.data = atoi(sensordata.datastr); // 将字符串转换为整数存入sensordata.data
 
-            // force_1 = buffer[0] * 1000 + buffer[1] * 100 + buffer[2] * 10 + buffer[3];
-            // force_1 = atoi(buffer);
-            // printf("force_sensor_1: %dg\n",force_1); // 打印读取到的4个字节数据
-            // printf("force_sensor: %dg\t%dg\t%dg\t%dg\t",sensordata.data1,sensordata.data2,sensordata.data3,sensordata.data4); // 打印读取到的4个字节数据
-            sensordata.timestamp = hrt_absolute_time();
-            orb_publish(ORB_ID(barometric_force_sensor), barometric_force_sensor_pub, &sensordata); // 用orb_publish函数发布新的传感器数据
-            // if (ret < 0)
-            // {
-            //     PX4_ERR("Failed to publish sensor data: %d", ret);
-            // }
-            // else
-            // {
-            //     PX4_INFO("Successd to publish sensor data: %d", ret);
-            // }
-            // px4_sleep(1);
-            // px4_usleep(10000);
+    //         // force_1 = buffer[0] * 1000 + buffer[1] * 100 + buffer[2] * 10 + buffer[3];
+    //         // force_1 = atoi(buffer);
+    //         // printf("force_sensor_1: %dg\n",force_1); // 打印读取到的4个字节数据
+    //         // printf("force_sensor: %dg\t%dg\t%dg\t%dg\t",sensordata.data1,sensordata.data2,sensordata.data3,sensordata.data4); // 打印读取到的4个字节数据
+    //         sensordata.timestamp = hrt_absolute_time();
+    //         orb_publish(ORB_ID(barometric_force_sensor), barometric_force_sensor_pub, &sensordata); // 用orb_publish函数发布新的传感器数据
+    //         // if (ret < 0)
+    //         // {
+    //         //     PX4_ERR("Failed to publish sensor data: %d", ret);
+    //         // }
+    //         // else
+    //         // {
+    //         //     PX4_INFO("Successd to publish sensor data: %d", ret);
+    //         // }
+    //         // px4_sleep(1);
+    //         // px4_usleep(10000);
+    //     }
+    // }
+    // ……(你的串口初始化和 orb_advertise 之后)……
+
+    // 极简帧解析器状态
+    int state = 0;              // 0: 等 0x01；1: 等 0x50；2: 收集剩余 22B
+    uint8_t frame[24] = {0};
+    size_t idx = 0;
+
+    while (!thread_should_exit) {
+
+        uint8_t b;
+        ssize_t r = read(uart_read, &b, 1);
+        if (r != 1) {
+            // 可选：根据需要处理 EAGAIN/超时；这里保持和你原先风格一致
+            continue;
         }
-    }
+
+        switch (state) {
+        case 0: // 等待帧头 0x01
+            if (b == 0x01) {
+                frame[0] = b;
+                idx = 1;
+                state = 1;
+            }
+            break;
+
+        case 1: // 已收 0x01，等待 0x50
+            if (b == 0x50) {
+                frame[1] = b;
+                idx = 2;
+                state = 2;
+            } else if (b == 0x01) {
+                // 仍可能是下一个帧的起点
+                frame[0] = 0x01;
+                idx = 1;
+                state = 1;
+            } else {
+                state = 0;
+                idx = 0;
+            }
+            break;
+
+        case 2: // 收集后续 22 字节（数据区 20B + 尾 2B）
+            frame[idx++] = b;
+            if (idx == 24) {
+                // 验尾：0xFF 0xFE
+                if (frame[22] == 0xFF && frame[23] == 0xFE) {
+                    const uint8_t *payload = &frame[2]; // 长度 20B
+                    int32_t v[4] = {0};
+                    bool parsed = false;
+
+                    // 自适应：尝试 0..3 偏移，按 BE32 取 4 路（满足 off+16 <= 20）
+                    for (int off = 0; off <= 3 && !parsed; off++) {
+                        if (off + 16 > 20) break;
+
+                        // 简单启发：每路最高字节像符号扩展（0x00 或 0xFF）
+                        bool ok = true;
+                        for (int k = 0; k < 4; k++) {
+                            uint8_t msb = payload[off + k*4 + 0];
+                            if (!(msb == 0x00 || msb == 0xFF)) { ok = false; break; }
+                        }
+                        if (!ok) continue;
+
+                        for (int k = 0; k < 4; k++) {
+                            v[k] = be_i32(payload + off + k*4);
+                        }
+                        parsed = true;
+                    }
+
+                    // 兜底：按 LE32@偏移 0
+                    if (!parsed) {
+                        v[0] = le_i32(payload + 0);
+                        v[1] = le_i32(payload + 4);
+                        v[2] = le_i32(payload + 8);
+                        v[3] = le_i32(payload + 12);
+                    }
+
+                    sensordata.timestamp = hrt_absolute_time();
+                    sensordata.data1 = clamp_u16_from_i32(v[0]);
+                    sensordata.data2 = clamp_u16_from_i32(v[1]);
+                    sensordata.data3 = clamp_u16_from_i32(v[2]);
+                    sensordata.data4 = clamp_u16_from_i32(v[3]);
+                    orb_publish(ORB_ID(barometric_force_sensor), barometric_force_sensor_pub, &sensordata);
+                }
+
+                // 重新同步：把当前字节当成下一帧的可能头
+                if (b == 0x01) {
+                    frame[0] = 0x01;
+                    idx = 1;
+                    state = 1;
+                } else {
+                    idx = 0;
+                    state = 0;
+                }
+            }
+            break;
+        } // switch
+    }     // while
 
     warnx("exiting"); // 打印退出消息
     thread_running = false; // 停止线程

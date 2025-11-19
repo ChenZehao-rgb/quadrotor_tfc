@@ -264,7 +264,7 @@ int ThrustFeedbackControl::main()
     int thrustdesireddata_sub_fd = orb_subscribe(ORB_ID(thrust_desired_data));
     orb_set_interval(thrustdesireddata_sub_fd, 10);
 
-    px4_pollfd_struct_t fds[] = 
+    px4_pollfd_struct_t fds[] =
     {
         { .fd = thrustdata_sub_fd,   .events = POLLIN },
         { .fd = thrustdesireddata_sub_fd,   .events = POLLIN },
@@ -340,7 +340,7 @@ int ThrustFeedbackControl::main()
             }
             error_counter++;
         }
-        else 
+        else
         {
             if (fds[0].revents & POLLIN)
             {
@@ -351,10 +351,10 @@ int ThrustFeedbackControl::main()
                 /*
                     obtain the raw thrust data from the sensor
                 */
-                thrustdata.thrust_raw_data_1 = sensordata.data1 / 1000.0f;
-                thrustdata.thrust_raw_data_2 = sensordata.data2 / 1000.0f;
-                thrustdata.thrust_raw_data_3 = sensordata.data3 / 1000.0f;
-                thrustdata.thrust_raw_data_4 = sensordata.data4 / 1000.0f;
+                thrustdata.thrust_raw_data_1 = (sensordata.data1 + _param_sensor1_bias1.get() + _param_sensor1_bias2.get()) / 1000.0f;
+                thrustdata.thrust_raw_data_2 = (sensordata.data2 + _param_sensor2_bias1.get() + _param_sensor2_bias2.get()) / 1000.0f;
+                thrustdata.thrust_raw_data_3 = (sensordata.data3 + _param_sensor3_bias1.get() + _param_sensor3_bias2.get()) / 1000.0f;
+                thrustdata.thrust_raw_data_4 = (sensordata.data4 + _param_sensor4_bias1.get() + _param_sensor4_bias2.get()) / 1000.0f;
                 thrustdata.thrust_raw_data_1 = (thrustdata.thrust_raw_data_1 > 2.0f) ? 2.0f : ((thrustdata.thrust_raw_data_1 < 0.0f) ? 0.0f : thrustdata.thrust_raw_data_1);
                 thrustdata.thrust_raw_data_2 = (thrustdata.thrust_raw_data_2 > 2.0f) ? 2.0f : ((thrustdata.thrust_raw_data_2 < 0.0f) ? 0.0f : thrustdata.thrust_raw_data_2);
                 thrustdata.thrust_raw_data_3 = (thrustdata.thrust_raw_data_3 > 2.0f) ? 2.0f : ((thrustdata.thrust_raw_data_3 < 0.0f) ? 0.0f : thrustdata.thrust_raw_data_3);
@@ -394,10 +394,14 @@ int ThrustFeedbackControl::main()
         // _thrust_desired(2) = ( _thrust_desired(2) > _param_tfc_thrust_max.get()) ? _param_tfc_thrust_max.get() : ((_thrust_desired(2) < 0.0f) ? 0.0f : _thrust_desired(2));
         // _thrust_desired(3) = ( _thrust_desired(3) > _param_tfc_thrust_max.get()) ? _param_tfc_thrust_max.get() : ((_thrust_desired(3) < 0.0f) ? 0.0f : _thrust_desired(3));
 
-        _thrust_desired(0) = _param_tfc_pwm_to_thrust_factor1.get() * thrustdesireddata.thrust_desired1 - 0.3f;
-        _thrust_desired(1) = _param_tfc_pwm_to_thrust_factor2.get() * thrustdesireddata.thrust_desired2 - 0.3f;
-        _thrust_desired(2) = _param_tfc_pwm_to_thrust_factor3.get() * thrustdesireddata.thrust_desired3 - 0.3f;
-        _thrust_desired(3) = _param_tfc_pwm_to_thrust_factor4.get() * thrustdesireddata.thrust_desired4 - 0.3f;
+        // _thrust_desired(0) = _param_tfc_pwm_to_thrust_factor1.get() * thrustdesireddata.thrust_desired1;
+        // _thrust_desired(1) = _param_tfc_pwm_to_thrust_factor2.get() * thrustdesireddata.thrust_desired2;
+        // _thrust_desired(2) = _param_tfc_pwm_to_thrust_factor3.get() * thrustdesireddata.thrust_desired3;
+        // _thrust_desired(3) = _param_tfc_pwm_to_thrust_factor4.get() * thrustdesireddata.thrust_desired4;
+        _thrust_desired(0) = 0.3f;
+        _thrust_desired(1) = 0.3f;
+        _thrust_desired(2) = 0.3f;
+        _thrust_desired(3) = 0.3f;
         // _thrust_desired(0) = _thrust_desired_1_lowpass_filter.apply(_thrust_desired(0));
         // _thrust_desired(1) = _thrust_desired_2_lowpass_filter.apply(_thrust_desired(1));
         // _thrust_desired(2) = _thrust_desired_3_lowpass_filter.apply(_thrust_desired(2));
@@ -414,10 +418,19 @@ int ThrustFeedbackControl::main()
         // _thrust_desired(3) = 0.7f;
 
         // thrust feedback control
-        _thrust_measure(0) = thrustdata.thrust_kalman_filter_data_2; // motor 1 corresponds to sensor 2
-        _thrust_measure(1) = thrustdata.thrust_kalman_filter_data_4; // motor 2 corresponds to sensor 4
-        _thrust_measure(2) = thrustdata.thrust_kalman_filter_data_1; // motor 3 corresponds to sensor 1
-        _thrust_measure(3) = thrustdata.thrust_kalman_filter_data_3; // motor 4 corresponds to sensor 3
+        if (_param_tfc_use_filtered_thrust.get() > 0.5f) {
+            // use the filtered thrust data
+            _thrust_measure(0) = thrustdata.thrust_kalman_filter_data_1; // motor 1 corresponds to sensor 1
+            _thrust_measure(1) = thrustdata.thrust_kalman_filter_data_2; // motor 2 corresponds to sensor 2
+            _thrust_measure(2) = thrustdata.thrust_kalman_filter_data_3; // motor 3 corresponds to sensor 3
+            _thrust_measure(3) = thrustdata.thrust_kalman_filter_data_4; // motor 4 corresponds to sensor 4
+        } else {
+            // use the raw thrust data
+            _thrust_measure(0) = thrustdata.thrust_raw_data_1; // motor 1 corresponds to sensor 1
+            _thrust_measure(1) = thrustdata.thrust_raw_data_2; // motor 2 corresponds to sensor 2
+            _thrust_measure(2) = thrustdata.thrust_raw_data_3; // motor 3 corresponds to sensor 3
+            _thrust_measure(3) = thrustdata.thrust_raw_data_4; // motor 4 corresponds to sensor 4
+        }
 
         /*
             thrust closed-loop control
@@ -471,14 +484,14 @@ int ThrustFeedbackControl::main()
         _iolc4.err = _thrust_desired(3) - _thrust_measure(3);
         IOLC_Calculate4(&_iolc4);
 
-        // thrustcontroldata.motor_speed_dot1 = _iolc.motorSpeed_dot;
-        // thrustcontroldata.motor_speed_dot2 = _iolc2.motorSpeed_dot;
-        // thrustcontroldata.motor_speed_dot3 = _iolc3.motorSpeed_dot;
-        // thrustcontroldata.motor_speed_dot4 = _iolc4.motorSpeed_dot;
-        // thrustcontroldata.motor_speed1 = _iolc.motorSpeed;
-        // thrustcontroldata.motor_speed2 = _iolc2.motorSpeed;
-        // thrustcontroldata.motor_speed3 = _iolc3.motorSpeed;
-        // thrustcontroldata.motor_speed4 = _iolc4.motorSpeed;
+        thrustcontroldata.motor_speed_dot1 = _iolc.motorSpeed_dot;
+        thrustcontroldata.motor_speed_dot2 = _iolc2.motorSpeed_dot;
+        thrustcontroldata.motor_speed_dot3 = _iolc3.motorSpeed_dot;
+        thrustcontroldata.motor_speed_dot4 = _iolc4.motorSpeed_dot;
+        thrustcontroldata.motor_speed1 = _iolc.motorSpeed;
+        thrustcontroldata.motor_speed2 = _iolc2.motorSpeed;
+        thrustcontroldata.motor_speed3 = _iolc3.motorSpeed;
+        thrustcontroldata.motor_speed4 = _iolc4.motorSpeed;
         thrustcontroldata.deta_t_1 = _iolc.dt;
         thrustcontroldata.deta_t_2 = _iolc2.dt;
         thrustcontroldata.deta_t_3 = _iolc3.dt;
@@ -495,6 +508,10 @@ int ThrustFeedbackControl::main()
         thrustcontroldata.thrust_feedback_out2 = _param_tfc_iolc_k2.get() * static_cast<float>(_iolc2.u);
         thrustcontroldata.thrust_feedback_out3 = _param_tfc_iolc_k3.get() * static_cast<float>(_iolc3.u);
         thrustcontroldata.thrust_feedback_out4 = _param_tfc_iolc_k4.get() * static_cast<float>(_iolc4.u);
+        // thrustcontroldata.thrust_feedback_out1 = (float)(_iolc.u);
+        // thrustcontroldata.thrust_feedback_out2 = (float)(_iolc2.u);
+        // thrustcontroldata.thrust_feedback_out3 = (float)(_iolc3.u);
+        // thrustcontroldata.thrust_feedback_out4 = (float)(_iolc4.u);
         _total_output(0) = _param_tfc_iolc_k1.get() * static_cast<float>(_iolc.u) + _iolc_u_ff(0);
         _total_output(1) = _param_tfc_iolc_k2.get() * static_cast<float>(_iolc2.u) + _iolc_u_ff(1);
         _total_output(2) = _param_tfc_iolc_k3.get() * static_cast<float>(_iolc3.u) + _iolc_u_ff(2);
@@ -527,7 +544,7 @@ int ThrustFeedbackControl::main()
         thrustcontroldata.thrust_kalman_filter_control_out_pwm4 = math::constrain(_thrust_kalman_filter_control_out(3), -1.f, 1.f);
 
         thrustcontroldata.thrust_start = _param_tfc_start.get();
-        
+
         thrustcontroldata.timestamp = hrt_absolute_time();
         _thrustcontroldata_pub.publish(thrustcontroldata);
 
