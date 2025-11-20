@@ -131,7 +131,8 @@ private:
         (ParamFloat<px4::params::SENSOR3_BIAS2>) _param_sensor3_bias2,
         (ParamFloat<px4::params::SENSOR4_BIAS1>) _param_sensor4_bias1,
         (ParamFloat<px4::params::SENSOR4_BIAS2>) _param_sensor4_bias2,
-        (ParamFloat<px4::params::THR_USE_FIL>) _param_tfc_use_filtered_thrust
+        (ParamFloat<px4::params::THR_USE_FIL>) _param_tfc_use_filtered_thrust,
+        (ParamFloat<px4::params::THRE_USE_TFC>) _param_use_tfc_threshold
     )
 
     uORB::SubscriptionInterval	_parameter_update_sub{ORB_ID(parameter_update), 1_s};

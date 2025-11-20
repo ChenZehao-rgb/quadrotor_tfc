@@ -145,6 +145,10 @@ void IOLC_Calculate(IOLC *iolc)
 		*(iolc->a2*iolc->motorSpeed*iolc->motorSpeed + iolc->a1*iolc->motorSpeed);
 	double g_x = (iolc->b0*(3*iolc->c3*iolc->motorSpeed*iolc->motorSpeed + 2*iolc->c2*iolc->motorSpeed + iolc->c1));
     iolc->u = ((iolc->v - f_x) / g_x);
+    if(isnan(iolc->u))
+    {
+        iolc->u = 0.0f;
+    }
 	iolc->u = (iolc->u > 0.3) ? 0.3 : ((iolc->u < 0.0) ? 0.0 : iolc->u);
 
 	/* Using Euler Integration Method to Calculate the Motor Speed */
@@ -174,6 +178,10 @@ void IOLC_Calculate2(IOLC2 *iolc)
 		*(iolc->a2*iolc->motorSpeed*iolc->motorSpeed + iolc->a1*iolc->motorSpeed);
 	double g_x = (iolc->b0*(3*iolc->c3*iolc->motorSpeed*iolc->motorSpeed + 2*iolc->c2*iolc->motorSpeed + iolc->c1));
     iolc->u = ((iolc->v - f_x) / g_x);
+    if(isnan(iolc->u))
+    {
+        iolc->u = 0.0f;
+    }
 	iolc->u = (iolc->u > 0.3) ? 0.3 : ((iolc->u < 0.0) ? 0.0 : iolc->u);
 
 	/* Using Euler Integration Method to Calculate the Motor Speed */
@@ -203,6 +211,10 @@ void IOLC_Calculate3(IOLC3 *iolc)
 		*(iolc->a2*iolc->motorSpeed*iolc->motorSpeed + iolc->a1*iolc->motorSpeed);
 	double g_x = (iolc->b0*(3*iolc->c3*iolc->motorSpeed*iolc->motorSpeed + 2*iolc->c2*iolc->motorSpeed + iolc->c1));
     iolc->u = ((iolc->v - f_x) / g_x);
+    if(isnan(iolc->u))
+    {
+        iolc->u = 0.0f;
+    }
 	iolc->u = (iolc->u > 0.3) ? 0.3 : ((iolc->u < 0.0) ? 0.0 : iolc->u);
 
 	/* Using Euler Integration Method to Calculate the Motor Speed */
@@ -232,6 +244,10 @@ void IOLC_Calculate4(IOLC4 *iolc)
 		*(iolc->a2*iolc->motorSpeed*iolc->motorSpeed + iolc->a1*iolc->motorSpeed);
 	double g_x = (iolc->b0*(3*iolc->c3*iolc->motorSpeed*iolc->motorSpeed + 2*iolc->c2*iolc->motorSpeed + iolc->c1));
     iolc->u = ((iolc->v - f_x) / g_x);
+    if(isnan(iolc->u))
+    {
+        iolc->u = 0.0f;
+    }
 	iolc->u = (iolc->u > 0.3) ? 0.3 : ((iolc->u < 0.0) ? 0.0 : iolc->u);
 
 	/* Using Euler Integration Method to Calculate the Motor Speed */
@@ -254,6 +270,8 @@ void ThrustFeedbackControl::parameters_update()
 int ThrustFeedbackControl::main()
 {
     appState.setRunning(true);
+
+    // bool feedback_control_enabled = false;
 
     // subscribe to thrust data topic
     int thrustdata_sub_fd = orb_subscribe(ORB_ID(barometric_force_sensor));
@@ -394,14 +412,14 @@ int ThrustFeedbackControl::main()
         // _thrust_desired(2) = ( _thrust_desired(2) > _param_tfc_thrust_max.get()) ? _param_tfc_thrust_max.get() : ((_thrust_desired(2) < 0.0f) ? 0.0f : _thrust_desired(2));
         // _thrust_desired(3) = ( _thrust_desired(3) > _param_tfc_thrust_max.get()) ? _param_tfc_thrust_max.get() : ((_thrust_desired(3) < 0.0f) ? 0.0f : _thrust_desired(3));
 
-        // _thrust_desired(0) = _param_tfc_pwm_to_thrust_factor1.get() * thrustdesireddata.thrust_desired1;
-        // _thrust_desired(1) = _param_tfc_pwm_to_thrust_factor2.get() * thrustdesireddata.thrust_desired2;
-        // _thrust_desired(2) = _param_tfc_pwm_to_thrust_factor3.get() * thrustdesireddata.thrust_desired3;
-        // _thrust_desired(3) = _param_tfc_pwm_to_thrust_factor4.get() * thrustdesireddata.thrust_desired4;
-        _thrust_desired(0) = 0.3f;
-        _thrust_desired(1) = 0.3f;
-        _thrust_desired(2) = 0.3f;
-        _thrust_desired(3) = 0.3f;
+        _thrust_desired(0) = _param_tfc_pwm_to_thrust_factor1.get() * thrustdesireddata.thrust_desired1;
+        _thrust_desired(1) = _param_tfc_pwm_to_thrust_factor2.get() * thrustdesireddata.thrust_desired2;
+        _thrust_desired(2) = _param_tfc_pwm_to_thrust_factor3.get() * thrustdesireddata.thrust_desired3;
+        _thrust_desired(3) = _param_tfc_pwm_to_thrust_factor4.get() * thrustdesireddata.thrust_desired4;
+        // _thrust_desired(0) = 0.3f;
+        // _thrust_desired(1) = 0.3f;
+        // _thrust_desired(2) = 0.3f;
+        // _thrust_desired(3) = 0.3f;
         // _thrust_desired(0) = _thrust_desired_1_lowpass_filter.apply(_thrust_desired(0));
         // _thrust_desired(1) = _thrust_desired_2_lowpass_filter.apply(_thrust_desired(1));
         // _thrust_desired(2) = _thrust_desired_3_lowpass_filter.apply(_thrust_desired(2));
@@ -546,6 +564,26 @@ int ThrustFeedbackControl::main()
         thrustcontroldata.thrust_start = _param_tfc_start.get();
 
         thrustcontroldata.timestamp = hrt_absolute_time();
+        // if((_thrust_desired(0)>_param_use_tfc_threshold)&&(_thrust_desired(1)>_param_use_tfc_threshold)&&(_thrust_desired(2)>_param_use_tfc_threshold)&&(_thrust_desired(3)>_param_use_tfc_threshold))
+        // {
+        //     feedback_control_enabled = true;
+        // }
+        // else
+        // {
+        //     feedback_control_enabled = false;
+        //     // reset the integral term when the feedback control is disabled
+        //     _iolc.err_integral = 0.0f;
+        //     _iolc2.err_integral = 0.0f;
+        //     _iolc3.err_integral = 0.0f;
+        //     _iolc4.err_integral = 0.0f;
+        // }
+        // if(!feedback_control_enabled)
+        // {
+        //     thrustcontroldata.thrust_control_out_pwm1 = math::constrain((2.f * _iolc_u_ff(0) - 1.f), -1.f, 1.f);
+        //     thrustcontroldata.thrust_control_out_pwm2 = math::constrain((2.f * _iolc_u_ff(1) - 1.f), -1.f, 1.f);
+        //     thrustcontroldata.thrust_control_out_pwm3 = math::constrain((2.f * _iolc_u_ff(2) - 1.f), -1.f, 1.f);
+        //     thrustcontroldata.thrust_control_out_pwm4 = math::constrain((2.f * _iolc_u_ff(3) - 1.f), -1.f, 1.f);
+        // }
         _thrustcontroldata_pub.publish(thrustcontroldata);
 
         px4_usleep(1000);
