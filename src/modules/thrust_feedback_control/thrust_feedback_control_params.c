@@ -509,7 +509,7 @@ PARAM_DEFINE_FLOAT(SENSOR3_BIAS1, 156.0f);
  *
  * @group Thrust Feedback Control
  */
-PARAM_DEFINE_FLOAT(SENSOR3_BIAS2, -566.0f);
+PARAM_DEFINE_FLOAT(SENSOR3_BIAS2, -266.0f);
 /**
  * Sensor4 Bias1
  *
