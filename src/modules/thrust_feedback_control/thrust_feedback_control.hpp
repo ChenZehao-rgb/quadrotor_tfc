@@ -148,13 +148,32 @@ private:
     thrust_control_data_s thrustcontroldata = {};
     uORB::Publication<thrust_control_data_s> _thrustcontroldata_pub{ORB_ID(thrust_control_data)};
 
-    double iolc_a3 = 0;
-    double iolc_a2 = -0.1663;
-    double iolc_a1 = -71.6385;
+    // 三阶拟合参数
+    double iolc_a3 = -2.252e-7;
+    double iolc_a2 = 9.821e-4;
+    double iolc_a1 = -6.925;
     double iolc_b0 = 6.0018e4;
-    double iolc_c3 = 3.379e-10*9.5493*9.5493*9.5493;
-    double iolc_c2 = -1.518e-6*9.5493*9.5493;
-    double iolc_c1 = 3.573e-3*9.5493;
+
+    // 二阶参数
+    // double iolc_a3 = 0;
+    // double iolc_a2 = -0.1663;
+    // double iolc_a1 = -71.6385;
+    // double iolc_b0 = 6.0018e4;
+
+    double U_b = 23.54; // 电池标称电压23.54V
+    double R_m = 0.055; // 电机电阻0.055欧姆
+    double R_e = 0.03; // 电调内阻0.03欧姆
+    double C_e = 0.028; // 反电动势常数
+    double J_m = 1.292e-4; // 电机转动惯量
+    double f_m = 3.217e-5; // 电机粘性摩擦系数
+    double alpha = 0.2113;
+
+    // double iolc_c3 = 3.379e-10*9.5493*9.5493*9.5493;
+    // double iolc_c2 = -1.518e-6*9.5493*9.5493;
+    // double iolc_c1 = 3.573e-3*9.5493;
+    double iolc_c3 = 3.379e-10/9.81;
+    double iolc_c2 = -1.518e-6/9.81;
+    double iolc_c1 = 3.573e-3/9.81;
     float Thrust_Max; // 单轴最大升力为2kg
     double motorSpeed_FF = 50.0;
 
@@ -167,6 +186,8 @@ private:
     matrix::Vector<float, 4> _total_output;
     matrix::Vector<float, 4> _iolc_u_ff;
     matrix::Vector<float, 4> _thrust_kalman_filter_control_out;
+    matrix::Vector<float, 4> _thrust_desired_dot;
+    matrix::Vector<float, 4> _u_fb_coeff;
 
     struct rc_channels_s rc_channals_data{};
 };

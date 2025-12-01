@@ -65,6 +65,23 @@ public:
 		_thrust_BFS4(1) = 0.0f;
 		_covariance_BFS4(0,0) = 10.0f;
 		_covariance_BFS4(1,1) = 10.0f;
+
+        _thrust_DThrust1(0) = 0.0f;
+		_thrust_DThrust1(1) = 0.0f;
+		_covariance_DThrust1(0,0) = 10.0f;
+		_covariance_DThrust1(1,1) = 10.0f;
+        _thrust_DThrust2(0) = 0.0f;
+		_thrust_DThrust2(1) = 0.0f;
+		_covariance_DThrust2(0,0) = 10.0f;
+		_covariance_DThrust2(1,1) = 10.0f;
+        _thrust_DThrust3(0) = 0.0f;
+        _thrust_DThrust3(1) = 0.0f;
+		_covariance_DThrust3(0,0) = 10.0f;
+		_covariance_DThrust3(1,1) = 10.0f;
+        _thrust_DThrust4(0) = 0.0f;
+        _thrust_DThrust4(1) = 0.0f;
+        _covariance_DThrust4(0,0) = 10.0f;
+        _covariance_DThrust4(1,1) = 10.0f;
 	}
 
     ThrustKalmanFilter(float covInit);
@@ -75,6 +92,11 @@ public:
     float thrust_kalman_filter_BFS2(float dt, float inputdata);
     float thrust_kalman_filter_BFS3(float dt, float inputdata);
     float thrust_kalman_filter_BFS4(float dt, float inputdata);
+
+    float thrust_kalman_filter_DThrust1(float dt, float inputdata);
+    float thrust_kalman_filter_DThrust2(float dt, float inputdata);
+    float thrust_kalman_filter_DThrust3(float dt, float inputdata);
+    float thrust_kalman_filter_DThrust4(float dt, float inputdata);
 
     // void getState(float &state0, float &state1);
 
@@ -143,7 +165,36 @@ private:
     matrix::Matrix<float, 2, 2> _covariance_BFS4;
     float _residual_BFS4{0.0f};
     float _innovCov_BFS4{0.0f};
-    
+
+    // DThrust1
+    void predict_DThrust1(float dt, float acc, float acc_unc);
+    bool update_DThrust1(float meas, float measUnc);
+    matrix::Vector<float, 2> _thrust_DThrust1;
+    matrix::Matrix<float, 2, 2> _covariance_DThrust1;
+    float _residual_DThrust1{0.0f};
+    float _innovCov_DThrust1{0.0f};
+    // DThrust2
+    void predict_DThrust2(float dt, float acc, float acc_unc);
+    bool update_DThrust2(float meas, float measUnc);
+    matrix::Vector<float, 2> _thrust_DThrust2;
+    matrix::Matrix<float, 2, 2> _covariance_DThrust2;
+    float _residual_DThrust2{0.0f};
+    float _innovCov_DThrust2{0.0f};
+    // DThrust3
+    void predict_DThrust3(float dt, float acc, float acc_unc);
+    bool update_DThrust3(float meas, float measUnc);
+    matrix::Vector<float, 2> _thrust_DThrust3;
+    matrix::Matrix<float, 2, 2> _covariance_DThrust3;
+    float _residual_DThrust3{0.0f};
+    float _innovCov_DThrust3{0.0f};
+    // DThrust4
+    void predict_DThrust4(float dt, float acc, float acc_unc);
+    bool update_DThrust4(float meas, float measUnc);
+    matrix::Vector<float, 2> _thrust_DThrust4;
+    matrix::Matrix<float, 2, 2> _covariance_DThrust4;
+    float _residual_DThrust4{0.0f};
+    float _innovCov_DThrust4{0.0f};
+
     // 一阶卡尔曼
     float BFS1_forcekalman_t_1 = 0.0f;
     float BFS1_Pkalman_t_1 = 2.0f;
@@ -165,6 +216,8 @@ private:
     DEFINE_PARAMETERS(
        (ParamFloat<px4::params::TFC_SD_ES>) _param_sd_estimate,
        (ParamFloat<px4::params::TFC_SD_ME>) _param_sd_measure,
+       (ParamFloat<px4::params::TFC_TD_ES>) _param_td_estimate,
+       (ParamFloat<px4::params::TFC_TD_ME>) _param_td_measure,
        (ParamFloat<px4::params::TFC_ME_U>) _param_measure_u,
        (ParamFloat<px4::params::TFC_ES_U>) _param_estimate_u
     )

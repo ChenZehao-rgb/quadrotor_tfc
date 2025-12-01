@@ -237,6 +237,32 @@ PARAM_DEFINE_FLOAT(TFC_SD_ES, 5.0f);
 PARAM_DEFINE_FLOAT(TFC_SD_ME, 0.05f);
 
 /**
+ * Kalman Filter Standard deviation of estimation
+ *
+ * force_feedback Kalman filter standard deviation of estimation. i.e. the standard deviation of the acceleration of the force.
+ *
+ * @min 0.0
+ * @max 100.0
+ * @decimal 3
+ * @increment 0.001
+ * @group Thrust Feedback Control
+ */
+PARAM_DEFINE_FLOAT(TFC_TD_ES, 5.0f);
+
+/**
+ * Kalman Filter Standard deviation of measurement
+ *
+ * force_feedback Kalman filter standard deviation of measurement.
+ *
+ * @min 0.0
+ * @max 1.0
+ * @decimal 4
+ * @increment 0.0001
+ * @group Thrust Feedback Control
+ */
+PARAM_DEFINE_FLOAT(TFC_TD_ME, 0.05f);
+
+/**
  * The correction factor of control output
  *
  * Force_d[0~1] = (1-alpha)*omega_d + alpha*omega_d^2, omega is the output of the controller[0~1].
@@ -424,10 +450,7 @@ PARAM_DEFINE_FLOAT(TFC_PID_KP, 0.05f);
  * Input-Output Linearization Controller Gain ki.
  *
  * @min 0.0
- * @max 5.0_thrust_measure(0) = thrustdata.thrust_kalman_filter_data_1; // motor 1 corresponds to sensor 1
-        _thrust_measure(1) = thrustdata.thrust_kalman_filter_data_2; // motor 2 corresponds to sensor 2
-        _thrust_measure(2) = thrustdata.thrust_kalman_filter_data_3; // motor 3 corresponds to sensor 3
-        _thrust_measure(3) = thrustdata.thrust_kalman_filter_data_4; // motor 4 corresponds to sensor 4
+ * @max 5.0
  * @decimal 4
  * @increment 0.0001
  * @group Thrust Feedback Control

@@ -286,7 +286,7 @@ bool ThrustKalmanFilter::update_BFS4(float meas, float measUnc)
 float ThrustKalmanFilter::thrust_kalman_filter_BFS4(float dt, float inputdata)
 {
     dt = (dt < 0.001f) ? 0.01f : dt;
-    
+
     parameters_update();
 	_cov_estimate = _param_sd_estimate.get();
     _cov_measure = _param_sd_measure.get();
@@ -297,6 +297,247 @@ float ThrustKalmanFilter::thrust_kalman_filter_BFS4(float dt, float inputdata)
     return _thrust_BFS4(0);
 }
 
+////////////////////////////////////////////////////////////////////////
+// 期望升力的二阶卡尔曼滤波--求解期望升力的一阶微分
+////////////////////////////////////////////////////////////////////////
+/*
+第一个期望升力的一阶微分预测与更新
+*/
+void ThrustKalmanFilter::predict_DThrust1(float dt, float acc, float acc_unc)
+{
+    _thrust_DThrust1(0) += _thrust_DThrust1(1) * dt + acc * dt * dt / 2;
+    _thrust_DThrust1(1) += acc * dt;
+
+    matrix::Matrix<float, 2, 2> A;
+    A(0, 0) = 1;
+    A(1, 1) = 1;
+    A(0, 1) = dt;
+
+    matrix::Matrix<float, 2, 1> G;
+    G(0, 0) = dt * dt / 2;
+    G(1, 0) = dt;
+
+    matrix::Matrix<float, 2, 2> process_noise = G * G.transpose() * (acc_unc * acc_unc);
+
+    _covariance_DThrust1 = A * _covariance_DThrust1 * A.transpose() + process_noise;
+}
+bool ThrustKalmanFilter::update_DThrust1(float meas, float measUnc)
+{
+    _residual_DThrust1 = meas - _thrust_DThrust1(0);
+
+    _innovCov_DThrust1 = _covariance_DThrust1(0, 0) + (measUnc * measUnc);
+
+    matrix::Vector<float, 2> kalmanGain;
+    kalmanGain(0) = _covariance_DThrust1(0, 0);
+    kalmanGain(1) = _covariance_DThrust1(1, 0);
+    kalmanGain /= _innovCov_DThrust1;
+
+    _thrust_DThrust1 += kalmanGain * _residual_DThrust1;
+    // _thrust_previous = _thrust;
+
+    // 2*2的单位矩阵
+    matrix::Matrix<float, 2, 2> identity;
+    identity.identity();
+
+    matrix::Matrix<float, 2, 2> KH;
+    KH(0, 0) = kalmanGain(0);
+    KH(1, 0) = kalmanGain(1);
+
+    _covariance_DThrust1 = (identity - KH) * _covariance_DThrust1;
+
+    return true;
+}
+float ThrustKalmanFilter::thrust_kalman_filter_DThrust1(float dt, float inputdata)
+{
+    dt = (dt < 0.001f) ? 0.01f : dt;
+
+    parameters_update();
+	_cov_estimate = _param_td_estimate.get();
+    _cov_measure = _param_td_measure.get();
+
+    predict_DThrust1(dt, 0.0f, _cov_estimate);
+    update_DThrust1(inputdata, _cov_measure);
+
+    return _thrust_DThrust1(1);
+}
+
+/*
+第二个期望升力的一阶微分预测与更新
+*/
+void ThrustKalmanFilter::predict_DThrust2(float dt, float acc, float acc_unc)
+{
+    _thrust_DThrust2(0) += _thrust_DThrust2(1) * dt + acc * dt * dt / 2;
+    _thrust_DThrust2(1) += acc * dt;
+
+    matrix::Matrix<float, 2, 2> A;
+    A(0, 0) = 1;
+    A(1, 1) = 1;
+    A(0, 1) = dt;
+
+    matrix::Matrix<float, 2, 1> G;
+    G(0, 0) = dt * dt / 2;
+    G(1, 0) = dt;
+
+    matrix::Matrix<float, 2, 2> process_noise = G * G.transpose() * (acc_unc * acc_unc);
+
+    _covariance_DThrust2 = A * _covariance_DThrust2 * A.transpose() + process_noise;
+}
+bool ThrustKalmanFilter::update_DThrust2(float meas, float measUnc)
+{
+    _residual_DThrust2 = meas - _thrust_DThrust2(0);
+
+    _innovCov_DThrust2 = _covariance_DThrust2(0, 0) + (measUnc * measUnc);
+    matrix::Vector<float, 2> kalmanGain;
+    kalmanGain(0) = _covariance_DThrust2(0, 0);
+    kalmanGain(1) = _covariance_DThrust2(1, 0);
+    kalmanGain /= _innovCov_DThrust2;
+    _thrust_DThrust2 += kalmanGain * _residual_DThrust2;
+    // _thrust_previous = _thrust;
+
+    // 2*2的单位矩阵
+    matrix::Matrix<float, 2, 2> identity;
+    identity.identity();
+
+    matrix::Matrix<float, 2, 2> KH;
+    KH(0, 0) = kalmanGain(0);
+    KH(1, 0) = kalmanGain(1);
+
+    _covariance_DThrust2 = (identity - KH) * _covariance_DThrust2;
+
+    return true;
+}
+float ThrustKalmanFilter::thrust_kalman_filter_DThrust2(float dt, float inputdata)
+{
+    dt = (dt < 0.001f) ? 0.01f : dt;
+
+    parameters_update();
+	_cov_estimate = _param_td_estimate.get();
+    _cov_measure = _param_td_measure.get();
+
+    predict_DThrust2(dt, 0.0f, _cov_estimate);
+    update_DThrust2(inputdata, _cov_measure);
+
+    return _thrust_DThrust2(1);
+}
+
+/*
+第三个期望升力的一阶微分预测与更新
+*/
+void ThrustKalmanFilter::predict_DThrust3(float dt, float acc, float acc_unc)
+{
+    _thrust_DThrust3(0) += _thrust_DThrust3(1) * dt + acc * dt * dt / 2;
+    _thrust_DThrust3(1) += acc * dt;
+
+    matrix::Matrix<float, 2, 2> A;
+    A(0, 0) = 1;
+    A(1, 1) = 1;
+    A(0, 1) = dt;
+
+    matrix::Matrix<float, 2, 1> G;
+    G(0, 0) = dt * dt / 2;
+    G(1, 0) = dt;
+
+    matrix::Matrix<float, 2, 2> process_noise = G * G.transpose() * (acc_unc * acc_unc);
+
+    _covariance_DThrust3 = A * _covariance_DThrust3 * A.transpose() + process_noise;
+}
+bool ThrustKalmanFilter::update_DThrust3(float meas, float measUnc)
+{
+    _residual_DThrust3 = meas - _thrust_DThrust3(0);
+
+    _innovCov_DThrust3 = _covariance_DThrust3(0, 0) + (measUnc * measUnc);
+    matrix::Vector<float, 2> kalmanGain;
+    kalmanGain(0) = _covariance_DThrust3(0, 0);
+    kalmanGain(1) = _covariance_DThrust3(1, 0);
+    kalmanGain /= _innovCov_DThrust3;
+    _thrust_DThrust3 += kalmanGain * _residual_DThrust3;
+    // _thrust_previous = _thrust;
+
+    // 2*2的单位矩阵
+    matrix::Matrix<float, 2, 2> identity;
+    identity.identity();
+
+    matrix::Matrix<float, 2, 2> KH;
+    KH(0, 0) = kalmanGain(0);
+    KH(1, 0) = kalmanGain(1);
+
+    _covariance_DThrust3 = (identity - KH) * _covariance_DThrust3;
+
+    return true;
+}
+float ThrustKalmanFilter::thrust_kalman_filter_DThrust3(float dt, float inputdata)
+{
+    dt = (dt < 0.001f) ? 0.01f : dt;
+
+    parameters_update();
+	_cov_estimate = _param_td_estimate.get();
+    _cov_measure = _param_td_measure.get();
+
+    predict_DThrust3(dt, 0.0f, _cov_estimate);
+    update_DThrust3(inputdata, _cov_measure);
+
+    return _thrust_DThrust3(1);
+}
+
+/*
+第四个期望升力的一阶微分预测与更新
+*/
+void ThrustKalmanFilter::predict_DThrust4(float dt, float acc, float acc_unc)
+{
+    _thrust_DThrust4(0) += _thrust_DThrust4(1) * dt + acc * dt * dt / 2;
+    _thrust_DThrust4(1) += acc * dt;
+
+    matrix::Matrix<float, 2, 2> A;
+    A(0, 0) = 1;
+    A(1, 1) = 1;
+    A(0, 1) = dt;
+
+    matrix::Matrix<float, 2, 1> G;
+    G(0, 0) = dt * dt / 2;
+    G(1, 0) = dt;
+
+    matrix::Matrix<float, 2, 2> process_noise = G * G.transpose() * (acc_unc * acc_unc);
+
+    _covariance_DThrust4 = A * _covariance_DThrust4 * A.transpose() + process_noise;
+}
+bool ThrustKalmanFilter::update_DThrust4(float meas, float measUnc)
+{
+    _residual_DThrust4 = meas - _thrust_DThrust4(0);
+    _innovCov_DThrust4 = _covariance_DThrust4(0, 0) + (measUnc * measUnc);
+
+    matrix::Vector<float, 2> kalmanGain;
+    kalmanGain(0) = _covariance_DThrust4(0, 0);
+    kalmanGain(1) = _covariance_DThrust4(1, 0);
+    kalmanGain /= _innovCov_DThrust4;
+
+    _thrust_DThrust4 += kalmanGain * _residual_DThrust4;
+    // _thrust_previous = _thrust;
+
+    // 2*2的单位矩阵
+    matrix::Matrix<float, 2, 2> identity;
+    identity.identity();
+
+    matrix::Matrix<float, 2, 2> KH;
+    KH(0, 0) = kalmanGain(0);
+    KH(1, 0) = kalmanGain(1);
+
+    _covariance_DThrust4 = (identity - KH) * _covariance_DThrust4;
+
+    return true;
+}
+float ThrustKalmanFilter::thrust_kalman_filter_DThrust4(float dt, float inputdata)
+{
+    dt = (dt < 0.001f) ? 0.01f : dt;
+
+    parameters_update();
+	_cov_estimate = _param_td_estimate.get();
+    _cov_measure = _param_td_measure.get();
+
+    predict_DThrust4(dt, 0.0f, _cov_estimate);
+    update_DThrust4(inputdata, _cov_measure);
+
+    return _thrust_DThrust4(1);
+}
 
 // void ThrustKalmanFilter::getState(float &state0, float &state1)
 // {
@@ -328,7 +569,7 @@ float ThrustKalmanFilter::BFS1_One_Order_Kalman(float inputdata)
 	// 更新当前时刻最优值，作为下一时刻的参考值
 	BFS1_forcekalman_t_1 = BFS1_forcekalman_t;
 	BFS1_Pkalman_t_1 = BFS1_PKalman_t;
-	
+
 	return BFS1_forcekalman_t;
 }
 
