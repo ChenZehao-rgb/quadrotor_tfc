@@ -375,10 +375,10 @@ int ThrustFeedbackControl::main()
                 /*
                     obtain the raw thrust data from the sensor
                 */
-                thrustdata.thrust_raw_data_1 = sensordata.data1 / 1000.0f;
-                thrustdata.thrust_raw_data_2 = sensordata.data2 / 1000.0f;
-                thrustdata.thrust_raw_data_3 = sensordata.data3 / 1000.0f;
-                thrustdata.thrust_raw_data_4 = sensordata.data4 / 1000.0f;
+                thrustdata.thrust_raw_data_1 = (sensordata.data1 + _param_sensor1_bias1.get() + _param_sensor1_bias2.get()) / 1000.0f;
+                thrustdata.thrust_raw_data_2 = (sensordata.data2 + _param_sensor2_bias1.get() + _param_sensor2_bias2.get()) / 1000.0f;
+                thrustdata.thrust_raw_data_3 = (sensordata.data3 + _param_sensor3_bias1.get() + _param_sensor3_bias2.get()) / 1000.0f;
+                thrustdata.thrust_raw_data_4 = (sensordata.data4 + _param_sensor4_bias1.get() + _param_sensor4_bias2.get()) / 1000.0f;
                 thrustdata.thrust_raw_data_1 = (thrustdata.thrust_raw_data_1 > 2.0f) ? 2.0f : ((thrustdata.thrust_raw_data_1 < 0.0f) ? 0.0f : thrustdata.thrust_raw_data_1);
                 thrustdata.thrust_raw_data_2 = (thrustdata.thrust_raw_data_2 > 2.0f) ? 2.0f : ((thrustdata.thrust_raw_data_2 < 0.0f) ? 0.0f : thrustdata.thrust_raw_data_2);
                 thrustdata.thrust_raw_data_3 = (thrustdata.thrust_raw_data_3 > 2.0f) ? 2.0f : ((thrustdata.thrust_raw_data_3 < 0.0f) ? 0.0f : thrustdata.thrust_raw_data_3);
@@ -445,6 +445,11 @@ int ThrustFeedbackControl::main()
                 _thrust_desired_dot(1) = thrust_kalman_filter.thrust_kalman_filter_DThrust2(dt_dt, _thrust_desired(1));
                 _thrust_desired_dot(2) = thrust_kalman_filter.thrust_kalman_filter_DThrust3(dt_dt, _thrust_desired(2));
                 _thrust_desired_dot(3) = thrust_kalman_filter.thrust_kalman_filter_DThrust4(dt_dt, _thrust_desired(3));
+                // use low-pass filter to filter the thrust desired derivative
+                // _thrust_desired_dot(0) = td.update(_thrust_desired(0), dt_dt, _param_alpha_tau.get());
+                // _thrust_desired_dot(1) = td.update(_thrust_desired(1), dt_dt, _param_alpha_tau.get());
+                // _thrust_desired_dot(2) = td.update(_thrust_desired(2), dt_dt, _param_alpha_tau.get());
+                // _thrust_desired_dot(3) = td.update(_thrust_desired(3), dt_dt, _param_alpha_tau.get());
 
                 last_timestamp_dt = thrustdesireddata.timestamp;
             }

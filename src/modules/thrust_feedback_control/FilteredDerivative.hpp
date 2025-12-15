@@ -1,5 +1,7 @@
-#include <lib/mathlib/mathlib.h>
+#pragma once
+
 #include <lib/mathlib/math/filter/AlphaFilter.hpp>
+#include <px4_platform_common/defines.h>   // isfinite
 
 template <typename T>
 class ThrustDerivative
@@ -7,37 +9,54 @@ class ThrustDerivative
 public:
     ThrustDerivative() = default;
 
-    void set_params(float tau, float dt)
+    // 单次调用：输入 thrust_sp 和 dt（可变），内部完成微分+滤波
+    // tau: 一阶滤波时间常数（秒）
+    float update(T thrust_sp, float dt, float tau)
     {
-        // tau 一阶滤波时间常数，dt 控制周期
-        // 经典关系：alpha = tau / (tau + dt)
-        const float alpha = tau / (tau + dt);
-        _filter.set_alpha(alpha);
-fate        _dt = dt;
-        _initialized = false;
-    }
+        // 参数保护
+        if (!PX4_ISFINITE(dt) || dt <= 1e-6f) {
+            // dt 不合法：输出保持不变（你也可以选择 return 0.0f）
+            return _initialized ? _last_output : 0.0f;
+        }
 
-    float update(float thrust_sp)
-    {
         if (!_initialized) {
             _prev_thrust_sp = thrust_sp;
-            _filter.reset(0.0f);    // 初始导数设为 0
+            _filter.reset(T(0));
             _initialized = true;
+            _last_output = 0.0f;
             return 0.0f;
         }
 
-        // 原始微分
-        float du_raw = (thrust_sp - _prev_thrust_sp) / _dt;
+        // 原始微分（dt 可变）
+        const float du_raw = float(thrust_sp - _prev_thrust_sp) / dt;
         _prev_thrust_sp = thrust_sp;
 
-        // AlphaFilter 对微分结果做低通
-        float du_filtered = _filter.update(du_raw);
+        // tau <= 0：不滤波
+        if (!PX4_ISFINITE(tau) || tau <= 0.0f) {
+            _last_output = du_raw;
+            return du_raw;
+        }
+
+        // AlphaFilter.hpp 的“时间抽象”一致：alpha = dt/(tau+dt)
+        const float alpha = dt / (tau + dt);
+        _filter.setAlpha(alpha);
+
+        const float du_filtered = float(_filter.update(T(du_raw)));
+        _last_output = du_filtered;
         return du_filtered;
+    }
+
+    void reset(T thrust_sp = T(0))
+    {
+        _prev_thrust_sp = thrust_sp;
+        _filter.reset(T(0));
+        _initialized = false;
+        _last_output = 0.0f;
     }
 
 private:
     AlphaFilter<T> _filter{};
-    T _prev_thrust_sp{0.0f};
-    T _dt{0.01f};
+    T _prev_thrust_sp{T(0)};
     bool _initialized{false};
+    float _last_output{0.0f};
 };

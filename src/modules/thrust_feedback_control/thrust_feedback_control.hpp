@@ -74,6 +74,7 @@
 
 #include <uORB/topics/rc_channels.h>
 #include "thrust_kalman_filter.hpp"
+#include "FilteredDerivative.hpp"
 
 #include <lib/mathlib/math/filter/LowPassFilter2p.hpp>
 
@@ -132,7 +133,7 @@ private:
         (ParamFloat<px4::params::SENSOR4_BIAS1>) _param_sensor4_bias1,
         (ParamFloat<px4::params::SENSOR4_BIAS2>) _param_sensor4_bias2,
         (ParamFloat<px4::params::THR_USE_FIL>) _param_tfc_use_filtered_thrust,
-        (ParamFloat<px4::params::THRE_USE_TFC>) _param_use_tfc_threshold
+        (ParamFloat<px4::params::ALPHA_TAU>) _param_alpha_tau
     )
 
     uORB::SubscriptionInterval	_parameter_update_sub{ORB_ID(parameter_update), 1_s};
@@ -190,4 +191,6 @@ private:
     matrix::Vector<float, 4> _u_fb_coeff;
 
     struct rc_channels_s rc_channals_data{};
+
+    ThrustDerivative<float> td;
 };

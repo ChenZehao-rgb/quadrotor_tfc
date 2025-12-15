@@ -553,8 +553,8 @@ PARAM_DEFINE_FLOAT(SENSOR4_BIAS2, -465.0f);
  */
 PARAM_DEFINE_FLOAT(THR_USE_FIL, 0.0f);
 /**
- * The threshold to use feedback control
+ * The AlphaFilter parameter
  *
  * @group Thrust Feedback Control
  */
-PARAM_DEFINE_FLOAT(THRE_USE_TFC, 0.15f);
+PARAM_DEFINE_FLOAT(ALPHA_TAU, 0.25f);
