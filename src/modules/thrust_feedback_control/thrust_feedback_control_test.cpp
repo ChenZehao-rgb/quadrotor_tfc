@@ -286,6 +286,16 @@ int ThrustFeedbackControl::main()
         { .fd = thrustdesireddata_sub_fd,   .events = POLLIN },
     };
 
+    auto clean_desired = [](float raw, int idx) -> float {
+                    if (!PX4_ISFINITE(raw)) {
+                        // PX4_ERR("TFC: thrust_desired%d not finite, reset to 0. raw=%e",
+                        //         idx, (double)raw);
+                        return 0.0f;   // 遇到 NaN/Inf 直接归零
+                    }
+
+                    // 再做一次幅值限幅，比如期望值本来应该在 [0, 1]
+                    return math::constrain(raw, 0.0f, 1.0f);
+                };
     int error_counter = 0;
     struct barometric_force_sensor_s sensordata;
     struct thrust_desired_data_s thrustdesireddata;
@@ -405,17 +415,6 @@ int ThrustFeedbackControl::main()
 
                 thrustdesireddata.timestamp = hrt_absolute_time();
                 static uint64_t last_timestamp_dt = thrustdesireddata.timestamp;
-
-                auto clean_desired = [](float raw, int idx) -> float {
-                    if (!PX4_ISFINITE(raw)) {
-                        // PX4_ERR("TFC: thrust_desired%d not finite, reset to 0. raw=%e",
-                        //         idx, (double)raw);
-                        return 0.0f;   // 遇到 NaN/Inf 直接归零
-                    }
-
-                    // 再做一次幅值限幅，比如期望值本来应该在 [0, 1]
-                    return math::constrain(raw, 0.0f, 1.0f);
-                };
 
                 // 对 4 个通道分别清洗
                 float des1 = clean_desired(thrustdesireddata.thrust_desired1, 1);

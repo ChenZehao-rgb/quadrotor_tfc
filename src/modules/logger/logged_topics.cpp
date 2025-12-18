@@ -60,7 +60,7 @@ void LoggedTopics::add_default_topics()
 
 	add_topic("robust_control_data_pid", 10);
 	add_topic("robust_control_data", 10);
-	
+
 	//add_topic("forcectl_kf_filterdata", 10);
 	add_topic("action_request");
 	add_topic("actuator_armed");
@@ -133,7 +133,7 @@ void LoggedTopics::add_default_topics()
 	add_topic("vehicle_local_position", 100);
 	add_topic("vehicle_local_position_setpoint", 100);
 	add_topic("vehicle_magnetometer", 200);
-	
+
 	add_topic("vehicle_roi", 1000);
 	add_topic("vehicle_status");
 	add_topic("vehicle_status_flags");
@@ -141,13 +141,13 @@ void LoggedTopics::add_default_topics()
 	add_topic("wind", 1000);
 
 	// multi topics
-	add_optional_topic_multi("actuator_outputs", 100, 3);
+	add_optional_topic_multi("actuator_outputs");
 	add_optional_topic_multi("airspeed_wind", 1000, 4);
 	add_optional_topic_multi("control_allocator_status", 200, 2);
 	add_optional_topic_multi("rate_ctrl_status", 200, 2);
 	add_optional_topic_multi("sensor_hygrometer", 500, 4);
 	add_optional_topic_multi("rpm", 200);
-	add_optional_topic_multi("telemetry_status", 1000, 4); 
+	add_optional_topic_multi("telemetry_status", 1000, 4);
 
 	// EKF multi topics (currently max 9 estimators)
 /* #if CONSTRAINED_MEMORY
