@@ -286,16 +286,6 @@ int ThrustFeedbackControl::main()
         { .fd = thrustdesireddata_sub_fd,   .events = POLLIN },
     };
 
-    auto clean_desired = [](float raw, int idx) -> float {
-                    if (!PX4_ISFINITE(raw)) {
-                        // PX4_ERR("TFC: thrust_desired%d not finite, reset to 0. raw=%e",
-                        //         idx, (double)raw);
-                        return 0.0f;   // 遇到 NaN/Inf 直接归零
-                    }
-
-                    // 再做一次幅值限幅，比如期望值本来应该在 [0, 1]
-                    return math::constrain(raw, 0.0f, 1.0f);
-                };
     int error_counter = 0;
     struct barometric_force_sensor_s sensordata;
     struct thrust_desired_data_s thrustdesireddata;
@@ -303,6 +293,8 @@ int ThrustFeedbackControl::main()
     static IOLC2 _iolc2 = {};
     static IOLC3 _iolc3 = {};
     static IOLC4 _iolc4 = {};
+    static float des_cache[4] = {0,0,0,0};
+    static bool des_inited = false;
 
     // state coefficients
     // double iolc_a3 = -(alpha * iolc_c3) / J_m;
@@ -358,6 +350,17 @@ int ThrustFeedbackControl::main()
     while(appState.isRunning())
     {
         parameters_update();
+        if (_vehicle_status_sub.update(&_vehicle_status)) {
+            _armed = (_vehicle_status.arming_state == vehicle_status_s::ARMING_STATE_ARMED);
+        }
+
+        if (!_armed) {
+            // disarmed
+            _thrust_desired.setZero();
+            _thrust_desired_dot.setZero();
+            px4_usleep(10000);   // 10 ms
+            continue; // 跳过本轮后续控制
+        }
 
         // float time1 = hrt_absolute_time();
         int poll_ret = px4_poll(fds, 2, 1000);
@@ -415,40 +418,44 @@ int ThrustFeedbackControl::main()
 
                 thrustdesireddata.timestamp = hrt_absolute_time();
                 static uint64_t last_timestamp_dt = thrustdesireddata.timestamp;
-
-                // 对 4 个通道分别清洗
-                float des1 = clean_desired(thrustdesireddata.thrust_desired1, 1);
-                float des2 = clean_desired(thrustdesireddata.thrust_desired2, 2);
-                float des3 = clean_desired(thrustdesireddata.thrust_desired3, 3);
-                float des4 = clean_desired(thrustdesireddata.thrust_desired4, 4);
-
-                // 再用“干净”的值去算 _thrust_desired
-                _thrust_desired(0) = _param_tfc_pwm_to_thrust_factor1.get() * des1;
-                _thrust_desired(1) = _param_tfc_pwm_to_thrust_factor2.get() * des2;
-                _thrust_desired(2) = _param_tfc_pwm_to_thrust_factor3.get() * des3;
-                _thrust_desired(3) = _param_tfc_pwm_to_thrust_factor4.get() * des4;
-
-                // _thrust_desired(0) = _param_tfc_pwm_to_thrust_factor1.get() * thrustdesireddata.thrust_desired1 - 0.3f;
-                // _thrust_desired(1) = _param_tfc_pwm_to_thrust_factor2.get() * thrustdesireddata.thrust_desired2 - 0.3f;
-                // _thrust_desired(2) = _param_tfc_pwm_to_thrust_factor3.get() * thrustdesireddata.thrust_desired3 - 0.3f;
-                // _thrust_desired(3) = _param_tfc_pwm_to_thrust_factor4.get() * thrustdesireddata.thrust_desired4 - 0.3f;
-                _thrust_desired(0) = ( _thrust_desired(0) > _param_tfc_thrust_max.get()) ? _param_tfc_thrust_max.get() : ((_thrust_desired(0) < 0.0f) ? 0.0f : _thrust_desired(0));
-                _thrust_desired(1) = ( _thrust_desired(1) > _param_tfc_thrust_max.get()) ? _param_tfc_thrust_max.get() : ((_thrust_desired(1) < 0.0f) ? 0.0f : _thrust_desired(1));
-                _thrust_desired(2) = ( _thrust_desired(2) > _param_tfc_thrust_max.get()) ? _param_tfc_thrust_max.get() : ((_thrust_desired(2) < 0.0f) ? 0.0f : _thrust_desired(2));
-                _thrust_desired(3) = ( _thrust_desired(3) > _param_tfc_thrust_max.get()) ? _param_tfc_thrust_max.get() : ((_thrust_desired(3) < 0.0f) ? 0.0f : _thrust_desired(3));
-
                 float dt_dt = (float)(thrustdesireddata.timestamp - last_timestamp_dt) / 1000000.0f;
+                float raw[4] = {thrustdesireddata.thrust_desired1,
+                                thrustdesireddata.thrust_desired2,
+                                thrustdesireddata.thrust_desired3,
+                                thrustdesireddata.thrust_desired4};
 
-                // obtain the thrust desired data from the flight controller
-                _thrust_desired_dot(0) = thrust_kalman_filter.thrust_kalman_filter_DThrust1(dt_dt, _thrust_desired(0));
-                _thrust_desired_dot(1) = thrust_kalman_filter.thrust_kalman_filter_DThrust2(dt_dt, _thrust_desired(1));
-                _thrust_desired_dot(2) = thrust_kalman_filter.thrust_kalman_filter_DThrust3(dt_dt, _thrust_desired(2));
-                _thrust_desired_dot(3) = thrust_kalman_filter.thrust_kalman_filter_DThrust4(dt_dt, _thrust_desired(3));
-                // use low-pass filter to filter the thrust desired derivative
-                // _thrust_desired_dot(0) = td.update(_thrust_desired(0), dt_dt, _param_alpha_tau.get());
-                // _thrust_desired_dot(1) = td.update(_thrust_desired(1), dt_dt, _param_alpha_tau.get());
-                // _thrust_desired_dot(2) = td.update(_thrust_desired(2), dt_dt, _param_alpha_tau.get());
-                // _thrust_desired_dot(3) = td.update(_thrust_desired(3), dt_dt, _param_alpha_tau.get());
+                for (int i=0;i<4;i++){
+                    if (PX4_ISFINITE(raw[i])) {
+                        des_cache[i] = math::constrain(raw[i], 0.f, 1.f);
+                        des_inited = true;
+                    } else {
+                        // 这里不一律归零，先“保持上一帧”
+                        // des_cache[i] = des_cache[i];
+                    }
+                }
+                if(des_inited)
+                {
+                    _thrust_desired(0) = _param_tfc_pwm_to_thrust_factor1.get() * des_cache[0];
+                    _thrust_desired(1) = _param_tfc_pwm_to_thrust_factor2.get() * des_cache[1];
+                    _thrust_desired(2) = _param_tfc_pwm_to_thrust_factor3.get() * des_cache[2];
+                    _thrust_desired(3) = _param_tfc_pwm_to_thrust_factor4.get() * des_cache[3];
+
+                    _thrust_desired(0) = ( _thrust_desired(0) > _param_tfc_thrust_max.get()) ? _param_tfc_thrust_max.get() : ((_thrust_desired(0) < 0.0f) ? 0.0f : _thrust_desired(0));
+                    _thrust_desired(1) = ( _thrust_desired(1) > _param_tfc_thrust_max.get()) ? _param_tfc_thrust_max.get() : ((_thrust_desired(1) < 0.0f) ? 0.0f : _thrust_desired(1));
+                    _thrust_desired(2) = ( _thrust_desired(2) > _param_tfc_thrust_max.get()) ? _param_tfc_thrust_max.get() : ((_thrust_desired(2) < 0.0f) ? 0.0f : _thrust_desired(2));
+                    _thrust_desired(3) = ( _thrust_desired(3) > _param_tfc_thrust_max.get()) ? _param_tfc_thrust_max.get() : ((_thrust_desired(3) < 0.0f) ? 0.0f : _thrust_desired(3));
+
+                    // obtain the thrust desired data from the flight controller
+                    _thrust_desired_dot(0) = thrust_kalman_filter.thrust_kalman_filter_DThrust1(dt_dt, _thrust_desired(0));
+                    _thrust_desired_dot(1) = thrust_kalman_filter.thrust_kalman_filter_DThrust2(dt_dt, _thrust_desired(1));
+                    _thrust_desired_dot(2) = thrust_kalman_filter.thrust_kalman_filter_DThrust3(dt_dt, _thrust_desired(2));
+                    _thrust_desired_dot(3) = thrust_kalman_filter.thrust_kalman_filter_DThrust4(dt_dt, _thrust_desired(3));
+                    // use low-pass filter to filter the thrust desired derivative
+                    // _thrust_desired_dot(0) = td.update(_thrust_desired(0), dt_dt, _param_alpha_tau.get());
+                    // _thrust_desired_dot(1) = td.update(_thrust_desired(1), dt_dt, _param_alpha_tau.get());
+                    // _thrust_desired_dot(2) = td.update(_thrust_desired(2), dt_dt, _param_alpha_tau.get());
+                    // _thrust_desired_dot(3) = td.update(_thrust_desired(3), dt_dt, _param_alpha_tau.get());
+                }
 
                 last_timestamp_dt = thrustdesireddata.timestamp;
             }
@@ -491,7 +498,7 @@ int ThrustFeedbackControl::main()
         _iolc.ki = _param_tfc_iolc_ki.get();
         _iolc.limit_i = _param_tfc_lim_i.get();
         _iolc.thrust_desired = _thrust_desired(0);
-        _iolc_u_ff(0) = _param_tfc_iolc_kff_1.get() * thrustdesireddata.thrust_desired1;
+        _iolc_u_ff(0) = _param_tfc_iolc_kff_1.get() * des_cache[0];
         _iolc.u_ff = _iolc_u_ff(0);
         _iolc.u_fb_coeff = _u_fb_coeff(0);
         _iolc.err = _thrust_desired(0) - _thrust_measure(0);
@@ -502,7 +509,7 @@ int ThrustFeedbackControl::main()
         _iolc2.ki = _param_tfc_iolc_ki.get();
         _iolc2.limit_i = _param_tfc_lim_i.get();
         _iolc2.thrust_desired = _thrust_desired(1);
-        _iolc_u_ff(1) = _param_tfc_iolc_kff_2.get() * thrustdesireddata.thrust_desired2;
+        _iolc_u_ff(1) = _param_tfc_iolc_kff_2.get() * des_cache[1];
         _iolc2.u_ff = _iolc_u_ff(1);
         _iolc2.u_fb_coeff = _u_fb_coeff(1);
         _iolc2.err = _thrust_desired(1) - _thrust_measure(1);
@@ -513,7 +520,7 @@ int ThrustFeedbackControl::main()
         _iolc3.ki = _param_tfc_iolc_ki.get();
         _iolc3.limit_i = _param_tfc_lim_i.get();
         _iolc3.thrust_desired = _thrust_desired(2);
-        _iolc_u_ff(2) = _param_tfc_iolc_kff_3.get() * thrustdesireddata.thrust_desired3;
+        _iolc_u_ff(2) = _param_tfc_iolc_kff_3.get() * des_cache[2];
         _iolc3.u_ff = _iolc_u_ff(2);
         _iolc3.u_fb_coeff = _u_fb_coeff(2);
         _iolc3.err = _thrust_desired(2) - _thrust_measure(2);
@@ -524,7 +531,7 @@ int ThrustFeedbackControl::main()
         _iolc4.ki = _param_tfc_iolc_ki.get();
         _iolc4.limit_i = _param_tfc_lim_i.get();
         _iolc4.thrust_desired = _thrust_desired(3);
-        _iolc_u_ff(3) = _param_tfc_iolc_kff_4.get() * thrustdesireddata.thrust_desired4;
+        _iolc_u_ff(3) = _param_tfc_iolc_kff_4.get() * des_cache[3];
         _iolc4.u_ff = _iolc_u_ff(3);
         _iolc4.u_fb_coeff = _u_fb_coeff(3);
         _iolc4.err = _thrust_desired(3) - _thrust_measure(3);

@@ -73,6 +73,7 @@
 #include <uORB/SubscriptionInterval.hpp>
 
 #include <uORB/topics/rc_channels.h>
+#include <uORB/topics/vehicle_status.h>
 #include "thrust_kalman_filter.hpp"
 #include "FilteredDerivative.hpp"
 
@@ -193,4 +194,7 @@ private:
     struct rc_channels_s rc_channals_data{};
 
     ThrustDerivative<float> td;
+    uORB::Subscription _vehicle_status_sub{ORB_ID(vehicle_status)};
+    vehicle_status_s _vehicle_status{};
+    bool _armed{false};
 };
