@@ -488,8 +488,8 @@ int ThrustFeedbackControl::main()
         _u_fb_coeff(2) = _param_tfc_iolc_k3.get();
         _u_fb_coeff(3) = _param_tfc_iolc_k4.get();
 
-        _iolc.kp = _param_tfc_iolc_k.get();
-        _iolc.ki = _param_tfc_iolc_ki.get();
+        _iolc.kp = _param_tfc_iolc_kp1.get();
+        _iolc.ki = _param_tfc_iolc_ki1.get();
         _iolc.limit_i = _param_tfc_lim_i.get();
         _iolc.thrust_desired = _thrust_desired(0);
         _iolc_u_ff(0) = _param_tfc_iolc_kff_1.get() * thrustdesireddata.thrust_desired1;
@@ -499,8 +499,8 @@ int ThrustFeedbackControl::main()
         _iolc.thrust_desired_dot = _thrust_desired_dot(0);
         IOLC_Calculate(&_iolc);
 
-        _iolc2.kp = _param_tfc_iolc_k.get();
-        _iolc2.ki = _param_tfc_iolc_ki.get();
+        _iolc2.kp = _param_tfc_iolc_kp2.get();
+        _iolc2.ki = _param_tfc_iolc_ki2.get();
         _iolc2.limit_i = _param_tfc_lim_i.get();
         _iolc2.thrust_desired = _thrust_desired(1);
         _iolc_u_ff(1) = _param_tfc_iolc_kff_2.get() * thrustdesireddata.thrust_desired2;
@@ -510,8 +510,8 @@ int ThrustFeedbackControl::main()
         _iolc2.thrust_desired_dot = _thrust_desired_dot(1);
         IOLC_Calculate2(&_iolc2);
 
-        _iolc3.kp = _param_tfc_iolc_k.get();
-        _iolc3.ki = _param_tfc_iolc_ki.get();
+        _iolc3.kp = _param_tfc_iolc_kp3.get();
+        _iolc3.ki = _param_tfc_iolc_ki3.get();
         _iolc3.limit_i = _param_tfc_lim_i.get();
         _iolc3.thrust_desired = _thrust_desired(2);
         _iolc_u_ff(2) = _param_tfc_iolc_kff_3.get() * thrustdesireddata.thrust_desired3;
@@ -521,8 +521,8 @@ int ThrustFeedbackControl::main()
         _iolc3.thrust_desired_dot = _thrust_desired_dot(2);
         IOLC_Calculate3(&_iolc3);
 
-        _iolc4.kp = _param_tfc_iolc_k.get();
-        _iolc4.ki = _param_tfc_iolc_ki.get();
+        _iolc4.kp = _param_tfc_iolc_kp4.get();
+        _iolc4.ki = _param_tfc_iolc_ki4.get();
         _iolc4.limit_i = _param_tfc_lim_i.get();
         _iolc4.thrust_desired = _thrust_desired(3);
         _iolc_u_ff(3) = _param_tfc_iolc_kff_4.get() * thrustdesireddata.thrust_desired4;

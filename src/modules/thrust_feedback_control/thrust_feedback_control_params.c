@@ -286,7 +286,7 @@ PARAM_DEFINE_FLOAT(TFC_ALPHA, 0.0f);
  * @increment 1
  * @group Thrust Feedback Control
  */
-PARAM_DEFINE_FLOAT(TFC_IOLC_KP1, 0.8f);
+PARAM_DEFINE_FLOAT(TFC_IOLC_KP1, 1.0f);
 
 /**
  * IOLC Coefficient kp2
@@ -299,7 +299,7 @@ PARAM_DEFINE_FLOAT(TFC_IOLC_KP1, 0.8f);
  * @increment 1
  * @group Thrust Feedback Control
  */
-PARAM_DEFINE_FLOAT(TFC_IOLC_KP2, 0.8f);
+PARAM_DEFINE_FLOAT(TFC_IOLC_KP2, 1.0f);
 
 /**
  * IOLC Coefficient kp3
@@ -312,7 +312,7 @@ PARAM_DEFINE_FLOAT(TFC_IOLC_KP2, 0.8f);
  * @increment 1
  * @group Thrust Feedback Control
  */
-PARAM_DEFINE_FLOAT(TFC_IOLC_KP3, 0.8f);
+PARAM_DEFINE_FLOAT(TFC_IOLC_KP3, 1.0f);
 
 /**
  * IOLC Coefficient kp4
@@ -325,7 +325,59 @@ PARAM_DEFINE_FLOAT(TFC_IOLC_KP3, 0.8f);
  * @increment 1
  * @group Thrust Feedback Control
  */
-PARAM_DEFINE_FLOAT(TFC_IOLC_KP4, 0.8f);
+PARAM_DEFINE_FLOAT(TFC_IOLC_KP4, 1.0f);
+
+/**
+ * IOLC Coefficient ki1
+ *
+ * Input-Output Linearization Controller Gain ki1.
+ *
+ * @min 0.0
+ * @max 500.0
+ * @decimal 1
+ * @increment 1
+ * @group Thrust Feedback Control
+ */
+PARAM_DEFINE_FLOAT(TFC_IOLC_KI1, 0.1f);
+
+/**
+ * IOLC Coefficient ki2
+ *
+ * Input-Output Linearization Controller Gain ki2.
+ *
+ * @min 0.0
+ * @max 500.0
+ * @decimal 1
+ * @increment 1
+ * @group Thrust Feedback Control
+ */
+PARAM_DEFINE_FLOAT(TFC_IOLC_KI2, 0.1f);
+
+/**
+ * IOLC Coefficient ki3
+ *
+ * Input-Output Linearization Controller Gain ki3.
+ *
+ * @min 0.0
+ * @max 500.0
+ * @decimal 1
+ * @increment 1
+ * @group Thrust Feedback Control
+ */
+PARAM_DEFINE_FLOAT(TFC_IOLC_KI3, 0.1f);
+
+/**
+ * IOLC Coefficient ki4
+ *
+ * Input-Output Linearization Controller Gain ki4.
+ *
+ * @min 0.0
+ * @max 500.0
+ * @decimal 1
+ * @increment 1
+ * @group Thrust Feedback Control
+ */
+PARAM_DEFINE_FLOAT(TFC_IOLC_KI4, 0.1f);
 
 /**
  * IOLC Coefficient K1
