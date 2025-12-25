@@ -26,8 +26,9 @@
         "cSpell.showStatus": false,
         "cSpell.words": [
                 "acro",
-                "nuttx",
-                "esc"
+                "Charlebois",
+                "esc",
+                "nuttx"
         ],
         "debug.toolBarLocation": "docked",
         "editor.defaultFormatter": "chiehyu.vscode-astyle",

@@ -153,9 +153,9 @@ void IOLC_Calculate(IOLC *iolc)
 		*(iolc->a3*iolc->motorSpeed*iolc->motorSpeed*iolc->motorSpeed + iolc->a2*iolc->motorSpeed*iolc->motorSpeed + iolc->a1*iolc->motorSpeed);
 	iolc->g_x = (iolc->b0*(3*iolc->c3*iolc->motorSpeed*iolc->motorSpeed + 2*iolc->c2*iolc->motorSpeed + iolc->c1));
     iolc->u_fb = ((iolc->v - iolc->f_x) / iolc->g_x);
-	iolc->u_fb = (iolc->u_fb > 0.3) ? 0.3 : ((iolc->u_fb < 0.0) ? 0.0 : iolc->u_fb);
+	iolc->u_fb = (iolc->u_fb > 0.4) ? 0.4 : ((iolc->u_fb < 0.0) ? 0.0 : iolc->u_fb);
     iolc->u = static_cast<float>(iolc->u_ff) + iolc->u_fb_coeff * static_cast<float>(iolc->u_fb);
-    iolc->u = (iolc->u > 0.3) ? 0.3 : ((iolc->u < 0.0) ? 0.0 : iolc->u);
+    iolc->u = (iolc->u > 0.4) ? 0.4 : ((iolc->u < 0.0) ? 0.0 : iolc->u);
 
 	/* Using Euler Integration Method to Calculate the Motor Speed */
 	iolc->motorSpeed_dot = (iolc->a3*iolc->motorSpeed*iolc->motorSpeed*iolc->motorSpeed + iolc->a2*iolc->motorSpeed*iolc->motorSpeed + iolc->a1*iolc->motorSpeed + iolc->b0*iolc->u);
@@ -184,9 +184,9 @@ void IOLC_Calculate2(IOLC2 *iolc)
 		*(iolc->a3*iolc->motorSpeed*iolc->motorSpeed*iolc->motorSpeed + iolc->a2*iolc->motorSpeed*iolc->motorSpeed + iolc->a1*iolc->motorSpeed);
 	iolc->g_x = (iolc->b0*(3*iolc->c3*iolc->motorSpeed*iolc->motorSpeed + 2*iolc->c2*iolc->motorSpeed + iolc->c1));
     iolc->u_fb = ((iolc->v - iolc->f_x) / iolc->g_x);
-	iolc->u_fb = (iolc->u_fb > 0.3) ? 0.3 : ((iolc->u_fb < 0.0) ? 0.0 : iolc->u_fb);
+	iolc->u_fb = (iolc->u_fb > 0.4) ? 0.4 : ((iolc->u_fb < 0.0) ? 0.0 : iolc->u_fb);
     iolc->u = static_cast<float>(iolc->u_ff) + iolc->u_fb_coeff * static_cast<float>(iolc->u_fb);
-    iolc->u = (iolc->u > 0.3) ? 0.3 : ((iolc->u < 0.0) ? 0.0 : iolc->u);
+    iolc->u = (iolc->u > 0.4) ? 0.4 : ((iolc->u < 0.0) ? 0.0 : iolc->u);
 
 	/* Using Euler Integration Method to Calculate the Motor Speed */
 	iolc->motorSpeed_dot = (iolc->a3*iolc->motorSpeed*iolc->motorSpeed*iolc->motorSpeed + iolc->a2*iolc->motorSpeed*iolc->motorSpeed + iolc->a1*iolc->motorSpeed + iolc->b0*iolc->u);
@@ -215,9 +215,9 @@ void IOLC_Calculate3(IOLC3 *iolc)
 		*(iolc->a3*iolc->motorSpeed*iolc->motorSpeed*iolc->motorSpeed + iolc->a2*iolc->motorSpeed*iolc->motorSpeed + iolc->a1*iolc->motorSpeed);
 	iolc->g_x = (iolc->b0*(3*iolc->c3*iolc->motorSpeed*iolc->motorSpeed + 2*iolc->c2*iolc->motorSpeed + iolc->c1));
     iolc->u_fb = ((iolc->v - iolc->f_x) / iolc->g_x);
-	iolc->u_fb = (iolc->u_fb > 0.3) ? 0.3 : ((iolc->u_fb < 0.0) ? 0.0 : iolc->u_fb);
+	iolc->u_fb = (iolc->u_fb > 0.4) ? 0.4 : ((iolc->u_fb < 0.0) ? 0.0 : iolc->u_fb);
     iolc->u = static_cast<float>(iolc->u_ff) + iolc->u_fb_coeff * static_cast<float>(iolc->u_fb);
-    iolc->u = (iolc->u > 0.3) ? 0.3 : ((iolc->u < 0.0) ? 0.0 : iolc->u);
+    iolc->u = (iolc->u > 0.4) ? 0.4 : ((iolc->u < 0.0) ? 0.0 : iolc->u);
 
 	/* Using Euler Integration Method to Calculate the Motor Speed */
 	iolc->motorSpeed_dot = (iolc->a3*iolc->motorSpeed*iolc->motorSpeed*iolc->motorSpeed + iolc->a2*iolc->motorSpeed*iolc->motorSpeed + iolc->a1*iolc->motorSpeed + iolc->b0*iolc->u);
@@ -246,9 +246,9 @@ void IOLC_Calculate4(IOLC4 *iolc)
 		*(iolc->a3*iolc->motorSpeed*iolc->motorSpeed*iolc->motorSpeed + iolc->a2*iolc->motorSpeed*iolc->motorSpeed + iolc->a1*iolc->motorSpeed);
 	iolc->g_x = (iolc->b0*(3*iolc->c3*iolc->motorSpeed*iolc->motorSpeed + 2*iolc->c2*iolc->motorSpeed + iolc->c1));
     iolc->u_fb = ((iolc->v - iolc->f_x) / iolc->g_x);
-	iolc->u_fb = (iolc->u_fb > 0.3) ? 0.3 : ((iolc->u_fb < 0.0) ? 0.0 : iolc->u_fb);
+	iolc->u_fb = (iolc->u_fb > 0.4) ? 0.4 : ((iolc->u_fb < 0.0) ? 0.0 : iolc->u_fb);
     iolc->u = static_cast<float>(iolc->u_ff) + iolc->u_fb_coeff * static_cast<float>(iolc->u_fb);
-    iolc->u = (iolc->u > 0.3) ? 0.3 : ((iolc->u < 0.0) ? 0.0 : iolc->u);
+    iolc->u = (iolc->u > 0.4) ? 0.4 : ((iolc->u < 0.0) ? 0.0 : iolc->u);
 
 	/* Using Euler Integration Method to Calculate the Motor Speed */
 	iolc->motorSpeed_dot = (iolc->a3*iolc->motorSpeed*iolc->motorSpeed*iolc->motorSpeed + iolc->a2*iolc->motorSpeed*iolc->motorSpeed + iolc->a1*iolc->motorSpeed + iolc->b0*iolc->u);
