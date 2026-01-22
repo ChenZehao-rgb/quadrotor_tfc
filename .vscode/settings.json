@@ -138,5 +138,6 @@
                 "${workspaceFolder}/validation/module_schema.yaml": "${workspaceFolder}/src/modules/*/module.yaml"
         },
         "cortex-debug.openocdPath": "${env:PICO_SDK_PATH}/../openocd/src/openocd",
-        "ros.distro": "noetic" // Added for rp2040
+        "ros.distro": "noetic",
+        "ROS2.distro": "noetic" // Added for rp2040
 }
